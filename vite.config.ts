@@ -5,6 +5,7 @@ import vue from '@vitejs/plugin-vue';
 import checker from 'vite-plugin-checker';
 import AutoImport from 'unplugin-auto-import/vite';
 import VueRouter from 'unplugin-vue-router/vite';
+import Icons from 'unplugin-icons/vite';
 
 import { VueRouterAutoImports } from 'unplugin-vue-router';
 
@@ -16,6 +17,9 @@ export default defineConfig({
       dts: './typed-router.d.ts'
     }),
     vue(),
+    Icons({
+      compiler: 'vue3'
+    }),
     checker({
       vueTsc: { tsconfigPath: './tsconfig.app.json' }
     }),
