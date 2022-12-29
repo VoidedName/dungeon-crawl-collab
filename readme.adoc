@@ -8,3 +8,11 @@ Outline here... dunno yet. Some bullet points on what we want somewhere, right?
 * Class System
 ** fixed?
 ** free?
+
+== Branching And Contribution Model
+To start with, we'll be using two branches. `main` and `dev`.
+
+* `main`: Update through PR from `dev` only.
+* `dev`: Update through PR from any other branch only.
+
+To contribute, please make a PR (pull request) against dev.
