@@ -4,6 +4,7 @@ import {
   positionComponent,
   renderableComponent
 } from '@/entity/Components';
+import { pipe } from '@/fp/pipe';
 
 export type EntityId = number;
 export type Entity = {
@@ -42,3 +43,10 @@ const player = addComponent(
   ),
   positionComponent
 );
+
+const player_factory = pipe((e: Entity) => addComponent(e, playerComponent))
+  .then(e => addComponent(e, positionComponent))
+  .then(e => addComponent(e, renderableComponent))
+  .compose();
+
+const player_2 = player_factory(createEntity());

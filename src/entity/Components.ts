@@ -1,7 +1,7 @@
 import type { SpriteId } from '@/sprite/Sprite';
 
-export type Component<T extends string, Props = object> = {
-  [key in T]: { readonly __brand__: T } & Props;
+export type Component<T extends string, Props extends object = object> = {
+  [key in T]: Props;
 };
 
 const PositionBrand = 'position';
@@ -17,7 +17,6 @@ export type Position = Component<
 export function positionComponent(): Position {
   return {
     [PositionBrand]: {
-      __brand__: PositionBrand,
       x: 0,
       y: 0
     }
@@ -36,7 +35,6 @@ export type Renderable = Component<
 export function renderableComponent(): Renderable {
   return {
     [RenderableBrand]: {
-      __brand__: RenderableBrand,
       sprite: 42
     }
   };
@@ -48,8 +46,6 @@ export type Player = Component<PlayerBrand>;
 
 export function playerComponent(): Player {
   return {
-    [PlayerBrand]: {
-      __brand__: PlayerBrand
-    }
+    [PlayerBrand]: {}
   };
 }
