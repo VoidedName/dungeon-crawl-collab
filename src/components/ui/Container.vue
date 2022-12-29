@@ -1,5 +1,11 @@
 <script setup lang="ts">
-const props = withDefaults(defineProps<{ as?: string }>(), { as: 'div' });
+type Props = {
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  as?: string;
+};
+
+const props = withDefaults(defineProps<Props>(), { as: 'div', size: 'xl' });
+const maxWidth = computed(() => `var(--breakpoints-${props.size})`);
 </script>
 
 <template>
@@ -8,9 +14,8 @@ const props = withDefaults(defineProps<{ as?: string }>(), { as: 'div' });
 
 <style scoped>
 .container {
-  --container-size: var(--breakpoints-xl);
   margin-inline: auto;
   width: 100%;
-  max-width: var(--container-size);
+  max-width: v-bind(maxWidth);
 }
 </style>
