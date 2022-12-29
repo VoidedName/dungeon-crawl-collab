@@ -1,6 +1,8 @@
 = Dungeon Crawl Collab Design Doc
+:toc:
 
-Outline here... dunno yet. Some bullet points on what we want somewhere, right?
+== Outline And Design
+Some bullet points on what we want somewhere, right?
 
 * Real Time
 * 2D Grid based
