@@ -5,6 +5,7 @@ import {
   renderableComponent
 } from '@/entity/Components';
 import { pipe } from '@/fp/pipe';
+import type { SpriteId } from '@/sprite/Sprite';
 
 export type EntityId = number;
 export type Entity = {
@@ -36,17 +37,22 @@ function createEntity(): Entity {
   };
 }
 
-const player = addComponent(
-  addComponent(
-    addComponent(createEntity(), playerComponent),
-    renderableComponent
-  ),
-  positionComponent
-);
+const withPlayer =
+  <E extends Entity>() =>
+  (e: E) =>
+    addComponent(e, playerComponent);
 
-const player_factory = pipe((e: Entity) => addComponent(e, playerComponent))
-  .then(e => addComponent(e, positionComponent))
-  .then(e => addComponent(e, renderableComponent))
-  .compose();
+const withPosition =
+  <E extends Entity>(x: number, y: number) =>
+  (e: E) =>
+    addComponent(e, () => positionComponent(x, y));
 
-const player_2 = player_factory(createEntity());
+const withRenderable =
+  <E extends Entity>(sprite: SpriteId) =>
+  (e: E) =>
+    addComponent(e, () => renderableComponent(sprite));
+
+const player_2 = pipe(withPlayer())
+  .then(withPosition(5, 2))
+  .then(withRenderable(13))
+  .evaluate(createEntity());

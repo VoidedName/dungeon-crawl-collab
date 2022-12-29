@@ -14,11 +14,11 @@ export type Position = Component<
   }
 >;
 
-export function positionComponent(): Position {
+export function positionComponent(x: number, y: number): Position {
   return {
     [PositionBrand]: {
-      x: 0,
-      y: 0
+      x,
+      y
     }
   };
 }
@@ -32,10 +32,10 @@ export type Renderable = Component<
   }
 >;
 
-export function renderableComponent(): Renderable {
+export function renderableComponent(sprite: SpriteId): Renderable {
   return {
     [RenderableBrand]: {
-      sprite: 42
+      sprite
     }
   };
 }
