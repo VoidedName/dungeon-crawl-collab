@@ -5,7 +5,8 @@
     "auto-imports.d.ts",
     "typed-router.d.ts",
     "src/**/*",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "src/**/*.json"
   ],
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
