@@ -6,18 +6,3 @@ import Header from './components/Header.vue';
   <Header />
   <main><router-view /></main>
 </template>
-
-<style>
-@import url('https://fonts.googleapis.com/css?family=Inconsolata|Oswald');
-
-body,
-html {
-  margin: 0;
-  font-family: 'Inconsolata', sans-serif;
-}
-
-.page-container {
-  max-width: 920px;
-  margin: 0 auto;
-}
-</style>

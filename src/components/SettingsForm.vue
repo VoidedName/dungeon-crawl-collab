@@ -35,8 +35,8 @@ function rebind(key: string, e: any) {
 
 <template>
   <form @submit.prevent="submit">
-    <p v-for="control in controlKeys">
-      <label :htmlFor="'move-' + control">Move Right</label>
+    <fieldset v-for="control in controlKeys">
+      <label :for="'move-' + control">Move Right</label>
       <button
         type="button"
         @click="rebind(control, $event)"
@@ -44,28 +44,32 @@ function rebind(key: string, e: any) {
         required
         :id="'move-' + control"
       >
-        <span v-if="modifying === control">press any key to rebind</span>
+        <span v-if="modifying === control">Press any key to rebind</span>
         <span v-else>{{ controls[control] }}</span>
       </button>
-    </p>
+    </fieldset>
 
-    <p>
-      <button>Update</button>
-    </p>
+    <button>Update</button>
   </form>
 </template>
 
 <style scoped>
-p {
+form {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
-label {
-  width: 100px;
+fieldset {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: 8rem 1fr;
 }
 
-input {
-  width: 40px;
+button:not([type='button']) {
+  background: var(--color-primary-dark);
+  color: var(--color-on-primary-dark);
+  padding: var(--space-3);
+  align-self: flex-start;
 }
 </style>
