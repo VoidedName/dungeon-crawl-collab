@@ -1,7 +1,7 @@
 import type { SpriteId } from '@/sprite/Sprite';
 
 export type Component<T extends string, Props = object> = {
-  [key in T]: { __brand__: T } & Props;
+  [key in T]: { readonly __brand__: T } & Props;
 };
 
 const PositionBrand = 'position';

@@ -8,14 +8,14 @@ import {
 export type EntityId = number;
 export type Entity = {
   entity_id: EntityId;
-} & Record<string, Component<string>>;
+};
 
 // mutable add
 function addComponent<E extends Entity, C extends Component<any>>(
-  entity: Entity,
+  entity: E,
   component: () => C
 ): E & C {
-  return Object.assign(entity, component());
+  return Object.assign(entity, component()) as E & C;
 }
 
 // mutable remove
@@ -35,7 +35,10 @@ function createEntity(): Entity {
   };
 }
 
-let player = createEntity();
-player = addComponent(player, playerComponent);
-player = addComponent(player, renderableComponent);
-player = addComponent(player, positionComponent);
+const player = addComponent(
+  addComponent(
+    addComponent(createEntity(), playerComponent),
+    renderableComponent
+  ),
+  positionComponent
+);
