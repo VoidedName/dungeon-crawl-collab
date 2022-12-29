@@ -13,6 +13,7 @@ We want to make a web based tiled dungeon crawler for fun :)
 ** free?
 
 === Tech Stack
+For starters, we want to be frontend only. We'll be using `Vue` for the html / css / js side of the application and `PIXI` as the rendering engine. 
 
 == Branching And Contribution Model
 To start with, we'll be using two branches. `main` and `dev`.
