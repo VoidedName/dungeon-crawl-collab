@@ -1,6 +1,29 @@
 import type { SpriteId } from '@/sprite/Sprite';
 import type { Entity } from '@/entity/Entity';
 
+/**
+ * A component represents a "property" of some sort that an entity can possess.
+ *
+ * An example is "Position". An entity could be positioned somewhere on the map.
+ *
+ * Some helper functions exist for pipe chaining various components
+ *
+ * @example
+ * let e = addComponent(createEntity(), positionComponent(2, 4))
+ *
+ * e.position.x // 2
+ * e.position.y // 4
+ *
+ * hasPosition(e) // true
+ *
+ * e = removeComponent(e, 'position')
+ * hasPosition(e) // false
+ *
+ * // adds player and position components to e
+ * e = pipe(withPlayer())
+ *        .then(withPosition(2, 4))
+ *        .evaluate(e)
+ */
 export type Component<T extends string, Props extends object = object> = {
   [key in T]: Props;
 };
@@ -79,7 +102,12 @@ export const withPlayer =
   (e: E) =>
     addComponent(e, playerComponent);
 
-// mutable add
+// TODO:  Consider not doing this mutably. We probably want to update all entities at once, i.e. queue these actions
+//        But this requires a abstracted ecs system that provides these actions
+
+/**
+ * Mutably changes the entity by adding the component to it
+ */
 export function addComponent<E extends Entity, C extends Component<any>>(
   entity: E,
   component: () => C
@@ -87,7 +115,9 @@ export function addComponent<E extends Entity, C extends Component<any>>(
   return Object.assign(entity, component()) as E & C;
 }
 
-// mutable remove
+/**
+ * Mutably changes the entity by removing the component from it
+ */
 export function removeComponent<
   E extends Entity,
   C extends Exclude<keyof E, keyof Entity>
