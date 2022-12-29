@@ -1,3 +1,10 @@
 = Dungeon Crawl Collab Design Doc
 
 Outline here... dunno yet. Some bullet points on what we want somewhere, right?
+
+* Real Time
+* 2D Grid based
+** Diagonal Movement?
+* Class System
+** fixed?
+** free?
