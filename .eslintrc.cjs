@@ -13,7 +13,12 @@ module.exports = {
     'vue/multi-word-component-names': 'off',
     'no-undef': 'off',
     'vue-scoped-css/no-unused-selector': 'error',
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      { 'ts-ignore': 'allow-with-description' }
+    ]
   },
   overrides: [
     {
