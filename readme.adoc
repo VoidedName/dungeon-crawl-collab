@@ -1,1 +1,3 @@
-= Dungeon Crawl Collab
+= Dungeon Crawl Collab Design Doc
+
+Outline here... dunno yet. Some bullet points on what we want somewhere, right?
