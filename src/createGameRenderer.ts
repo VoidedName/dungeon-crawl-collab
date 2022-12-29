@@ -17,7 +17,7 @@ export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {
   const { width, height } = canvas.getBoundingClientRect();
-
+  console.log(width, height);
   const app = new PIXI.Application({
     width,
     height,

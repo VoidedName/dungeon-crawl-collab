@@ -29,7 +29,7 @@
   --color-on-primary: hsl(var(--grey), 0%);
 
 
-  --font-primary: Lato;
+  --font-primary: Inconsolata;
 
   --space-0: 0;
   --space-1: .125rem;
