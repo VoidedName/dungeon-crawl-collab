@@ -1,3 +1,24 @@
 = Dungeon Crawl Collab Design Doc
+:toc:
 
-Outline here... dunno yet. Some bullet points on what we want somewhere, right?
+== Outline And Design
+We want to make a web based tiled dungeon crawler for fun :)
+
+=== Mechanics and Features
+* Real Time
+* 2D Grid based
+** Diagonal Movement?
+* Class System
+** fixed?
+** free?
+
+=== Tech Stack
+For starters, we want to be frontend only. We'll be using `Vue` for the html / css / js side of the application and `PIXI` as the rendering engine. 
+
+== Branching And Contribution Model
+To start with, we'll be using two branches. `main` and `dev`.
+
+* `main`: Update through PR from `dev` only.
+* `dev`: Update through PR from any other branch only.
+
+To contribute, please make a PR (pull request) against dev.
