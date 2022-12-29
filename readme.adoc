@@ -2,8 +2,9 @@
 :toc:
 
 == Outline And Design
-Some bullet points on what we want somewhere, right?
+We want to make a tile based dungeon crawler for fun :)
 
+=== Mechanics and Features
 * Real Time
 * 2D Grid based
 ** Diagonal Movement?
