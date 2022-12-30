@@ -136,52 +136,28 @@ function createInternals(): ECSInternals {
     entitiesBySystem: new Map<string, Set<ECSEntityId>>()
   };
 }
+function getEntity<E extends ECSEntity>(
+  internals: ECSInternals,
+  e: E | ECSEntityId
+): E | undefined {
+  return typeof e === 'number'
+    ? (internals.entities.get(e) as E | undefined)
+    : e;
+}
 
-// we would add systems to the world as well, and optimise them (then need static access)
-export function createWorld(): ECSWorld {
-  const internals = createInternals();
-
-  function entitiesByComponent<C extends ECSComponent<any>[]>(
-    keys: BrandsFromComponents<C>
-  ): (ECSEntity & Intersect<C>)[] {
-    if (keys.length === 0) return [];
-    const entitySets = keys.map(
-      key => internals.entityByComponent.get(key) ?? new Set<ECSEntityId>()
-    );
-    const entities: (ECSEntity & Intersect<C>)[] = [];
-    for (const e of entitySets[0]!) {
-      if (entitySets.every(s => s.has(e)))
-        entities.push(internals.entities.get(e)! as ECSEntity & Intersect<C>);
-    }
-    return entities;
-  }
-
-  function addSystem<T extends ECSComponent<any>[]>(
-    name: string,
-    system: ECSSystem<T>
-  ) {
-    if (internals.entitiesBySystem.has(name))
-      throw new Error(
-        `A system under the name '${name}' is already registered!`
-      );
-
-    internals.systems.push([name, system]);
-    const targets = entitiesByComponent(system.target);
-    internals.entitiesBySystem.set(
-      name,
-      new Set(targets.map(e => e.entity_id))
-    );
-  }
-
-  function removeSystem(name: string): void {
-    internals.systems = internals.systems.filter(([n]) => n !== name);
-    internals.entitiesBySystem.delete(name);
-  }
-
+function internalCreateEntity(
+  internals: ECSInternals
+): ECSWorld['createEntity'] {
   function createEntity(): ECSEntityBuilder<ECSEntity> {
     return entityBuilder(internals);
   }
 
+  return createEntity;
+}
+
+function internalDeleteEntity(
+  internals: ECSInternals
+): ECSWorld['deleteEntity'] {
   function deleteEntity(e: ECSEntityId): void;
   function deleteEntity(e: ECSEntity): void;
   function deleteEntity(e: ECSEntity | ECSEntityId): void {
@@ -199,24 +175,12 @@ export function createWorld(): ECSWorld {
       system.delete(id);
     }
   }
+  return deleteEntity;
+}
 
-  function runSystems() {
-    internals.systems.forEach(([name, system]) => {
-      const entities = [
-        ...(internals.entitiesBySystem.get(name)?.values() ?? [])
-      ]
-        .map(e => internals.entities.get(e))
-        .filter(e => e !== undefined) as ECSEntity[];
-      system.run(entities as any); // this any is intentional
-    });
-  }
-
-  function getEntity<E extends ECSEntity>(e: E | ECSEntityId): E | undefined {
-    return typeof e === 'number'
-      ? (internals.entities.get(e) as E | undefined)
-      : e;
-  }
-
+function internalAddComponent(
+  internals: ECSInternals
+): ECSWorld['addComponent'] {
   function addComponent<C extends ECSComponent<any>>(
     e: ECSEntityId,
     component: () => C
@@ -229,7 +193,7 @@ export function createWorld(): ECSWorld {
     e: E | ECSEntityId,
     component: () => C
   ): (E & C) | ((ECSEntity & C) | undefined) {
-    const entity: E | undefined = getEntity(e);
+    const entity: E | undefined = getEntity(internals, e);
     if (entity === undefined) return undefined;
 
     const c = component();
@@ -252,7 +216,12 @@ export function createWorld(): ECSWorld {
 
     return entity as (E & C) | (ECSEntity & C);
   }
+  return addComponent;
+}
 
+function internalRemoveComponents(
+  internals: ECSInternals
+): ECSWorld['removeComponent'] {
   function removeComponent<C extends ECSComponent<any>>(
     entity: ECSEntityId,
     component: C extends ECSComponent<infer S> ? S : never
@@ -268,7 +237,7 @@ export function createWorld(): ECSWorld {
     entity: E | ECSEntityId,
     component: C
   ): Omit<E, keyof C> | ECSEntity | undefined {
-    const e: E | undefined = getEntity(entity);
+    const e: E | undefined = getEntity(internals, entity);
     if (e === undefined) return undefined;
     // update entity
     delete e[component];
@@ -286,14 +255,87 @@ export function createWorld(): ECSWorld {
     return e as Omit<E, keyof C> | ECSEntity;
   }
 
+  return removeComponent;
+}
+
+function internalEntitiesByComponent(
+  internals: ECSInternals
+): ECSWorld['entitiesByComponent'] {
+  function entitiesByComponent<C extends ECSComponent<any>[]>(
+    keys: BrandsFromComponents<C>
+  ): (ECSEntity & Intersect<C>)[] {
+    if (keys.length === 0) return [];
+    const entitySets = keys.map(
+      key => internals.entityByComponent.get(key) ?? new Set<ECSEntityId>()
+    );
+    const entities: (ECSEntity & Intersect<C>)[] = [];
+    for (const e of entitySets[0]!) {
+      if (entitySets.every(s => s.has(e)))
+        entities.push(internals.entities.get(e)! as ECSEntity & Intersect<C>);
+    }
+    return entities;
+  }
+
+  return entitiesByComponent;
+}
+
+function internalAddSystem(internals: ECSInternals): ECSWorld['addSystem'] {
+  const entitiesByComponent = internalEntitiesByComponent(internals);
+  function addSystem<T extends ECSComponent<any>[]>(
+    name: string,
+    system: ECSSystem<T>
+  ) {
+    if (internals.entitiesBySystem.has(name))
+      throw new Error(
+        `A system under the name '${name}' is already registered!`
+      );
+
+    internals.systems.push([name, system]);
+    const targets = entitiesByComponent(system.target);
+    internals.entitiesBySystem.set(
+      name,
+      new Set(targets.map(e => e.entity_id))
+    );
+  }
+  return addSystem;
+}
+
+function internalRemoveSystem(
+  internals: ECSInternals
+): ECSWorld['removeSystem'] {
+  function removeSystem(name: string): void {
+    internals.systems = internals.systems.filter(([n]) => n !== name);
+    internals.entitiesBySystem.delete(name);
+  }
+  return removeSystem;
+}
+
+function internalRunSystem(internals: ECSInternals): ECSWorld['runSystems'] {
+  function runSystems() {
+    internals.systems.forEach(([name, system]) => {
+      const entities = [
+        ...(internals.entitiesBySystem.get(name)?.values() ?? [])
+      ]
+        .map(e => internals.entities.get(e))
+        .filter(e => e !== undefined) as ECSEntity[];
+      system.run(entities as any); // this any is intentional
+    });
+  }
+  return runSystems;
+}
+
+// we would add systems to the world as well, and optimise them (then need static access)
+export function createWorld(): ECSWorld {
+  const internals = createInternals();
+
   return {
-    createEntity,
-    entitiesByComponent,
-    addSystem,
-    runSystems,
-    addComponent,
-    removeComponent,
-    removeSystem,
-    deleteEntity
+    createEntity: internalCreateEntity(internals),
+    deleteEntity: internalDeleteEntity(internals),
+    addComponent: internalAddComponent(internals),
+    removeComponent: internalRemoveComponents(internals),
+    entitiesByComponent: internalEntitiesByComponent(internals),
+    addSystem: internalAddSystem(internals),
+    removeSystem: internalRemoveSystem(internals),
+    runSystems: internalRunSystem(internals)
   };
 }

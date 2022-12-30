@@ -7,7 +7,6 @@ import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { withPlayer, withPosition, withRenderable } from '@/entity/Components';
 import { withVelocity } from '@/entity/Velocity';
-import type { ECSEntity } from '@/ecs/ECSEntity';
 
 export function createGameLoop() {
   const world = createWorld();
