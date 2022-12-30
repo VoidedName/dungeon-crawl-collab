@@ -2,7 +2,7 @@ import type { DisplayObject } from 'pixi.js';
 import { isControlOn } from './ControlsManager';
 import type { TEntity } from './EntityManager';
 
-export const PLAYER_SPEED = 1;
+export const PLAYER_SPEED = 2.6;
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 

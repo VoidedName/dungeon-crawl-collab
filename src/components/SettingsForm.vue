@@ -48,8 +48,6 @@ function rebind(control: Control, e: any) {
         <span v-else>{{ configurationMap[control] }}</span>
       </button>
     </fieldset>
-
-    <button>Update</button>
   </section>
 </template>
 
