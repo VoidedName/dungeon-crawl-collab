@@ -9,24 +9,26 @@ onMounted(async () => {
   renderer = await createGameRenderer({
     canvas: canvasEl.value
   });
-
-  document.body.style.overflow = 'hidden';
-  document.body.style.height = '100vh';
 });
 
 onUnmounted(() => {
   renderer?.cleanup();
-  document.body.style.overflow = '';
-  document.body.style.height = '';
 });
 </script>
 
 <template>
-  <canvas ref="canvasEl" />
+  <div class="game-renderer">
+    <canvas ref="canvasEl" />
+  </div>
 </template>
 
 <style scoped>
+.game-renderer {
+  height: 100%;
+  background-color: aqua;
+}
 canvas {
-  height: 100vh;
+  margin-inline: auto;
+  display: block;
 }
 </style>

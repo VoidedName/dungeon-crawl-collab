@@ -17,14 +17,15 @@ export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {
   const { width, height } = canvas.getBoundingClientRect();
-  console.log(width, height);
+  console.log(width, height, canvas.parentElement?.clientHeight);
   const app = new PIXI.Application({
     width,
     height,
     autoDensity: true,
     antialias: false,
     background: 0x000000,
-    view: canvas
+    view: canvas,
+    resizeTo: canvas.parentElement!
   });
 
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -38,6 +39,10 @@ export const createGameRenderer = async ({
       initialAnimation: 'idle'
     });
     sprite.position.set(app.screen.width / 2, app.screen.height / 2);
+    app.stage.interactive = true;
+    app.stage.on('pointermove', e => {
+      console.log(e.global);
+    });
     canvas.addEventListener('mousemove', e => {
       sprite.position.set(e.clientX, e.clientY);
     });
