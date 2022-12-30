@@ -2,6 +2,10 @@ import * as PIXI from 'pixi.js';
 import type { AsyncReturnType } from './utils/types';
 import { throttle } from './utils/helpers';
 import { createEntitySprite } from './createEntitySprite';
+import { createGameLoop } from './createGameLoop';
+import { addEntity } from './EntityManager';
+import { PLAYER_SPEED, type TPlayerEntity } from './PlayerEntity';
+import { loadMap } from './MapManager';
 
 if (import.meta.env.DEV) {
   // @ts-ignore enables PIXI devtools
@@ -17,7 +21,6 @@ export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {
   const { width, height } = canvas.getBoundingClientRect();
-  console.log(width, height, canvas.parentElement?.clientHeight);
   const app = new PIXI.Application({
     width,
     height,
@@ -39,17 +42,20 @@ export const createGameRenderer = async ({
       initialAnimation: 'idle'
     });
     sprite.position.set(app.screen.width / 2, app.screen.height / 2);
-    app.stage.interactive = true;
-    app.stage.on('pointermove', e => {
-      console.log(e.global);
-    });
-    canvas.addEventListener('mousemove', e => {
-      sprite.position.set(e.clientX, e.clientY);
-    });
     app.stage.addChild(sprite);
+    return sprite;
   };
 
-  await addTestSprite();
+  await loadMap(app);
+
+  const testSprite = await addTestSprite();
+  addEntity({
+    id: 1,
+    sprite: testSprite,
+    speed: PLAYER_SPEED
+  } as TPlayerEntity);
+
+  createGameLoop(app);
 
   return {
     cleanup() {
