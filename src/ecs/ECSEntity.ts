@@ -5,14 +5,14 @@ export type EntityId = number;
  * Various components can be associated / disassociated with / from the entity
  * via the addComponent / removeComponent functions
  */
-export type Entity = {
+export type ECSEntity = {
   entity_id: EntityId;
 };
 
 let entityCount = 0;
 
 // TODO: Generalize this
-export function createEntity(): Entity {
+export function createEntity(): ECSEntity {
   return {
     entity_id: entityCount++
   };

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { createEntity } from '@/entity/Entity';
+import { createEntity } from '@/ecs/ECSEntity';
 import {
   addComponent,
   hasPlayer,
