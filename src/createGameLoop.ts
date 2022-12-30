@@ -10,7 +10,11 @@ import { withPlayer, withPosition, withRenderable } from '@/entity/Components';
 import { withVelocity } from '@/entity/Velocity';
 import { CameraSystem } from './systems/CameraSystem';
 
-export function createGameLoop(app: Application) {
+function spriteResolver(id: number) {
+  return (getEntityById(id)! as unknown as TPlayerEntity).sprite;
+}
+
+export function createGameLoop() {
   const world = createWorld();
 
   world
@@ -22,14 +26,8 @@ export function createGameLoop(app: Application) {
     .build();
 
   world.addSystem('movement', MovementSystem);
-  world.addSystem(
-    'render',
-    RenderSystem(id => (getEntityById(id)! as unknown as TPlayerEntity).sprite)
-  );
-  world.addSystem(
-    'camera',
-    CameraSystem(id => (getEntityById(id)! as unknown as TPlayerEntity).sprite)
-  );
+  world.addSystem('render', RenderSystem(spriteResolver));
+  world.addSystem('camera', CameraSystem(spriteResolver));
 
   function tick() {
     const player = world.entitiesByComponent<[Player, Velocity]>([
