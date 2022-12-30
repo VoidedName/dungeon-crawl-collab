@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { createGameRenderer, type GameRenderer } from '@/createGameRenderer.js';
+import {
+  createGameRenderer,
+  type GameRenderer
+} from '@/renderer/createGameRenderer.js';
 
 const canvasEl = ref<HTMLCanvasElement>();
 let renderer: GameRenderer;
@@ -25,7 +28,6 @@ onUnmounted(() => {
 <style scoped>
 .game-renderer {
   height: 100%;
-  background-color: aqua;
 }
 canvas {
   margin-inline: auto;

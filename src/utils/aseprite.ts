@@ -1,3 +1,4 @@
+import type { SpriteAnimationState } from '@/renderer/createSprite';
 import * as PIXI from 'pixi.js';
 import type { FrameObject, ISpritesheetData, Spritesheet } from 'pixi.js';
 
@@ -51,7 +52,7 @@ export function parseAsperiteAnimationSheet(
   return {
     frames: Object.fromEntries(
       asepritesheet.frames.map(frame => {
-        const frameName = `${frame.filename}`;
+        const frameName = frame.filename;
         // avoids console warnings with HMR
         if (import.meta.env.DEV) {
           PIXI.Texture.removeFromCache(frameName);
@@ -72,7 +73,7 @@ export function parseAsperiteAnimationSheet(
 }
 
 export const createSpritesheetFrameObject = (
-  name: string,
+  name: SpriteAnimationState,
   spritesheet: Spritesheet,
   spritesheetData: ISpritesheetData
 ): FrameObject[] => {

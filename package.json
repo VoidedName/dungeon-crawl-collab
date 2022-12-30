@@ -18,6 +18,7 @@
   "dependencies": {
     "@iconify-json/game-icons": "^1.1.1",
     "@vueuse/core": "^9.9.0",
+    "pixi-viewport": "^4.38.0",
     "pixi.js": "^7.0.5",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
