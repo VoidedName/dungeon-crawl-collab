@@ -21,7 +21,7 @@ function normalize({ x, y }: { x: number; y: number }) {
   return { x: x / len, y: y / len };
 }
 
-export function updatePlayer(player: TPlayerEntity) {
+export function tryPlayerMove(): { x: number; y: number } {
   let dx = 0;
   let dy = 0;
   if (isControlOn('right')) {
@@ -36,13 +36,6 @@ export function updatePlayer(player: TPlayerEntity) {
   if (isControlOn('down')) {
     dy += 1;
   }
-  const { x: nx, y: ny } = normalize({ x: dx, y: dy });
-
-  const moveX = nx * player.speed;
-  const moveY = ny * player.speed;
-
-  player.sprite.position.set(
-    player.sprite.position.x + moveX,
-    player.sprite.position.y + moveY
-  );
+  const normalized = normalize({ x: dx, y: dy });
+  return { x: normalized.x * 5, y: normalized.y * 5 };
 }

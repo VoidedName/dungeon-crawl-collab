@@ -49,7 +49,7 @@ export const createGameRenderer = async ({
 
   const testSprite = await addTestSprite();
   addEntity({
-    id: 'player',
+    id: 1,
     sprite: testSprite,
     speed: PLAYER_SPEED
   } as TPlayerEntity);
