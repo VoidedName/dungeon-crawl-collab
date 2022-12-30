@@ -17,11 +17,17 @@ export type CreateGameRendererOptions = {
   canvas: HTMLCanvasElement;
 };
 
+let app: PIXI.Application;
+
+export function getApp() {
+  return app;
+}
+
 export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {
   const { width, height } = canvas.getBoundingClientRect();
-  const app = new PIXI.Application({
+  app = new PIXI.Application({
     width,
     height,
     autoDensity: true,
