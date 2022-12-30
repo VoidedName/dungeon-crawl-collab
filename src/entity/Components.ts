@@ -27,10 +27,8 @@ export function positionComponent(x: number, y: number): Position {
   };
 }
 
-export const withPosition =
-  <E extends ECSEntity>(x: number, y: number) =>
-  (e: E) =>
-    addComponent(e, () => positionComponent(x, y));
+export const withPosition = (x: number, y: number) => () =>
+  positionComponent(x, y);
 
 const RenderableBrand = 'renderable';
 type RenderableBrand = typeof RenderableBrand;
@@ -53,10 +51,8 @@ export function renderableComponent(sprite: SpriteId): Renderable {
   };
 }
 
-export const withRenderable =
-  <E extends ECSEntity>(sprite: SpriteId) =>
-  (e: E) =>
-    addComponent(e, () => renderableComponent(sprite));
+export const withRenderable = (sprite: SpriteId) => () =>
+  renderableComponent(sprite);
 
 const PlayerBrand = 'player';
 type PlayerBrand = typeof PlayerBrand;
@@ -71,31 +67,7 @@ export function hasPlayer<E extends ECSEntity>(e: E): e is E & Player {
   return PlayerBrand in e;
 }
 
-export const withPlayer =
-  <E extends ECSEntity>() =>
-  (e: E) =>
-    addComponent(e, playerComponent);
+export const withPlayer = <E extends ECSEntity>() => playerComponent;
 
 // TODO:  Consider not doing this mutably. We probably want to update all entities at once, i.e. queue these actions
 //        But this requires a abstracted ecs system that provides these actions
-
-/**
- * Mutably changes the entity by adding the component to it
- */
-export function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
-  entity: E,
-  component: () => C
-): E & C {
-  return Object.assign(entity, component()) as E & C;
-}
-
-/**
- * Mutably changes the entity by removing the component from it
- */
-export function removeComponent<
-  E extends ECSEntity,
-  C extends Exclude<keyof E, keyof ECSEntity>
->(entity: E, component: C): Omit<E, C> {
-  delete entity[component];
-  return entity;
-}

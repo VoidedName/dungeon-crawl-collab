@@ -11,3 +11,11 @@ export type Override<A, B> = Omit<A, keyof B> & B;
 export type Mutable<T> = { -readonly [Key in keyof T]: T[Key] };
 export type AsyncReturnType<T extends (...args: any) => Promise<any>> =
   T extends (...args: any) => Promise<infer R> ? R : any;
+
+export type Intersect<X extends any[]> = X extends []
+  ? never
+  : X extends [head: infer A]
+  ? A
+  : X extends [head: infer A, ...tail: infer B]
+  ? A & Intersect<[...B]>
+  : never;

@@ -1,4 +1,4 @@
-export type EntityId = number;
+export type ECSEntityId = number;
 /**
  * An entity, is at its core, just an id.
  *
@@ -6,14 +6,5 @@ export type EntityId = number;
  * via the addComponent / removeComponent functions
  */
 export type ECSEntity = {
-  entity_id: EntityId;
+  entity_id: ECSEntityId;
 };
-
-let entityCount = 0;
-
-// TODO: Generalize this
-export function createEntity(): ECSEntity {
-  return {
-    entity_id: entityCount++
-  };
-}
