@@ -1,25 +1,25 @@
 <script lang="ts" setup>
-const controls = ref<any>({
-  right: 'KeyD',
-  left: 'KeyA',
-  up: 'KeyW',
-  down: 'KeyS',
-  use: 'KeyE'
-});
+import { getConfiguration, Controls } from '@/ControlsManager';
+import type { ComputedRef } from 'vue';
+import type { Control } from '@/ControlsManager';
 
-const controlKeys = Object.keys(controls.value);
-
+const configuration = ref<any>(getConfiguration());
 const modifying = ref('');
 const lastListener = ref();
 
-function submit() {
-  // TODO: persist the form info into a shared global state that both the game and this form can modify?
-}
+const configurationMap: ComputedRef<Record<Control, string>> = computed(() =>
+  Object.entries(configuration.value).reduce(
+    (obj, [key, value]: any) => ({ ...obj, [value]: key }),
+    {} as any
+  )
+);
 
-function rebind(key: string, e: any) {
+function rebind(control: Control, e: any) {
   e.currentTarget.blur();
   function onKeyPress(e: KeyboardEvent) {
-    controls.value[key] = e.code;
+    const oldKeyCode = configurationMap.value[control];
+    delete configuration.value[oldKeyCode];
+    configuration.value[e.code] = control;
     modifying.value = '';
     window.removeEventListener('keypress', onKeyPress);
   }
@@ -28,15 +28,15 @@ function rebind(key: string, e: any) {
     lastListener.value = undefined;
   }
   lastListener.value = onKeyPress;
-  modifying.value = key;
+  modifying.value = control;
   window.addEventListener('keypress', onKeyPress);
 }
 </script>
 
 <template>
-  <form @submit.prevent="submit">
-    <fieldset v-for="control in controlKeys">
-      <label :for="'move-' + control">Move Right</label>
+  <section>
+    <fieldset v-for="control in Controls">
+      <label :for="'move-' + control">Move {{ control }}</label>
       <button
         type="button"
         @click="rebind(control, $event)"
@@ -45,16 +45,16 @@ function rebind(key: string, e: any) {
         :id="'move-' + control"
       >
         <span v-if="modifying === control">Press any key to rebind</span>
-        <span v-else>{{ controls[control] }}</span>
+        <span v-else>{{ configurationMap[control] }}</span>
       </button>
     </fieldset>
 
     <button>Update</button>
-  </form>
+  </section>
 </template>
 
 <style scoped>
-form {
+section {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
