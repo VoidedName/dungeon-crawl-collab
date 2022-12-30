@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { Control, getConfiguration } from '@/ControlsManager';
+import { getConfiguration, Controls } from '@/ControlsManager';
 import type { ComputedRef } from 'vue';
+import type { Control } from '@/ControlsManager';
 
 const configuration = ref<any>(getConfiguration());
 const modifying = ref('');
@@ -34,7 +35,7 @@ function rebind(control: Control, e: any) {
 
 <template>
   <section>
-    <fieldset v-for="control in Control">
+    <fieldset v-for="control in Controls">
       <label :for="'move-' + control">Move {{ control }}</label>
       <button
         type="button"

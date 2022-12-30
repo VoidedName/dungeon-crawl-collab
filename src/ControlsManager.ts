@@ -1,25 +1,20 @@
-export enum Control {
-  up = 'up',
-  down = 'down',
-  left = 'left',
-  right = 'right',
-  use = 'use'
-}
+export const Controls = ['up', 'down', 'left', 'right', 'use'] as const;
+export type Control = typeof Controls[number];
 
-const configuration: Record<string, Control> = {
-  KeyD: Control.right,
-  KeyA: Control.left,
-  KeyW: Control.up,
-  KeyS: Control.down,
-  KeyE: Control.use
-};
+const configuration = {
+  KeyD: 'right',
+  KeyA: 'left',
+  KeyW: 'up',
+  KeyS: 'down',
+  KeyE: 'use'
+} as Record<string, Control>;
 
 const controls = {
-  [Control.up]: false,
-  [Control.down]: false,
-  [Control.left]: false,
-  [Control.right]: false,
-  [Control.use]: false
+  ['up']: false,
+  ['down']: false,
+  ['left']: false,
+  ['right']: false,
+  ['use']: false
 };
 
 export function getConfiguration() {
@@ -35,9 +30,7 @@ export function isControlOn(control: Control) {
 }
 
 export function setControl(control: Control, isOn: boolean) {
-  if (Object.values(Control).includes(control)) {
-    controls[control] = isOn;
-  }
+  controls[control] = isOn;
 }
 
 export function getControls() {

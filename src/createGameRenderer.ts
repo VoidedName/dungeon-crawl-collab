@@ -56,7 +56,7 @@ export const createGameRenderer = async ({
     speed: PLAYER_SPEED
   } as TPlayerEntity);
 
-  createGameLoop(app);
+  createGameLoop();
 
   return {
     cleanup() {
