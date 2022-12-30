@@ -1,9 +1,9 @@
 const entities = [];
 
-const entityMap: Record<string, TEntity> = {};
+const entityMap: Record<number, TEntity> = {};
 
 export type TEntity = {
-  id: string;
+  id: number;
   [key: string]: any;
 };
 
@@ -12,6 +12,6 @@ export function addEntity(entity: TEntity) {
   entityMap[entity.id] = entity;
 }
 
-export function getEntityById(id: string) {
+export function getEntityById(id: number) {
   return entityMap[id];
 }
