@@ -74,7 +74,7 @@ describe('position component', () => {
     expect(hasPosition(e)).toBeTruthy();
   });
 
-  test('has position has the right sprite id', () => {
+  test('has position has the right coords', () => {
     const e = addComponent(createEntity(), () => positionComponent(13, 7));
     expect(e.position.x).toBe(13);
     expect(e.position.y).toBe(7);
