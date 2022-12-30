@@ -78,9 +78,9 @@ function entityBuilder<T extends ECSEntity>(
  */
 export interface ECSWorld {
   createEntity(): ECSEntityBuilder<ECSEntity>;
-
   deleteEntity(e: ECSEntityId): void;
   deleteEntity(e: ECSEntity): void;
+  entities(): Iterable<ECSEntity>;
 
   addComponent<C extends ECSComponent<any>>(
     e: ECSEntityId,
@@ -102,7 +102,7 @@ export interface ECSWorld {
 
   entitiesByComponent<C extends ECSComponent<any>[]>(
     keys: BrandsFromComponents<C>
-  ): (ECSEntity & Intersect<C>)[];
+  ): Array<ECSEntity & Intersect<C>>;
 
   addSystem<T extends ECSComponent<any>[]>(
     name: string,
@@ -114,8 +114,6 @@ export interface ECSWorld {
   runSystems(): void;
 }
 
-// todo systems
-// todo entity management
 /**
  * Track internal state of the ECS, things like next entity id, the entities, etc
  */
@@ -136,6 +134,7 @@ function createInternals(): ECSInternals {
     entitiesBySystem: new Map<string, Set<ECSEntityId>>()
   };
 }
+
 function getEntity<E extends ECSEntity>(
   internals: ECSInternals,
   e: E | ECSEntityId
@@ -176,6 +175,13 @@ function internalDeleteEntity(
     }
   }
   return deleteEntity;
+}
+
+function internalEntities(internals: ECSInternals): ECSWorld['entities'] {
+  function entities(): Iterable<ECSEntity> {
+    return internals.entities.values();
+  }
+  return entities;
 }
 
 function internalAddComponent(
@@ -294,7 +300,7 @@ function internalAddSystem(internals: ECSInternals): ECSWorld['addSystem'] {
     const targets = entitiesByComponent(system.target);
     internals.entitiesBySystem.set(
       name,
-      new Set(targets.map(e => e.entity_id))
+      new Set([...targets].map(e => e.entity_id))
     );
   }
   return addSystem;
@@ -318,19 +324,23 @@ function internalRunSystem(internals: ECSInternals): ECSWorld['runSystems'] {
       ]
         .map(e => internals.entities.get(e))
         .filter(e => e !== undefined) as ECSEntity[];
-      system.run(entities as any); // this any is intentional
+      system.run(entities);
     });
   }
   return runSystems;
 }
 
-// we would add systems to the world as well, and optimise them (then need static access)
+/**
+ * Creates a new ECSWorld instance.
+ * @see ECSWorld
+ */
 export function createWorld(): ECSWorld {
   const internals = createInternals();
 
   return {
     createEntity: internalCreateEntity(internals),
     deleteEntity: internalDeleteEntity(internals),
+    entities: internalEntities(internals),
     addComponent: internalAddComponent(internals),
     removeComponent: internalRemoveComponents(internals),
     entitiesByComponent: internalEntitiesByComponent(internals),

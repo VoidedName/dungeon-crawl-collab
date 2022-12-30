@@ -5,5 +5,5 @@ import type { BrandsFromComponents } from '@/ecs/types';
 
 export interface ECSSystem<Cs extends ECSComponent<any>[]> {
   readonly target: BrandsFromComponents<Cs>;
-  readonly run: (entities: ECSEntity & Intersect<Cs>[]) => void;
+  readonly run: (entities: (ECSEntity & Intersect<Cs>)[]) => void;
 }
