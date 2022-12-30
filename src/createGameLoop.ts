@@ -1,12 +1,13 @@
 import { getEntityById } from './EntityManager';
 import { type TPlayerEntity, tryPlayerMove } from './PlayerEntity';
 import { createWorld } from '@/ecs/ECSWorld';
-import type { Player } from '@/entity/Components';
+import type { Player, Position } from '@/entity/Components';
 import type { Velocity } from '@/entity/Velocity';
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { withPlayer, withPosition, withRenderable } from '@/entity/Components';
 import { withVelocity } from '@/entity/Velocity';
+import type { ECSEntity } from '@/ecs/ECSEntity';
 
 export function createGameLoop() {
   const world = createWorld();

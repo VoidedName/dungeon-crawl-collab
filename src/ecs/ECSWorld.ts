@@ -79,6 +79,27 @@ function entityBuilder<T extends ECSEntity>(
 export interface ECSWorld {
   createEntity(): ECSEntityBuilder<ECSEntity>;
 
+  deleteEntity(e: ECSEntityId): void;
+  deleteEntity(e: ECSEntity): void;
+
+  addComponent<C extends ECSComponent<any>>(
+    e: ECSEntityId,
+    component: () => C
+  ): (ECSEntity & C) | undefined;
+  addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+    e: E,
+    component: () => C
+  ): E & C;
+
+  removeComponent<C extends ECSComponent<any>>(
+    entity: ECSEntityId,
+    component: C extends ECSComponent<infer S> ? S : never
+  ): ECSEntity | undefined;
+  removeComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+    entity: E,
+    component: C extends ECSComponent<infer S> ? S : never
+  ): Omit<E, keyof C>;
+
   entitiesByComponent<C extends ECSComponent<any>[]>(
     keys: BrandsFromComponents<C>
   ): (ECSEntity & Intersect<C>)[];
@@ -87,6 +108,8 @@ export interface ECSWorld {
     name: string,
     system: ECSSystem<T>
   ): void;
+
+  removeSystem(name: string): void;
 
   runSystems(): void;
 }
@@ -150,8 +173,31 @@ export function createWorld(): ECSWorld {
     );
   }
 
+  function removeSystem(name: string): void {
+    internals.systems = internals.systems.filter(([n]) => n !== name);
+    internals.entitiesBySystem.delete(name);
+  }
+
   function createEntity(): ECSEntityBuilder<ECSEntity> {
     return entityBuilder(internals);
+  }
+
+  function deleteEntity(e: ECSEntityId): void;
+  function deleteEntity(e: ECSEntity): void;
+  function deleteEntity(e: ECSEntity | ECSEntityId): void {
+    const id = typeof e === 'number' ? e : e.entity_id;
+    // drop entity
+    internals.entities.delete(id);
+
+    // remove from components
+    for (const component of internals.entityByComponent.values()) {
+      component.delete(id);
+    }
+
+    // remove from systems
+    for (const system of internals.entitiesBySystem.values()) {
+      system.delete(id);
+    }
   }
 
   function runSystems() {
@@ -165,10 +211,89 @@ export function createWorld(): ECSWorld {
     });
   }
 
+  function getEntity<E extends ECSEntity>(e: E | ECSEntityId): E | undefined {
+    return typeof e === 'number'
+      ? (internals.entities.get(e) as E | undefined)
+      : e;
+  }
+
+  function addComponent<C extends ECSComponent<any>>(
+    e: ECSEntityId,
+    component: () => C
+  ): (ECSEntity & C) | undefined;
+  function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+    e: E,
+    component: () => C
+  ): E & C;
+  function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+    e: E | ECSEntityId,
+    component: () => C
+  ): (E & C) | ((ECSEntity & C) | undefined) {
+    const entity: E | undefined = getEntity(e);
+    if (entity === undefined) return undefined;
+
+    const c = component();
+    const brand = Object.keys(c)[0]!;
+
+    // update entity
+    Object.assign(entity, c);
+
+    // add to components
+    const set = internals.entityByComponent.get(brand) ?? new Set();
+    set.add(entity.entity_id);
+    internals.entityByComponent.set(brand, set);
+
+    // add to systems
+    internals.systems.forEach(([name, system]) => {
+      if (system.target.every(k => k in entity)) {
+        internals.entitiesBySystem.get(name)!.add(entity.entity_id);
+      }
+    });
+
+    return entity as (E & C) | (ECSEntity & C);
+  }
+
+  function removeComponent<C extends ECSComponent<any>>(
+    entity: ECSEntityId,
+    component: C extends ECSComponent<infer S> ? S : never
+  ): ECSEntity | undefined;
+  function removeComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+    entity: E,
+    component: C extends ECSComponent<infer S> ? S : never
+  ): Omit<E, keyof C>;
+  function removeComponent<
+    E extends ECSEntity,
+    C extends string & Exclude<keyof E, keyof ECSEntity>
+  >(
+    entity: E | ECSEntityId,
+    component: C
+  ): Omit<E, keyof C> | ECSEntity | undefined {
+    const e: E | undefined = getEntity(entity);
+    if (e === undefined) return undefined;
+    // update entity
+    delete e[component];
+
+    // update components
+    internals.entitiesBySystem.get(component)?.delete(e.entity_id);
+
+    // update systems
+    internals.systems.forEach(([name, system]) => {
+      if (system.target.some(k => k === component)) {
+        internals.entitiesBySystem.get(name)!.delete(e.entity_id);
+      }
+    });
+
+    return e as Omit<E, keyof C> | ECSEntity;
+  }
+
   return {
     createEntity,
     entitiesByComponent,
     addSystem,
-    runSystems
+    runSystems,
+    addComponent,
+    removeComponent,
+    removeSystem,
+    deleteEntity
   };
 }
