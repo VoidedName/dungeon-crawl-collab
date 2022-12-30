@@ -1,11 +1,12 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Position, Renderable } from '@/entity/Components';
+import { PositionBrand, type Position } from '@/entity/Components';
+import { type Renderable, RenderableBrand } from '@/entity/Renderable';
 import type { DisplayObject } from 'pixi.js';
 
 export const RenderSystem: (
   resolveSprite: (sprite: number) => DisplayObject
 ) => ECSSystem<[Position, Renderable]> = resolveSprite => ({
-  target: ['position', 'renderable'],
+  target: [PositionBrand, RenderableBrand],
   run: entities => {
     entities.forEach(e => {
       const sprite = resolveSprite(e.renderable.sprite);

@@ -4,7 +4,7 @@ import type { ECSComponent } from '@/ecs/ECSComponent';
 
 // TODO: Consider splitting the components apart, they're only expected to grow
 
-const PositionBrand = 'position';
+export const PositionBrand = 'position';
 type PositionBrand = typeof PositionBrand;
 export type Position = ECSComponent<
   PositionBrand,
@@ -30,31 +30,7 @@ export function positionComponent(x: number, y: number): Position {
 export const withPosition = (x: number, y: number) => () =>
   positionComponent(x, y);
 
-const RenderableBrand = 'renderable';
-type RenderableBrand = typeof RenderableBrand;
-export type Renderable = ECSComponent<
-  RenderableBrand,
-  {
-    sprite: SpriteId;
-  }
->;
-
-export function hasRenderable<E extends ECSEntity>(e: E): e is E & Renderable {
-  return RenderableBrand in e;
-}
-
-export function renderableComponent(sprite: SpriteId): Renderable {
-  return {
-    [RenderableBrand]: {
-      sprite
-    }
-  };
-}
-
-export const withRenderable = (sprite: SpriteId) => () =>
-  renderableComponent(sprite);
-
-const PlayerBrand = 'player';
+export const PlayerBrand = 'player';
 type PlayerBrand = typeof PlayerBrand;
 export type Player = ECSComponent<PlayerBrand>;
 export function playerComponent(): Player {

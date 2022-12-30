@@ -1,9 +1,9 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Position } from '@/entity/Components';
-import type { Velocity } from '@/entity/Velocity';
+import { PositionBrand, type Position } from '@/entity/Components';
+import { VelocityBrand, type Velocity } from '@/entity/Velocity';
 
 export const MovementSystem: ECSSystem<[Position, Velocity]> = {
-  target: ['position', 'velocity'],
+  target: [PositionBrand, VelocityBrand],
   run: entities => {
     entities.forEach(e => {
       e.position.x += e.velocity.x;

@@ -2,12 +2,13 @@ import type { Application } from 'pixi.js';
 import { getEntityById } from './EntityManager';
 import { type TPlayerEntity, tryPlayerMove } from './PlayerEntity';
 import { createWorld } from '@/ecs/ECSWorld';
-import type { Player, Position } from '@/entity/Components';
+import type { Player } from '@/entity/Components';
 import type { Velocity } from '@/entity/Velocity';
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
-import { withPlayer, withPosition, withRenderable } from '@/entity/Components';
+import { withPlayer, withPosition } from '@/entity/Components';
 import { withVelocity } from '@/entity/Velocity';
+import { withRenderable } from './entity/Renderable';
 
 export function createGameLoop(app: Application) {
   const world = createWorld();
@@ -23,7 +24,9 @@ export function createGameLoop(app: Application) {
   world.addSystem('movement', MovementSystem);
   world.addSystem(
     'render',
-    RenderSystem(id => (getEntityById(id)! as unknown as TPlayerEntity).sprite)
+    RenderSystem(
+      id => (getEntityById(id)! as unknown as TPlayerEntity).sprite.container
+    )
   );
 
   function tick() {
@@ -38,7 +41,7 @@ export function createGameLoop(app: Application) {
 
     // TODO: move into CameraSystem probably?
     const playerSprite = (getEntityById(1)! as unknown as TPlayerEntity).sprite;
-    const { x: playerX, y: playerY } = playerSprite.position;
+    const { x: playerX, y: playerY } = playerSprite.container.position;
     const cx = playerX - app.screen.width / 2;
     const cy = playerY - app.screen.height / 2;
     app.stage.position.set(-cx, -cy);

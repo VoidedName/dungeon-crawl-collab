@@ -1,7 +1,7 @@
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
 
-const VelocityBrand = 'velocity';
+export const VelocityBrand = 'velocity';
 type VelocityBrand = typeof VelocityBrand;
 export type Velocity = ECSComponent<
   VelocityBrand,
