@@ -1,16 +1,14 @@
-import { getApp } from '@/createGameRenderer';
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { Player, Position, Renderable } from '@/entity/Components';
-import { getEntityById } from '@/EntityManager';
-import type { TPlayerEntity } from '@/PlayerEntity';
 import type { DisplayObject } from 'pixi.js';
+import type { Application } from 'pixi.js';
 
 export const CameraSystem: (
-  resolveSprite: (sprite: number) => DisplayObject
-) => ECSSystem<[Player, Position, Renderable]> = resolveSprite => ({
+  resolveSprite: (sprite: number) => DisplayObject,
+  app: Application
+) => ECSSystem<[Player, Position, Renderable]> = (resolveSprite, app) => ({
   target: ['player', 'position', 'renderable'],
   run: entities => {
-    const app = getApp();
     const player = entities[0];
     if (!app || !player) return;
 

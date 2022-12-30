@@ -19,10 +19,6 @@ export type CreateGameRendererOptions = {
 
 let app: PIXI.Application;
 
-export function getApp() {
-  return app;
-}
-
 export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {

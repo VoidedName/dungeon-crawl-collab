@@ -2,7 +2,7 @@ import type { Application } from 'pixi.js';
 import { getEntityById } from './EntityManager';
 import { type TPlayerEntity, tryPlayerMove } from './PlayerEntity';
 import { createWorld } from '@/ecs/ECSWorld';
-import type { Player, Position } from '@/entity/Components';
+import type { Player } from '@/entity/Components';
 import type { Velocity } from '@/entity/Velocity';
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
@@ -14,7 +14,7 @@ function spriteResolver(id: number) {
   return (getEntityById(id)! as unknown as TPlayerEntity).sprite;
 }
 
-export function createGameLoop() {
+export function createGameLoop(app: Application) {
   const world = createWorld();
 
   world
@@ -27,7 +27,7 @@ export function createGameLoop() {
 
   world.addSystem('movement', MovementSystem);
   world.addSystem('render', RenderSystem(spriteResolver));
-  world.addSystem('camera', CameraSystem(spriteResolver));
+  world.addSystem('camera', CameraSystem(spriteResolver, app));
 
   function tick() {
     const player = world.entitiesByComponent<[Player, Velocity]>([
