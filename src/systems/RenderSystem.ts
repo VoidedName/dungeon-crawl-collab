@@ -1,5 +1,6 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Position, Renderable } from '@/entity/Components';
+import type { Position } from '@/entity/components/Position';
+import type { Renderable } from '@/entity/components/Renderable';
 import type { DisplayObject } from 'pixi.js';
 
 export const RenderSystem: (

@@ -1,5 +1,7 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Player, Position, Renderable } from '@/entity/Components';
+import type { Player } from '@/entity/components/Player';
+import type { Position } from '@/entity/components/Position';
+import type { Renderable } from '@/entity/components/Renderable';
 import type { DisplayObject } from 'pixi.js';
 import type { Application } from 'pixi.js';
 
