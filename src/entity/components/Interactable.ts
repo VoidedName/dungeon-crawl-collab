@@ -7,7 +7,7 @@ export type Interactable = ECSComponent<
   InteractableBrand,
   {
     text: string;
-    pickupRadius: number;
+    interactionRadius: number;
   }
 >;
 export function hasInteractable<E extends ECSEntity>(
@@ -15,17 +15,18 @@ export function hasInteractable<E extends ECSEntity>(
 ): e is E & Interactable {
   return InteractableBrand in e;
 }
-export const withInteractable = (text: string, pickupRadius: number) => () =>
-  interactableComponent(text, pickupRadius);
+export const withInteractable =
+  (text: string, interactionRadius: number) => () =>
+    interactableComponent(text, interactionRadius);
 
 export function interactableComponent(
   text: string,
-  pickupRadius: number
+  interactionRadius: number
 ): Interactable {
   return {
     [InteractableBrand]: {
       text,
-      pickupRadius
+      interactionRadius
     }
   };
 }
