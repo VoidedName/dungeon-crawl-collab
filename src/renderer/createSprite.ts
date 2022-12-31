@@ -4,43 +4,48 @@ import {
   createSpritesheetFrameObject,
   parseAsperiteAnimationSheet
 } from '@/utils/aseprite';
-import { AnimationState } from '@/entity/Animatable';
+import { AnimationState, type AnimationOptions } from '@/entity/Animatable';
 
 export type SpriteIdentifier = keyof typeof sprites;
 
-export type CreateSpriteOptions = {
-  id: SpriteIdentifier;
-};
+export type CreateSpriteOptions = Partial<AnimationParams>;
 
 const textureCache = new Map<string, Promise<PIXI.Texture>>();
 
 export type SpriteWrapper = {
   sprite: PIXI.Container;
-  scheduleTransition: (params: Partial<AnimationParams>) => void;
-  flushTransition: () => void;
+  transitionTo: (
+    state: AnimationState,
+    options?: Partial<AnimationOptions>
+  ) => void;
 };
 
 export type AnimationParams = {
   state: AnimationState;
-  loop?: boolean;
-  onComplete?: () => void;
-  animationSpeed?: number;
-};
+} & AnimationOptions;
 
-export const createSprite = ({ id }: CreateSpriteOptions): SpriteWrapper => {
+export const createSprite = (
+  id: SpriteIdentifier,
+  {
+    state = AnimationState.IDLE,
+    loop = true,
+    fallbackOnComplete = null,
+    animationSpeed = 1
+  }: CreateSpriteOptions = {}
+): SpriteWrapper => {
   const container = new PIXI.Container();
   const { url, meta } = sprites[id];
   const spriteSheetData = parseAsperiteAnimationSheet(meta);
 
   let spritesheet: PIXI.Spritesheet;
   let sprite: PIXI.AnimatedSprite;
+
   const animationParams: AnimationParams = {
-    state: AnimationState.IDLE,
-    loop: true,
-    onComplete: undefined,
-    animationSpeed: 1
+    state,
+    loop,
+    fallbackOnComplete,
+    animationSpeed
   };
-  let flushPending = true;
 
   const getTexture = () => {
     if (!textureCache.has(url)) {
@@ -89,30 +94,31 @@ export const createSprite = ({ id }: CreateSpriteOptions): SpriteWrapper => {
     }
 
     sprite.loop = animationParams.loop ?? true;
-    sprite.onComplete = animationParams.onComplete ?? undefined;
+    sprite.onComplete = () => {
+      if (animationParams.fallbackOnComplete) {
+        Object.assign(animationParams, {
+          state: animationParams.fallbackOnComplete,
+          loop: true,
+          animationSpeed: 1,
+          fallbackOnComplete: null
+        });
+        animate();
+      }
+    };
     sprite.animationSpeed = animationParams.animationSpeed ?? 1;
 
     sprite.play();
   };
 
+  animate();
+
   return {
     sprite: container,
 
-    scheduleTransition(params) {
-      if (params.state === animationParams.state) return;
-      if (isDefined(params.state)) {
-        animationParams.state = params.state;
-      }
+    transitionTo(state, options = {}) {
+      if (state === animationParams.state) return;
 
-      animationParams.loop = params.loop ?? true;
-      animationParams.onComplete = params.onComplete ?? undefined;
-      animationParams.animationSpeed = params.animationSpeed ?? 1;
-      flushPending = true;
-    },
-
-    flushTransition: () => {
-      if (!flushPending) return;
-      flushPending = false;
+      Object.assign(animationParams, { state, ...options });
       animate();
     }
   };

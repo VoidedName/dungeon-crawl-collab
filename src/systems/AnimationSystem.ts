@@ -9,12 +9,9 @@ export const AnimationSystem: (
   target: [AnimatableBrand, RenderableBrand],
   run: entities => {
     entities.forEach(e => {
-      const { scheduleTransition, flushTransition } = resolveSprite(
-        e.renderable.sprite
-      );
+      const { transitionTo } = resolveSprite(e.renderable.sprite);
 
-      scheduleTransition({ state: e.animatable.animationState });
-      flushTransition();
+      transitionTo(e.animatable.state, e.animatable.options);
     });
   }
 });

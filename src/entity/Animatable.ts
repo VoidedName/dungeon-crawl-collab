@@ -1,6 +1,6 @@
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
-import type { Values } from '@/utils/types';
+import type { Nullable, Values } from '@/utils/types';
 
 export const AnimationState = {
   IDLE: 'idle',
@@ -9,13 +9,20 @@ export const AnimationState = {
 } as const;
 export type AnimationState = Values<typeof AnimationState>;
 
+export type AnimationOptions = {
+  loop: boolean;
+  animationSpeed: number;
+  fallbackOnComplete: Nullable<AnimationState>;
+};
+
 export const AnimatableBrand = 'animatable';
 type AnimatableBrand = typeof AnimatableBrand;
 
 export type Animatable = ECSComponent<
   AnimatableBrand,
   {
-    animationState: AnimationState;
+    state: AnimationState;
+    options: AnimationOptions;
   }
 >;
 
@@ -26,7 +33,12 @@ export function hasAnimatable<E extends ECSEntity>(e: E): e is E & Animatable {
 export function animatableComponent(): Animatable {
   return {
     [AnimatableBrand]: {
-      animationState: AnimationState.IDLE
+      state: AnimationState.IDLE,
+      options: {
+        animationSpeed: 1,
+        loop: true,
+        fallbackOnComplete: null
+      }
     }
   };
 }

@@ -16,5 +16,5 @@ export const resolveSprite = (id: SpriteId) => {
 };
 
 export const register = (id: SpriteId, spriteName: SpriteIdentifier) => {
-  spriteLookup.set(id, createSprite({ id: spriteName }));
+  spriteLookup.set(id, createSprite(spriteName));
 };

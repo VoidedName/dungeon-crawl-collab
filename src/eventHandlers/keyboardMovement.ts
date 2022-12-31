@@ -36,7 +36,7 @@ export const keyboardMovementHandler = (
 
   const isMoving = Object.values(directions).some(d => d === true);
 
-  player.animatable.animationState = isMoving
+  player.animatable.state = isMoving
     ? AnimationState.RUNNING
     : AnimationState.IDLE;
 };
