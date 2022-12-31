@@ -4,6 +4,8 @@ import { pipe } from '@/fp/pipe';
 import type { Intersect } from '@/utils/types';
 import type { BrandsFromComponents } from '@/ecs/types';
 import type { ECSSystem } from '@/ecs/ECSSystem';
+import type { Maybe } from '@/utils/Maybe';
+import { none, some } from '@/utils/Maybe';
 
 /**
  * Mutably changes the entity by adding the component to it
@@ -112,6 +114,14 @@ export interface ECSWorld {
   removeSystem(name: string): void;
 
   runSystems(): void;
+
+  set(name: string, global: any): void;
+
+  get<T>(name: string): Maybe<T>;
+
+  delete(name: string): void;
+
+  globals(): Iterable<[string, any]>;
 }
 
 /**
@@ -123,6 +133,7 @@ type ECSInternals = {
   nextEntityId: ECSEntityId;
   systems: [string, ECSSystem<any>][];
   entitiesBySystem: Map<string, Set<ECSEntityId>>;
+  globals: Map<string, any>;
 };
 
 function createInternals(): ECSInternals {
@@ -131,7 +142,8 @@ function createInternals(): ECSInternals {
     entities: new Map<ECSEntityId, ECSEntity>(),
     nextEntityId: 0,
     systems: [],
-    entitiesBySystem: new Map<string, Set<ECSEntityId>>()
+    entitiesBySystem: new Map<string, Set<ECSEntityId>>(),
+    globals: new Map<string, any>()
   };
 }
 
@@ -330,6 +342,40 @@ function internalRunSystem(internals: ECSInternals): ECSWorld['runSystems'] {
   return runSystems;
 }
 
+function internalGet(internals: ECSInternals): ECSWorld['get'] {
+  function get<T>(name: string) {
+    if (internals.globals.has(name))
+      return some(internals.globals.get(name) as T);
+    return none<T>();
+  }
+
+  return get;
+}
+
+function internalSet(internals: ECSInternals): ECSWorld['set'] {
+  function set(name: string, global: any) {
+    internals.globals.set(name, global);
+  }
+
+  return set;
+}
+
+function internalDelete(internals: ECSInternals): ECSWorld['delete'] {
+  function remove(name: string) {
+    internals.globals.delete(name);
+  }
+
+  return remove;
+}
+
+function internalGlobals(internals: ECSInternals): ECSWorld['globals'] {
+  function globals() {
+    return internals.globals.entries();
+  }
+
+  return globals;
+}
+
 /**
  * Creates a new ECSWorld instance.
  * @see ECSWorld
@@ -346,6 +392,10 @@ export function createWorld(): ECSWorld {
     entitiesByComponent: internalEntitiesByComponent(internals),
     addSystem: internalAddSystem(internals),
     removeSystem: internalRemoveSystem(internals),
-    runSystems: internalRunSystem(internals)
+    runSystems: internalRunSystem(internals),
+    set: internalSet(internals),
+    get: internalGet(internals),
+    delete: internalDelete(internals),
+    globals: internalGlobals(internals)
   };
 }
