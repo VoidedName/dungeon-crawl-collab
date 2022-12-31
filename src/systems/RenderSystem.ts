@@ -21,6 +21,7 @@ export const RenderSystem: (
         app.stage.addChild(sprite);
       }
 
+      // Change the sprite orientation according to where it's movings
       if (e.velocity.target.x !== 0) {
         sprite.scale.x = e.velocity.target.x < 0 ? -1 : 1;
       }
