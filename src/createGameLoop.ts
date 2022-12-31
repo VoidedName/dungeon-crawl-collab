@@ -9,6 +9,11 @@ import { RenderSystem } from '@/systems/RenderSystem';
 import { withPlayer, withPosition } from '@/entity/Components';
 import { withVelocity } from '@/entity/Velocity';
 import { withRenderable } from './entity/Renderable';
+import { CameraSystem } from './systems/CameraSystem';
+
+function spriteResolver(id: number) {
+  return (getEntityById(id)! as unknown as TPlayerEntity).sprite.container;
+}
 
 export function createGameLoop(app: Application) {
   const world = createWorld();
@@ -22,12 +27,8 @@ export function createGameLoop(app: Application) {
     .build();
 
   world.addSystem('movement', MovementSystem);
-  world.addSystem(
-    'render',
-    RenderSystem(
-      id => (getEntityById(id)! as unknown as TPlayerEntity).sprite.container
-    )
-  );
+  world.addSystem('render', RenderSystem(spriteResolver));
+  world.addSystem('camera', CameraSystem(spriteResolver, app));
 
   function tick() {
     const player = world.entitiesByComponent<[Player, Velocity]>([
@@ -38,13 +39,6 @@ export function createGameLoop(app: Application) {
     player.velocity = tryPlayerMove();
 
     world.runSystems();
-
-    // TODO: move into CameraSystem probably?
-    const playerSprite = (getEntityById(1)! as unknown as TPlayerEntity).sprite;
-    const { x: playerX, y: playerY } = playerSprite.container.position;
-    const cx = playerX - app.screen.width / 2;
-    const cy = playerY - app.screen.height / 2;
-    app.stage.position.set(-cx, -cy);
 
     window.requestAnimationFrame(tick);
   }
