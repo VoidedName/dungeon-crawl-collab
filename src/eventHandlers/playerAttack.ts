@@ -3,9 +3,12 @@ import {
   AnimatableBrand,
   type Animatable,
   AnimationState
-} from '@/entity/Animatable';
-import { PlayerBrand, type Player } from '@/entity/Player';
-import { RenderableBrand, type Renderable } from '@/entity/Renderable';
+} from '@/entity/components/Animatable';
+import { PlayerBrand, type Player } from '@/entity/components/Player';
+import {
+  RenderableBrand,
+  type Renderable
+} from '@/entity/components/Renderable';
 import { objectAssign } from '@/utils/helpers';
 import type { Point } from '@/utils/types';
 

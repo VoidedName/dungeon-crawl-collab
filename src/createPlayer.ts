@@ -1,23 +1,37 @@
 import type { ECSWorld } from './ecs/ECSWorld';
-import { withMovementIntent } from './entity/MovementIntent';
-import { withPlayer } from './entity/Player';
-import { withPosition } from './entity/Position';
-import { withRenderable } from './entity/Renderable';
-import { withVelocity } from './entity/Velocity';
-import type { sprites } from '@/assets/sprites';
-import type { SpriteIdentifier } from './renderer/createSprite';
-import { withAnimatable } from './entity/Animatable';
+import { withMovementIntent } from './entity/components/MovementIntent';
+import { withPlayer } from './entity/components/Player';
+import { withPosition } from './entity/components/Position';
+import { withRenderable } from './entity/components/Renderable';
+import { withVelocity } from './entity/components/Velocity';
+import {
+  createAnimatedSprite,
+  type SpriteName
+} from './renderer/createAnimatedSprite';
+import { AnimationState, withAnimatable } from './entity/components/Animatable';
+import { register } from './renderer/renderableCache';
 
 export type CreatePlayerOptions = {
-  spriteName: SpriteIdentifier;
+  spriteName: SpriteName;
 };
-export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) =>
+export const createPlayer = async (
+  world: ECSWorld,
+  options: CreatePlayerOptions
+) => {
+  const id = 'PLAYER';
+  const sprite = await createAnimatedSprite(
+    options.spriteName,
+    AnimationState.IDLE
+  );
+  await register(id, sprite);
+
   world
     .createEntity()
     .with(withPlayer())
     .with(withPosition(200, 100))
     .with(withVelocity(5))
-    .with(withRenderable(1, options.spriteName))
-    .with(withAnimatable())
+    .with(withRenderable(id))
+    .with(withAnimatable(options.spriteName))
     .with(withMovementIntent())
     .build();
+};

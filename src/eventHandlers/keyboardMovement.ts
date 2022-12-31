@@ -3,15 +3,16 @@ import {
   AnimatableBrand,
   type Animatable,
   AnimationState
-} from '@/entity/Animatable';
+} from '@/entity/components/Animatable';
 import {
   MovementIntentBrand,
   type MovementIntent
-} from '@/entity/MovementIntent';
-import { PlayerBrand, type Player } from '@/entity/Player';
-import { RenderableBrand, type Renderable } from '@/entity/Renderable';
-import type { SpriteWrapper } from '@/renderer/createSprite';
-import type { SpriteId } from '@/sprite/Sprite';
+} from '@/entity/components/MovementIntent';
+import { PlayerBrand, type Player } from '@/entity/components/Player';
+import {
+  RenderableBrand,
+  type Renderable
+} from '@/entity/components/Renderable';
 
 export type Directions = {
   up: boolean;

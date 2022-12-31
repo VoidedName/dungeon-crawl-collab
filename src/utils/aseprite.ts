@@ -1,4 +1,4 @@
-import type { AnimationState } from '@/entity/Animatable';
+import type { AnimationState } from '@/entity/components/Animatable';
 import * as PIXI from 'pixi.js';
 import type { FrameObject, ISpritesheetData, Spritesheet } from 'pixi.js';
 

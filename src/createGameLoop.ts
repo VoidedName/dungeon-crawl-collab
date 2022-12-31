@@ -4,7 +4,7 @@ import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
 import { loadMap } from './MapManager';
-import { resolveSprite } from './sprite/Sprite';
+import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
 import { createControls } from './createControls';

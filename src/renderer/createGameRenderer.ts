@@ -12,6 +12,8 @@ export type CreateGameRendererOptions = {
   canvas: HTMLCanvasElement;
 };
 
+export const SCALE = 2;
+
 export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {
@@ -28,7 +30,6 @@ export const createGameRenderer = async ({
 
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
-  const SCALE = 2;
   app.stage.scale.set(SCALE);
   app.stage.sortableChildren = true;
 

@@ -2,9 +2,9 @@ import type { ECSSystem } from '@/ecs/ECSSystem';
 import {
   MovementIntentBrand,
   type MovementIntent
-} from '@/entity/MovementIntent';
-import { PositionBrand, type Position } from '@/entity/Position';
-import { VelocityBrand, type Velocity } from '@/entity/Velocity';
+} from '@/entity/components/MovementIntent';
+import { PositionBrand, type Position } from '@/entity/components/Position';
+import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import type { Directions } from '@/eventHandlers/keyboardMovement';
 import type { Point } from '@/utils/types';
 import { addVector, mulVector } from '@/utils/vectors';

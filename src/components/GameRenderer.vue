@@ -14,7 +14,7 @@ onMounted(async () => {
   renderer = await createGameRenderer({
     canvas: canvasEl.value
   });
-  loop = createGameLoop(renderer.app);
+  loop = await createGameLoop(renderer.app);
 });
 
 onUnmounted(() => {

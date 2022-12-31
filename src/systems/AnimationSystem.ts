@@ -1,29 +1,40 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import { RenderableBrand, type Renderable } from '@/entity/Renderable';
-import { AnimatableBrand, type Animatable } from '@/entity/Animatable';
-import type { SpriteWrapper } from '@/renderer/createSprite';
+import {
+  RenderableBrand,
+  type Renderable
+} from '@/entity/components/Renderable';
+import {
+  AnimatableBrand,
+  type Animatable
+} from '@/entity/components/Animatable';
+import type { RenderableId } from '@/renderer/renderableCache';
+import type { AnimatedSprite } from 'pixi.js';
+import { updateTextures } from '@/renderer/createAnimatedSprite';
 
 export const AnimationSystem: (
-  resolveSprite: (sprite: number) => SpriteWrapper
+  resolveSprite: (sprite: RenderableId) => AnimatedSprite
 ) => ECSSystem<[Animatable, Renderable]> = resolveSprite => ({
   target: [AnimatableBrand, RenderableBrand],
   run: entities => {
     entities.forEach(e => {
-      const { transitionTo, currentAnimation } = resolveSprite(
-        e.renderable.sprite
+      const sprite = resolveSprite(e.renderable.sprite);
+
+      if (!e.animatable.isDirty) return;
+      e.animatable.isDirty = false;
+
+      sprite.loop = e.animatable.options.loop;
+      sprite.onComplete = () => {
+        if (!e.animatable.options.fallbackOnComplete) return;
+        e.animatable.state = e.animatable.options.fallbackOnComplete;
+        e.animatable.options.loop = true;
+        e.animatable.options.fallbackOnComplete = null;
+      };
+
+      updateTextures(
+        e.renderable.sprite,
+        e.animatable.spriteName,
+        e.animatable.state
       );
-      if (e.animatable.state === currentAnimation) return;
-
-      transitionTo(e.animatable.state, sprite => {
-        sprite.loop = e.animatable.options.loop;
-        sprite.onComplete = () => {
-          if (!e.animatable.options.fallbackOnComplete) return;
-
-          e.animatable.state = e.animatable.options.fallbackOnComplete;
-          e.animatable.options.loop = true;
-          e.animatable.options.fallbackOnComplete = null;
-        };
-      });
     });
   }
 });
