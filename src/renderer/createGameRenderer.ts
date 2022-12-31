@@ -1,11 +1,7 @@
 import * as PIXI from 'pixi.js';
 import type { AsyncReturnType } from '../utils/types';
 import { throttle } from '../utils/helpers';
-import { createSprite } from './createSprite';
-import testMap from '@/assets/tilesets/test-map.png';
 import { loadMap } from '@/MapManager';
-import { addEntity } from '@/EntityManager';
-import { PLAYER_SPEED, type TPlayerEntity } from '@/PlayerEntity';
 
 if (import.meta.env.DEV) {
   // @ts-ignore enables PIXI devtools
@@ -41,30 +37,9 @@ export const createGameRenderer = async ({
   }, 100);
   window.addEventListener('resize', onWindowResize);
 
-  const addTestSprite = async () => {
-    const wizard = await createSprite({
-      id: 'wizard'
-    });
-    wizard.position.set(
-      app.screen.width / (2 * SCALE),
-      app.screen.height / (2 * SCALE)
-    );
-
-    app.stage.interactive = true;
-
-    app.stage.addChild(wizard);
-
-    return wizard;
-  };
+  app.stage.interactive = true;
 
   await loadMap(app);
-
-  const testSprite = await addTestSprite();
-  addEntity({
-    id: 1,
-    sprite: testSprite,
-    speed: PLAYER_SPEED
-  } as TPlayerEntity);
 
   return {
     app,

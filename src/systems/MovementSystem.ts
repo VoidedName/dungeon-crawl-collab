@@ -41,10 +41,8 @@ export const MovementSystem: ECSSystem<[Position, MovementIntent, Velocity]> = {
   target: [PositionBrand, MovementIntentBrand, VelocityBrand],
   run: entities => {
     entities.forEach(e => {
-      e.position = addVector(
-        e.position,
-        computeVelocity(e.movement_intent, e.velocity.speed)
-      );
+      e.velocity.target = computeVelocity(e.movement_intent, e.velocity.speed);
+      e.position = addVector(e.position, e.velocity.target);
     });
   }
 };

@@ -1,4 +1,4 @@
-import type { SpriteAnimationState } from '@/renderer/createSprite';
+import type { AnimationState } from '@/entity/Animatable';
 import * as PIXI from 'pixi.js';
 import type { FrameObject, ISpritesheetData, Spritesheet } from 'pixi.js';
 
@@ -73,7 +73,7 @@ export function parseAsperiteAnimationSheet(
 }
 
 export const createSpritesheetFrameObject = (
-  name: SpriteAnimationState,
+  name: AnimationState,
   spritesheet: Spritesheet,
   spritesheetData: ISpritesheetData
 ): FrameObject[] => {

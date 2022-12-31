@@ -1,6 +1,7 @@
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
-import type { SpriteId } from '@/sprite/Sprite';
+import type { SpriteIdentifier } from '@/renderer/createSprite';
+import { register, type SpriteId } from '@/sprite/Sprite';
 
 export const RenderableBrand = 'renderable';
 type RenderableBrand = typeof RenderableBrand;
@@ -15,13 +16,18 @@ export function hasRenderable<E extends ECSEntity>(e: E): e is E & Renderable {
   return RenderableBrand in e;
 }
 
-export function renderableComponent(sprite: SpriteId): Renderable {
+export function renderableComponent(
+  id: SpriteId,
+  sprite: SpriteIdentifier
+): Renderable {
+  register(id, sprite);
+
   return {
     [RenderableBrand]: {
-      sprite
+      sprite: id
     }
   };
 }
 
-export const withRenderable = (sprite: SpriteId) => () =>
-  renderableComponent(sprite);
+export const withRenderable = (id: SpriteId, sprite: SpriteIdentifier) => () =>
+  renderableComponent(id, sprite);
