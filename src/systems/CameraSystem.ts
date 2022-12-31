@@ -1,25 +1,27 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Player } from '@/entity/components/Player';
-import type { Position } from '@/entity/components/Position';
-import type { Renderable } from '@/entity/components/Renderable';
-import type { DisplayObject } from 'pixi.js';
-import type { Application } from 'pixi.js';
+import { PlayerBrand, type Player } from '@/entity/components/Player';
+import { PositionBrand, type Position } from '@/entity/components/Position';
+import {
+  RenderableBrand,
+  type Renderable
+} from '@/entity/components/Renderable';
+import { SCALE } from '@/renderer/createGameRenderer';
+import type { RenderableId } from '@/renderer/renderableCache';
+import type { Application, DisplayObject } from 'pixi.js';
 
 export const CameraSystem: (
-  resolveSprite: (sprite: number) => DisplayObject,
+  resolveSprite: (sprite: RenderableId) => DisplayObject,
   app: Application
 ) => ECSSystem<[Player, Position, Renderable]> = (resolveSprite, app) => ({
-  target: ['player', 'position', 'renderable'],
+  target: [PlayerBrand, PositionBrand, RenderableBrand],
   run: entities => {
     const player = entities[0];
     if (!app || !player) return;
 
-    const playerSprite = resolveSprite(player.renderable.sprite);
     const { x: playerX, y: playerY } = player.position;
-    const cx =
-      playerX - app.screen.width / 2 + playerSprite.getBounds().width / 2;
-    const cy =
-      playerY - app.screen.height / 2 + playerSprite.getBounds().height / 2;
-    app.stage.position.set(-cx, -cy);
+    const cx = playerX * -1 * SCALE + app.screen.width / 2;
+
+    const cy = playerY * -1 * SCALE + app.screen.height / 2;
+    app.stage.position.set(cx, cy);
   }
 });

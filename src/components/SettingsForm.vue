@@ -1,16 +1,15 @@
 <script lang="ts" setup>
-import { getConfiguration, Controls } from '@/ControlsManager';
+import { getConfiguration, Controls } from '@/createControls.js';
 import type { ComputedRef } from 'vue';
-import type { Control } from '@/ControlsManager';
+import type { Control } from '@/createControls.js';
 
 const configuration = ref<any>(getConfiguration());
 const modifying = ref('');
 const lastListener = ref();
 
-const configurationMap: ComputedRef<Record<Control, string>> = computed(() =>
-  Object.entries(configuration.value).reduce(
-    (obj, [key, value]: any) => ({ ...obj, [value]: key }),
-    {} as any
+const configurationMap = computed<Record<Control, string>>(() =>
+  Object.fromEntries(
+    Object.entries(configuration.value).map(([k, v]) => [v, k])
   )
 );
 

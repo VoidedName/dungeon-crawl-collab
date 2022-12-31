@@ -1,55 +1,96 @@
 import type { Application } from 'pixi.js';
-import { getEntityById } from './EntityManager';
-import { type TPlayerEntity, tryPlayerMove } from './PlayerEntity';
-import { createWorld } from '@/ecs/ECSWorld';
-import type { Velocity } from '@/entity/Velocity';
+import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
+import { isNever } from './utils/assertions';
+import type { Point, Values } from './utils/types';
+
+import { loadMap } from './MapManager';
+import { resolveSprite } from './renderer/renderableCache';
+import { createEventQueue, type EventQueue } from './createEventQueue';
+import { createPlayer } from './createPlayer';
+import { createControls } from './createControls';
+
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
-import { withVelocity } from '@/entity/Velocity';
 import { CameraSystem } from './systems/CameraSystem';
-import { loadMap } from './MapManager';
-import { withPlayer, type Player } from './entity/components/Player';
-import { withPosition } from './entity/components/Position';
-import { withRenderable } from './entity/components/Renderable';
 import { InteractionSystem } from './systems/InteractionSystem';
+import { AnimationSystem } from './systems/AnimationSystem';
 
-function spriteResolver(id: number) {
-  const entity = getEntityById(id);
-  if (!entity) throw new Error('invalid sprite of id ' + id);
+import {
+  type Directions,
+  keyboardMovementHandler
+} from './eventHandlers/keyboardMovement';
+import { playerAttackHandler } from './eventHandlers/playerAttack';
 
-  return (entity as unknown as TPlayerEntity).sprite;
-}
+export type GameLoop = { cleanup: () => void };
+
+// @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
+export const EventNames = {
+  KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
+  PLAYER_ATTACK: 'PLAYER_ATTACK'
+} as const;
+export type EventNames = Values<typeof EventNames>;
+
+type KeyboardMovementEvent = {
+  type: typeof EventNames.KEYBOARD_MOVEMENT;
+  payload: Directions;
+};
+
+type PlayerAttackEvent = {
+  type: typeof EventNames.PLAYER_ATTACK;
+  payload: Point;
+};
+
+type QueueEvent = KeyboardMovementEvent | PlayerAttackEvent;
+
+export type GameLoopQueue = EventQueue<QueueEvent>;
+
+const eventQueueReducer =
+  (world: ECSWorld) =>
+  ({ type, payload }: QueueEvent) => {
+    switch (type) {
+      case EventNames.KEYBOARD_MOVEMENT:
+        return keyboardMovementHandler(payload, world);
+
+      case EventNames.PLAYER_ATTACK:
+        return playerAttackHandler(payload, world);
+
+      default:
+        isNever(type);
+    }
+  };
 
 export async function createGameLoop(app: Application) {
   const world = createWorld();
+  const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
+  app.stage.on('pointerdown', e => {
+    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
+  });
+  const controls = createControls(queue);
 
   await loadMap(app, world);
 
-  world
-    .createEntity()
-    .with(withPlayer())
-    .with(withPosition(200, 100))
-    .with(withVelocity(0, 0))
-    .with(withRenderable(1))
-    .build();
-
   world.addSystem('movement', MovementSystem);
-  world.addSystem('render', RenderSystem(spriteResolver));
-  world.addSystem('camera', CameraSystem(spriteResolver, app));
-  world.addSystem('interactions', InteractionSystem(spriteResolver, world));
+  world.addSystem('render', RenderSystem(resolveSprite, app));
+  world.addSystem('camera', CameraSystem(resolveSprite, app));
+  world.addSystem('animation', AnimationSystem(resolveSprite));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, world));
+
+  createPlayer(world, { spriteName: 'wizard' });
+
+  let rafId: number;
 
   function tick() {
-    const player = world.entitiesByComponent<[Player, Velocity]>([
-      'player',
-      'velocity'
-    ])[0]!;
-
-    player.velocity = tryPlayerMove();
-
+    queue.process();
     world.runSystems();
-
-    window.requestAnimationFrame(tick);
+    rafId = window.requestAnimationFrame(tick);
   }
 
-  window.requestAnimationFrame(tick);
+  rafId = window.requestAnimationFrame(tick);
+
+  return {
+    cleanup() {
+      window.cancelAnimationFrame(rafId);
+      controls.cleanup();
+    }
+  };
 }

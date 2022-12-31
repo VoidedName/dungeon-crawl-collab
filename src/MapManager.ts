@@ -4,9 +4,9 @@ import tilesheetImage from './assets/tilesheet.png';
 import type { ECSWorld } from './ecs/ECSWorld';
 import { withInteractable } from './entity/components/Interactable';
 import { withPosition } from './entity/components/Position';
-import { addEntity } from './EntityManager';
 import { Text } from 'pixi.js';
 import { withRenderable } from './entity/components/Renderable';
+import { register } from './renderer/renderableCache';
 
 const map = [
   [4, 3, 3, 3, 4, 0, 0, 0],
@@ -21,9 +21,11 @@ const map = [
 ];
 
 const TILE_SIZE = 64;
+const HALF_TILE = TILE_SIZE / 2;
 
 const STAIRS_ID = 5;
-
+const STAIRS_RENDERABLE_ID = 'Stairs';
+const STAIRS_PICKUP_RADIUS = TILE_SIZE * 1.25;
 const tileIdMap = new Map([
   [0, null],
   [1, 'floor'],
@@ -62,47 +64,44 @@ export async function loadMap(app: PIXI.Application, world: ECSWorld) {
 
   const mapGroup = new Container();
 
-  const defer = [];
-
   for (let i = 0; i < map.length; i++) {
     const row = map[i]!;
     for (let j = 0; j < row.length; j++) {
       const tileId = row[j]!;
       if (!tileIdMap.has(tileId)) continue;
       const textureName = tileIdMap.get(tileId)!;
+      const tileContainer = new Container();
       const tile = new Sprite(sheet.textures[textureName]);
-      tile.position.set(j * TILE_SIZE, i * TILE_SIZE);
-      mapGroup.addChild(tile);
+      tileContainer.addChild(tile);
+      tileContainer.position.set(j * TILE_SIZE, i * TILE_SIZE);
 
       if (tileId === STAIRS_ID) {
-        defer.push(() => {
-          const text = new Text('descend', {
-            fontFamily: 'Arial',
-            fontSize: 24,
-            fill: 0xffffff,
-            align: 'center'
-          });
-          text.anchor.y = 2.5;
-          text.anchor.x = 0.5;
-          addEntity({
-            id: 250, // TODO: fix me, hacky
-            sprite: text
-          });
-          app.stage.addChild(text);
-
-          world
-            .createEntity()
-            .with(withInteractable('descend'))
-            .with(withPosition(tile.position.x + 32, tile.position.y + 32))
-            .with(withRenderable(250))
-            .build();
+        const text = new Text('descend', {
+          fontFamily: 'Arial',
+          fontSize: 36,
+          fill: 0xffffff,
+          align: 'center'
         });
+
+        text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
+        text.position.set(0, -30);
+        register(STAIRS_RENDERABLE_ID, text);
+
+        tileContainer.addChild(text);
+
+        const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
+        world
+          .createEntity()
+          .with(withInteractable('descend', STAIRS_PICKUP_RADIUS))
+          .with(withPosition(globalPos.x + HALF_TILE, globalPos.y + HALF_TILE))
+          .with(withRenderable(STAIRS_RENDERABLE_ID))
+          .build();
       }
+
+      mapGroup.addChild(tileContainer);
     }
   }
   app.stage.addChild(mapGroup);
-
-  defer.forEach(cb => cb());
 
   return mapGroup;
 }

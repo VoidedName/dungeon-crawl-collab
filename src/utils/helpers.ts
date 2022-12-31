@@ -1,3 +1,5 @@
+import type { AnyObject } from './types';
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const throttle = (fn: Function, wait = 300) => {
   let inThrottle: boolean,
@@ -23,3 +25,9 @@ export const throttle = (fn: Function, wait = 300) => {
     }
   };
 };
+
+// type safe Object.assign
+export const objectAssign = <T extends AnyObject>(
+  obj: T,
+  ...partials: Partial<T>[]
+): T => Object.assign(obj, ...partials);

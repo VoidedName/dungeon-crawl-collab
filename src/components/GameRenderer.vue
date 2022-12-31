@@ -1,32 +1,39 @@
 <script setup lang="ts">
-import { createGameRenderer, type GameRenderer } from '@/createGameRenderer.js';
+import { createGameLoop, type GameLoop } from '@/createGameLoop';
+import {
+  createGameRenderer,
+  type GameRenderer
+} from '@/renderer/createGameRenderer.js';
 
 const canvasEl = ref<HTMLCanvasElement>();
 let renderer: GameRenderer;
+let loop: GameLoop;
 
 onMounted(async () => {
   if (!canvasEl.value) return;
   renderer = await createGameRenderer({
     canvas: canvasEl.value
   });
-
-  document.body.style.overflow = 'hidden';
-  document.body.style.height = '100vh';
+  loop = await createGameLoop(renderer.app);
 });
 
 onUnmounted(() => {
   renderer?.cleanup();
-  document.body.style.overflow = '';
-  document.body.style.height = '';
+  loop?.cleanup();
 });
 </script>
 
 <template>
-  <canvas ref="canvasEl" />
+  <div class="game-renderer">
+    <canvas ref="canvasEl" />
+  </div>
 </template>
 
 <style scoped>
+.game-renderer {
+  height: 100%;
+}
 canvas {
-  height: 100vh;
+  display: block;
 }
 </style>
