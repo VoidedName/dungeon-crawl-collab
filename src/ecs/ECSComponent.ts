@@ -47,7 +47,7 @@ export const has =
   <E extends ECSEntity = ECSEntity>(e: E): e is E & C =>
     brand in e;
 
-type ECSBuilder<C extends ECSComponent<any>> =
+type ECSComponentBuilder<C extends ECSComponent<any>> =
   ECSComponentPros<C> extends Record<string, never>
     ? () => C
     : (props: ECSComponentPros<C>) => () => C;
@@ -63,8 +63,8 @@ type ECSBuilder<C extends ECSComponent<any>> =
  */
 export const ecsComponent = <C extends ECSComponent<any>>(
   brand: BrandFromComponent<C>
-): ECSBuilder<C> =>
+): ECSComponentBuilder<C> =>
   ((props?: ECSComponentPros<C>) => {
     if (props === undefined) return { [brand]: {} };
     return () => ({ [brand]: props });
-  }) as ECSBuilder<C>;
+  }) as ECSComponentBuilder<C>;
