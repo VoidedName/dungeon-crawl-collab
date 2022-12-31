@@ -13,9 +13,14 @@ describe('ecs helpers', () => {
     expect(guard({ entity_id: 1 })).toBeFalsy();
   });
 
-  test('component constructor constructs the right component', () => {
+  test('component constructor with props evaluates curried', () => {
     const constructor =
       ecsComponent<ECSComponent<'comp', { prop: number }>>('comp');
-    expect(constructor({ prop: 24 })).toStrictEqual({ comp: { prop: 24 } });
+    expect(constructor({ prop: 24 })()).toStrictEqual({ comp: { prop: 24 } });
+  });
+
+  test('component constructor without props evaluates directly', () => {
+    const constructor = ecsComponent<ECSComponent<'comp'>>('comp');
+    expect(constructor()).toStrictEqual({ comp: {} });
   });
 });

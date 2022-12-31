@@ -24,7 +24,10 @@ import type { ECSEntity } from '@/ecs/ECSEntity';
  *        .then(withPosition(2, 4))
  *        .evaluate(e)
  */
-export type ECSComponent<T extends string, Props extends object = object> = {
+// NO, ESLint, you are wrong. Object and {} do not mean the same thing,
+// and your suggested variants are not type compatible.
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type ECSComponent<T extends string, Props extends {} = {}> = {
   [key in T]: Props;
 };
 
@@ -44,6 +47,11 @@ export const has =
   <E extends ECSEntity = ECSEntity>(e: E): e is E & C =>
     brand in e;
 
+type ECSBuilder<C extends ECSComponent<any>> =
+  ECSComponentPros<C> extends Record<string, never>
+    ? () => C
+    : (props: ECSComponentPros<C>) => () => C;
+
 /**
  * Generates a ECSComponent constructor for a specific component
  *
@@ -53,9 +61,10 @@ export const has =
  *
  * const positionComponent = position({x: 4, y: 5})
  */
-export const ecsComponent =
-  <C extends ECSComponent<any>>(brand: BrandFromComponent<C>) =>
-  (props: ECSComponentPros<C>) =>
-    ({
-      [brand]: props
-    } as unknown as C);
+export const ecsComponent = <C extends ECSComponent<any>>(
+  brand: BrandFromComponent<C>
+): ECSBuilder<C> =>
+  ((props?: ECSComponentPros<C>) => {
+    if (props === undefined) return { [brand]: {} };
+    return () => ({ [brand]: props });
+  }) as ECSBuilder<C>;

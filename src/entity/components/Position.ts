@@ -7,8 +7,4 @@ type PositionBrand = typeof PositionBrand;
 export type Position = ECSComponent<PositionBrand, Point>;
 
 export const hasPosition = has<Position>('position');
-export const positionComponent = (x: number, y: number) =>
-  ecsComponent<Position>('position')({ x, y });
-
-export const withPosition = (x: number, y: number) => () =>
-  positionComponent(x, y);
+export const positionComponent = ecsComponent<Position>('position');

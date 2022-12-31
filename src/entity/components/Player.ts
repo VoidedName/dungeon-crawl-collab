@@ -6,5 +6,3 @@ type PlayerBrand = typeof PlayerBrand;
 export type Player = ECSComponent<PlayerBrand>;
 export const playerComponent = ecsComponent<Player>('player');
 export const hasPlayer = has<Player>('player');
-
-export const withPlayer = () => playerComponent;
