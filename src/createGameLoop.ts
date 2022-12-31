@@ -80,7 +80,7 @@ export async function createGameLoop(app: Application) {
   });
   const controls = createControls(queue);
 
-  world.addSystem('movement', MovementSystem);
+  world.addSystem('movement', MovementSystem(world));
   world.addSystem('render', RenderSystem(resolveSprite, app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
   world.addSystem('animation', AnimationSystem(resolveSprite));

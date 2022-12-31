@@ -13,6 +13,7 @@ import { register } from './renderer/renderableCache';
 import { withStats } from './entity/components/Stats';
 import { withOrientation } from './entity/components/Orientation';
 import { withInteractIntent } from './entity/components/InteractIntent';
+import { withSize } from './entity/components/Size';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -33,6 +34,7 @@ export const createPlayer = async (
     .createEntity()
     .with(withPlayer())
     .with(withPosition(200, 100))
+    .with(withSize(64, 64))
     .with(withStats({ speed: 5 }))
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withOrientation(0))

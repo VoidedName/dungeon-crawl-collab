@@ -10,29 +10,26 @@ import { register } from './renderer/renderableCache';
 import type { Player } from './entity/components/Player';
 import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
+import { withCollidable } from './entity/components/Collidable';
 
 const maps = [
   [
-    [4, 3, 3, 3, 4, 0, 0, 0],
-    [4, 1, 1, 1, 3, 3, 3, 3],
-    [4, 1, 5, 1, 1, 1, 1, 1],
-    [4, 1, 1, 1, 1, 1, 6, 1],
-    [4, 1, 1, 1, 1, 1, 1, 1],
-    [4, 1, 1, 1, 2, 2, 2, 2],
-    [4, 1, 1, 1, 4, 0, 0, 0],
-    [4, 1, 1, 1, 4, 0, 0, 0],
-    [4, 2, 2, 2, 4, 0, 0, 1]
+    [4, 3, 3, 3, 4, 0, 0, 0, 0],
+    [4, 1, 1, 1, 3, 3, 3, 3, 4],
+    [4, 1, 5, 1, 1, 1, 1, 1, 4],
+    [4, 1, 1, 1, 1, 1, 6, 1, 4],
+    [4, 1, 1, 1, 1, 1, 1, 1, 4],
+    [4, 1, 1, 1, 2, 2, 2, 2, 4],
+    [4, 1, 1, 1, 4, 0, 0, 0, 0],
+    [4, 1, 1, 1, 4, 0, 0, 0, 0],
+    [4, 2, 2, 2, 4, 0, 0, 0, 0]
   ],
   [
-    [4, 3, 3, 3, 4, 0, 0, 0],
-    [4, 1, 1, 1, 3, 3, 3, 3],
-    [4, 1, 1, 1, 1, 1, 1, 1],
-    [4, 1, 1, 1, 1, 1, 1, 1],
-    [4, 1, 6, 1, 1, 1, 1, 1],
-    [4, 1, 1, 1, 2, 2, 2, 2],
-    [4, 1, 1, 1, 4, 0, 0, 0],
-    [4, 1, 1, 1, 4, 0, 0, 0],
-    [4, 2, 2, 2, 4, 0, 2, 0]
+    [4, 3, 3, 3, 3, 3, 3, 3, 4],
+    [4, 1, 1, 1, 1, 1, 1, 1, 4],
+    [4, 1, 6, 1, 1, 1, 1, 1, 4],
+    [4, 1, 1, 1, 1, 1, 1, 1, 4],
+    [4, 2, 2, 2, 2, 2, 2, 2, 4]
   ]
 ];
 
@@ -53,6 +50,8 @@ const tileIdMap = new Map([
   [STAIRS_DOWN_ID, 'stairs_down'],
   [STAIRS_UP_ID, 'stairs_up']
 ]);
+
+const collidableTypes = [2, 3, 4];
 
 function getFrameDetail(index = 0) {
   return {
@@ -200,8 +199,22 @@ export async function loadMap(
           .with(withPosition(globalPos.x + HALF_TILE, globalPos.y + HALF_TILE))
           .with(withRenderable(STAIRS_UP_RENDERABLE_ID))
           .build();
-      }
+      } else if (collidableTypes.includes(tileId)) {
+        const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
 
+        world
+          .createEntity()
+          .with(withMapObject())
+          .with(
+            withCollidable({
+              x: globalPos.x,
+              y: globalPos.y,
+              w: TILE_SIZE,
+              h: TILE_SIZE
+            })
+          )
+          .build();
+      }
       mapGroup.addChild(tileContainer);
     }
   }
