@@ -1,5 +1,5 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import { PositionBrand, type Position } from '@/entity/Components';
+import { PositionBrand, type Position } from '@/entity/Position';
 import { type Renderable, RenderableBrand } from '@/entity/Renderable';
 import type { DisplayObject } from 'pixi.js';
 

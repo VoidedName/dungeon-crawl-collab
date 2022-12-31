@@ -1,5 +1,5 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import { PositionBrand, type Position } from '@/entity/Components';
+import { PositionBrand, type Position } from '@/entity/Position';
 import { VelocityBrand, type Velocity } from '@/entity/Velocity';
 
 export const MovementSystem: ECSSystem<[Position, Velocity]> = {

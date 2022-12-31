@@ -1,6 +1,6 @@
-import { isControlOn } from './ControlsManager';
+import type { DisplayObject } from 'pixi.js';
+import { isControlOn } from './createControls';
 import type { TEntity } from './EntityManager';
-import type { GameSprite } from '@/renderer/createSprite';
 
 export const PLAYER_SPEED = 2.6;
 
@@ -8,7 +8,7 @@ export type Direction = 'up' | 'down' | 'left' | 'right';
 
 export type TPlayerEntity = {
   speed: number;
-  sprite: GameSprite;
+  sprite: DisplayObject;
 } & TEntity;
 
 function normalize({ x, y }: { x: number; y: number }) {

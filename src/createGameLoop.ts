@@ -1,47 +1,69 @@
 import type { Application } from 'pixi.js';
-import { getEntityById } from './EntityManager';
-import { type TPlayerEntity, tryPlayerMove } from './PlayerEntity';
-import { createWorld } from '@/ecs/ECSWorld';
-import type { Player } from '@/entity/Components';
-import type { Velocity } from '@/entity/Velocity';
+import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
-import { withPlayer, withPosition } from '@/entity/Components';
-import { withVelocity } from '@/entity/Velocity';
-import { withRenderable } from './entity/Renderable';
 import { CameraSystem } from './systems/CameraSystem';
+import { resolveSprite } from './sprite/Sprite';
+import {
+  createEventQueue,
+  type EventQueue,
+  type EventQueueEvent
+} from './createEventQueue';
+import { VelocitySystem } from './systems/VelocitySystem';
+import { createPlayer } from './createPlayer';
+import { createControls } from './createControls';
+import { keyboardMovementHandler } from './eventHandlers/keyboardMovement';
 
-function spriteResolver(id: number) {
-  return (getEntityById(id)! as unknown as TPlayerEntity).sprite.container;
-}
+export type GameLoop = ReturnType<typeof createGameLoop>;
+
+export const QUEUE_EVENTS = {
+  KEYBOARD_MOVEMENT: 'keyboard movement'
+} as const;
+
+type Events = {
+  [QUEUE_EVENTS.KEYBOARD_MOVEMENT]: {
+    up: boolean;
+    down: boolean;
+    left: boolean;
+    right: boolean;
+  };
+};
+
+export type EventQueueHandler = (e: any, world: ECSWorld) => void;
+export type GameLoopQueue = EventQueue<Events>;
+
+const queueHandlerLookup = {
+  [QUEUE_EVENTS.KEYBOARD_MOVEMENT]: keyboardMovementHandler
+};
 
 export function createGameLoop(app: Application) {
   const world = createWorld();
+  const queue = createEventQueue<Events>(({ type, payload }) => {
+    queueHandlerLookup[type]({ type, payload }, world);
+  });
+  const controls = createControls(queue);
 
-  world
-    .createEntity()
-    .with(withPlayer())
-    .with(withPosition(200, 100))
-    .with(withVelocity(0, 0))
-    .with(withRenderable(1))
-    .build();
-
+  world.addSystem('velocity', VelocitySystem);
   world.addSystem('movement', MovementSystem);
-  world.addSystem('render', RenderSystem(spriteResolver));
-  world.addSystem('camera', CameraSystem(spriteResolver, app));
+  world.addSystem('render', RenderSystem(resolveSprite));
+  world.addSystem('camera', CameraSystem(resolveSprite, app));
 
-  function tick() {
-    const player = world.entitiesByComponent<[Player, Velocity]>([
-      'player',
-      'velocity'
-    ])[0]!;
+  createPlayer(world);
 
-    player.velocity = tryPlayerMove();
+  let rafId: number;
 
+  async function tick() {
+    await queue.process();
     world.runSystems();
-
-    window.requestAnimationFrame(tick);
+    rafId = window.requestAnimationFrame(tick);
   }
 
-  window.requestAnimationFrame(tick);
+  rafId = window.requestAnimationFrame(tick);
+
+  return {
+    cleanup() {
+      window.cancelAnimationFrame(rafId);
+      controls.cleanup();
+    }
+  };
 }

@@ -1,5 +1,7 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Player, Position, Renderable } from '@/entity/Components';
+import { PlayerBrand, type Player } from '@/entity/Player';
+import { PositionBrand, type Position } from '@/entity/Position';
+import { RenderableBrand, type Renderable } from '@/entity/Renderable';
 import type { DisplayObject } from 'pixi.js';
 import type { Application } from 'pixi.js';
 
@@ -7,7 +9,7 @@ export const CameraSystem: (
   resolveSprite: (sprite: number) => DisplayObject,
   app: Application
 ) => ECSSystem<[Player, Position, Renderable]> = (resolveSprite, app) => ({
-  target: ['player', 'position', 'renderable'],
+  target: [PlayerBrand, PositionBrand, RenderableBrand],
   run: entities => {
     const player = entities[0];
     if (!app || !player) return;

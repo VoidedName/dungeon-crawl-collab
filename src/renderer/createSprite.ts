@@ -15,29 +15,15 @@ export type TriggerAnimationOptions = {
   loop?: boolean;
 };
 export type CreateSpriteOptions = {
-  initialAnimation: SpriteAnimationState;
   id: SpriteIdentifier;
 };
 
 const textureCache = new Map<string, Promise<PIXI.Texture>>();
 
-export type GameSprite = {
-  container: PIXI.Container;
-  currentAnimation: Readonly<SpriteAnimationState>;
-  transitionTo: (
-    animation: SpriteAnimationState,
-    options?: TriggerAnimationOptions
-  ) => void;
-};
-
-export const createSprite = ({
-  initialAnimation,
-  id
-}: CreateSpriteOptions): GameSprite => {
+export const createSprite = ({ id }: CreateSpriteOptions): PIXI.Container => {
   const container = new PIXI.Container();
   const { url, meta } = sprites[id];
   const spriteSheetData = parseAsperiteAnimationSheet(meta);
-  let currentAnimation = initialAnimation;
 
   let spritesheet: PIXI.Spritesheet;
 
@@ -60,43 +46,23 @@ export const createSprite = ({
     return spritesheet;
   };
 
-  const animate = async ({
-    onComplete,
-    animationSpeed = 1,
-    loop = true
-  }: TriggerAnimationOptions) => {
-    container.removeChildren();
-
+  const load = async () => {
     const sprite = new PIXI.AnimatedSprite(
       createSpritesheetFrameObject(
-        currentAnimation,
+        'idle',
         await getSpritesheet(),
         spriteSheetData
       )
     );
 
     sprite.anchor.set(0.5, 0.5);
-    sprite.loop = loop;
-    sprite.animationSpeed = animationSpeed;
-    sprite.onComplete = () => {
-      onComplete?.(sprite);
-    };
+
     sprite.play();
 
     container.addChild(sprite);
   };
 
-  animate({});
+  load();
 
-  return {
-    container,
-    transitionTo(animation, options = {}) {
-      if (currentAnimation === animation) return;
-      currentAnimation = animation;
-      animate(options);
-    },
-    get currentAnimation() {
-      return currentAnimation;
-    }
-  };
+  return container;
 };

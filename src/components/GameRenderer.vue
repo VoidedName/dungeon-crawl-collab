@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { createGameLoop, type GameLoop } from '@/createGameLoop';
 import {
   createGameRenderer,
   type GameRenderer
@@ -6,16 +7,19 @@ import {
 
 const canvasEl = ref<HTMLCanvasElement>();
 let renderer: GameRenderer;
+let loop: GameLoop;
 
 onMounted(async () => {
   if (!canvasEl.value) return;
   renderer = await createGameRenderer({
     canvas: canvasEl.value
   });
+  loop = createGameLoop(renderer.app);
 });
 
 onUnmounted(() => {
   renderer?.cleanup();
+  loop?.cleanup();
 });
 </script>
 
@@ -30,7 +34,6 @@ onUnmounted(() => {
   height: 100%;
 }
 canvas {
-  margin-inline: auto;
   display: block;
 }
 </style>

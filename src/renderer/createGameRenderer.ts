@@ -4,7 +4,6 @@ import { throttle } from '../utils/helpers';
 import { createSprite } from './createSprite';
 import testMap from '@/assets/tilesets/test-map.png';
 import { loadMap } from '@/MapManager';
-import { createGameLoop } from '@/createGameLoop';
 import { addEntity } from '@/EntityManager';
 import { PLAYER_SPEED, type TPlayerEntity } from '@/PlayerEntity';
 
@@ -18,13 +17,11 @@ export type CreateGameRendererOptions = {
   canvas: HTMLCanvasElement;
 };
 
-let app: PIXI.Application;
-
 export const createGameRenderer = async ({
   canvas
 }: CreateGameRendererOptions) => {
   const { width, height } = canvas.getBoundingClientRect();
-  app = new PIXI.Application({
+  const app = new PIXI.Application({
     width,
     height,
     autoDensity: true,
@@ -38,11 +35,7 @@ export const createGameRenderer = async ({
 
   const SCALE = 2;
   app.stage.scale.set(SCALE);
-  const map = PIXI.Sprite.from(testMap);
 
-  map.anchor.set(0.5, 0.5);
-  map.position.set(app.screen.width / 4, app.screen.height / 4);
-  app.stage.addChild(map);
   const onWindowResize = throttle(() => {
     app.resize();
   }, 100);
@@ -50,17 +43,16 @@ export const createGameRenderer = async ({
 
   const addTestSprite = async () => {
     const wizard = await createSprite({
-      id: 'wizard',
-      initialAnimation: 'idle'
+      id: 'wizard'
     });
-    wizard.container.position.set(
+    wizard.position.set(
       app.screen.width / (2 * SCALE),
       app.screen.height / (2 * SCALE)
     );
 
     app.stage.interactive = true;
 
-    app.stage.addChild(wizard.container);
+    app.stage.addChild(wizard);
 
     return wizard;
   };
@@ -74,9 +66,8 @@ export const createGameRenderer = async ({
     speed: PLAYER_SPEED
   } as TPlayerEntity);
 
-  createGameLoop(app);
-
   return {
+    app,
     cleanup() {
       window.removeEventListener('resize', onWindowResize);
       app.destroy();
