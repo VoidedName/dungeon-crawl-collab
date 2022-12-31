@@ -39,12 +39,20 @@ export type ECSComponent<T extends string, Props extends object = object> = {
  *    e.position // do something with position
  * }
  */
-
 export const has =
   <C extends ECSComponent<any>>(brand: BrandFromComponent<C>) =>
   <E extends ECSEntity = ECSEntity>(e: E): e is E & C =>
     brand in e;
 
+/**
+ * Generates a ECSComponent constructor for a specific component
+ *
+ * @example
+ *
+ * const position = ecsComponent<Position>("position");
+ *
+ * const positionComponent = position({x: 4, y: 5})
+ */
 export const ecsComponent =
   <C extends ECSComponent<any>>(brand: BrandFromComponent<C>) =>
   (props: ECSComponentPros<C>) =>

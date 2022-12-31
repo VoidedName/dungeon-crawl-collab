@@ -116,10 +116,19 @@ export interface ECSWorld {
 
   runSystems(): void;
 
+  /**
+   * Sets a global with "name"
+   */
   set(name: string, global: any): void;
 
+  /**
+   * Gets a global with "name"
+   */
   get<T>(name: string): Maybe<T>;
 
+  /**
+   * Deletes a global with "name"
+   */
   delete(name: string): void;
 
   globals(): Iterable<[string, any]>;
