@@ -19,3 +19,8 @@ export type Intersect<X extends any[]> = X extends []
   : X extends [head: infer A, ...tail: infer B]
   ? A & Intersect<[...B]>
   : never;
+
+export type Point = { x: number; y: number };
+export type Size = { w: number; h: number };
+export type Circle = Point & { r: number };
+export type Rectangle = Point & Size;

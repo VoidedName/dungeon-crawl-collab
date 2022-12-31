@@ -1,6 +1,6 @@
 import type { EventQueue } from './createEventQueue';
 import { useKeydownOnce } from './composables/useKeydownOnce';
-import { QUEUE_EVENTS, type GameLoopQueue } from './createGameLoop';
+import { EventNames, type GameLoopQueue } from './createGameLoop';
 
 export const Controls = ['up', 'down', 'left', 'right', 'use'] as const;
 
@@ -33,10 +33,6 @@ export function setConfiguration(newConfiguration: any) {
   Object.assign(configuration, newConfiguration);
 }
 
-export function isControlOn(control: Control) {
-  return controls[control] === true;
-}
-
 export function setControl(control: Control, isOn: boolean) {
   controls[control] = isOn;
 }
@@ -53,7 +49,7 @@ export const createControls = (queue: GameLoopQueue) => {
 
     if (isMovementControl(control)) {
       queue.dispatch({
-        type: QUEUE_EVENTS.KEYBOARD_MOVEMENT,
+        type: EventNames.KEYBOARD_MOVEMENT,
         payload: controls
       });
     }

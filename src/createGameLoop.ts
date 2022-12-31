@@ -1,49 +1,48 @@
 import type { Application } from 'pixi.js';
-import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
+import { createWorld } from '@/ecs/ECSWorld';
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { resolveSprite } from './sprite/Sprite';
-import {
-  createEventQueue,
-  type EventQueue,
-  type EventQueueEvent
-} from './createEventQueue';
-import { VelocitySystem } from './systems/VelocitySystem';
+import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
 import { createControls } from './createControls';
-import { keyboardMovementHandler } from './eventHandlers/keyboardMovement';
+import {
+  type Directions,
+  keyboardMovementHandler
+} from './eventHandlers/keyboardMovement';
+import type { Values } from './utils/types';
+import { isNever } from './utils/assertions';
 
 export type GameLoop = ReturnType<typeof createGameLoop>;
 
-export const QUEUE_EVENTS = {
-  KEYBOARD_MOVEMENT: 'keyboard movement'
+export const EventNames = {
+  KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT'
 } as const;
+export type EventNames = Values<typeof EventNames>;
 
-type Events = {
-  [QUEUE_EVENTS.KEYBOARD_MOVEMENT]: {
-    up: boolean;
-    down: boolean;
-    left: boolean;
-    right: boolean;
-  };
+type KeyboardActionEvent = {
+  type: typeof EventNames.KEYBOARD_MOVEMENT;
+  payload: Directions;
 };
 
-export type EventQueueHandler = (e: any, world: ECSWorld) => void;
-export type GameLoopQueue = EventQueue<Events>;
+type QueueEvent = KeyboardActionEvent;
 
-const queueHandlerLookup = {
-  [QUEUE_EVENTS.KEYBOARD_MOVEMENT]: keyboardMovementHandler
-};
+export type GameLoopQueue = EventQueue<QueueEvent>;
 
 export function createGameLoop(app: Application) {
   const world = createWorld();
-  const queue = createEventQueue<Events>(({ type, payload }) => {
-    queueHandlerLookup[type]({ type, payload }, world);
+  const queue = createEventQueue<QueueEvent>(event => {
+    switch (event.type) {
+      case EventNames.KEYBOARD_MOVEMENT:
+        return keyboardMovementHandler(event.payload, world);
+
+      default:
+        isNever(event.type);
+    }
   });
   const controls = createControls(queue);
 
-  world.addSystem('velocity', VelocitySystem);
   world.addSystem('movement', MovementSystem);
   world.addSystem('render', RenderSystem(resolveSprite));
   world.addSystem('camera', CameraSystem(resolveSprite, app));

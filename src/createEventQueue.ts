@@ -1,23 +1,23 @@
 import type { AnyObject } from './utils/types';
 
 export type EventQueueMap = Record<string, AnyObject>;
-export type EventQueueEvent<T extends EventQueueMap, K extends keyof T> = {
-  type: K;
-  payload: T[K];
+export type EventQueueEvent = {
+  type: string;
+  payload: any;
 };
 
-export type EventQueue<T extends EventQueueMap> = {
-  dispatch: <E extends keyof T>(event: EventQueueEvent<T, E>) => void;
+export type EventQueue<T extends EventQueueEvent> = {
+  dispatch: (event: T) => void;
   process: () => void;
 };
 
-export const createEventQueue = <T extends EventQueueMap>(
-  reducer: <E extends keyof T>(event: EventQueueEvent<T, E>) => void
+export const createEventQueue = <T extends EventQueueEvent>(
+  reducer: (event: T) => void
 ): EventQueue<T> => {
-  const events: EventQueueEvent<T, any>[] = [];
+  const events: T[] = [];
 
   return {
-    dispatch<E extends keyof T>(event: EventQueueEvent<T, E>) {
+    dispatch(event: T) {
       events.push(event);
     },
 

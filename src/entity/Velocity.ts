@@ -6,8 +6,7 @@ type VelocityBrand = typeof VelocityBrand;
 export type Velocity = ECSComponent<
   VelocityBrand,
   {
-    x: number;
-    y: number;
+    speed: number;
   }
 >;
 
@@ -15,9 +14,8 @@ export function hasVelocity<E extends ECSEntity>(e: E): e is E & Velocity {
   return VelocityBrand in e;
 }
 
-export const withVelocity = (x: number, y: number) => () => ({
+export const withVelocity = (speed: number) => () => ({
   [VelocityBrand]: {
-    x,
-    y
+    speed
   }
 });
