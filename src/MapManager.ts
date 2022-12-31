@@ -128,7 +128,7 @@ export async function loadMap(
         const text = new Text('Descend', {
           fontFamily: 'Arial',
           fontSize: 36,
-          fill: 0xffffff,
+          fill: 0xff0000,
           align: 'center'
         });
 
@@ -166,7 +166,7 @@ export async function loadMap(
         const text = new Text('Ascend', {
           fontFamily: 'Arial',
           fontSize: 36,
-          fill: 0xffffff,
+          fill: 0x00ffff,
           align: 'center'
         });
 
@@ -178,6 +178,7 @@ export async function loadMap(
         tileContainer.addChild(text);
 
         const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
+
         if (spawnAtStairsUp) {
           spawnLocation = tileContainer.toGlobal({
             x: HALF_TILE,
