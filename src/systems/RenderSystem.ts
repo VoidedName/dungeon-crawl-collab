@@ -12,18 +12,17 @@ export const RenderSystem: (
   target: [PositionBrand, RenderableBrand, VelocityBrand],
   run: entities => {
     entities.forEach(e => {
-      const { sprite } = resolveSprite(e.renderable.sprite);
+      const { container } = resolveSprite(e.renderable.sprite);
 
-      if (!sprite.parent) {
-        app.stage.addChild(sprite);
+      if (!container.parent) {
+        app.stage.addChild(container);
       }
 
       if (e.velocity.target.x !== 0) {
-        sprite.scale.x = e.velocity.target.x < 0 ? -1 : 1;
+        container.scale.x = e.velocity.target.x < 0 ? -1 : 1;
       }
 
-      sprite.x = e.position.x;
-      sprite.y = e.position.y;
+      container.position.set(e.position.x, e.position.y);
     });
   }
 });

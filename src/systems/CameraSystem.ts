@@ -14,10 +14,11 @@ export const CameraSystem: (
     const player = entities[0];
     if (!app || !player) return;
 
-    const { sprite } = resolveSprite(player.renderable.sprite);
+    const { container } = resolveSprite(player.renderable.sprite);
     const { x: playerX, y: playerY } = player.position;
-    const cx = playerX - app.screen.width / 2 + sprite.getBounds().width / 2;
-    const cy = playerY - app.screen.height / 2 + sprite.getBounds().height / 2;
+    const cx = playerX - app.screen.width / 2 + container.getBounds().width / 2;
+    const cy =
+      playerY - app.screen.height / 2 + container.getBounds().height / 2;
     app.stage.position.set(-cx, -cy);
   }
 });

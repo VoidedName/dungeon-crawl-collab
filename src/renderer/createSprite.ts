@@ -4,34 +4,25 @@ import {
   createSpritesheetFrameObject,
   parseAsperiteAnimationSheet
 } from '@/utils/aseprite';
-import { AnimationState, type AnimationOptions } from '@/entity/Animatable';
+import type { AnimationState } from '@/entity/Animatable';
+import type { AnimatedSprite } from 'pixi.js';
 
 export type SpriteIdentifier = keyof typeof sprites;
-
-export type CreateSpriteOptions = Partial<AnimationParams>;
 
 const textureCache = new Map<string, Promise<PIXI.Texture>>();
 
 export type SpriteWrapper = {
-  sprite: PIXI.Container;
+  container: PIXI.Container;
   transitionTo: (
     state: AnimationState,
-    options?: Partial<AnimationOptions>
+    prepareFn?: (sprite: AnimatedSprite) => void
   ) => void;
+  currentAnimation: Readonly<AnimationState>;
 };
-
-export type AnimationParams = {
-  state: AnimationState;
-} & AnimationOptions;
 
 export const createSprite = (
   id: SpriteIdentifier,
-  {
-    state = AnimationState.IDLE,
-    loop = true,
-    fallbackOnComplete = null,
-    animationSpeed = 1
-  }: CreateSpriteOptions = {}
+  initialAnimation: AnimationState
 ): SpriteWrapper => {
   const container = new PIXI.Container();
   const { url, meta } = sprites[id];
@@ -40,12 +31,7 @@ export const createSprite = (
   let spritesheet: PIXI.Spritesheet;
   let sprite: PIXI.AnimatedSprite;
 
-  const animationParams: AnimationParams = {
-    state,
-    loop,
-    fallbackOnComplete,
-    animationSpeed
-  };
+  let currentAnimation: AnimationState = initialAnimation;
 
   const getTexture = () => {
     if (!textureCache.has(url)) {
@@ -69,7 +55,7 @@ export const createSprite = (
   const initSprite = async () => {
     sprite = new PIXI.AnimatedSprite(
       createSpritesheetFrameObject(
-        animationParams.state,
+        currentAnimation,
         await getSpritesheet(),
         spriteSheetData
       )
@@ -80,7 +66,7 @@ export const createSprite = (
 
   const updateTextures = async () => {
     sprite.textures = createSpritesheetFrameObject(
-      animationParams.state,
+      currentAnimation,
       await getSpritesheet(),
       spriteSheetData
     );
@@ -93,33 +79,22 @@ export const createSprite = (
       await updateTextures();
     }
 
-    sprite.loop = animationParams.loop ?? true;
-    sprite.onComplete = () => {
-      if (animationParams.fallbackOnComplete) {
-        Object.assign(animationParams, {
-          state: animationParams.fallbackOnComplete,
-          loop: true,
-          animationSpeed: 1,
-          fallbackOnComplete: null
-        });
-        animate();
-      }
-    };
-    sprite.animationSpeed = animationParams.animationSpeed ?? 1;
-
     sprite.play();
   };
 
   animate();
 
   return {
-    sprite: container,
+    container,
 
-    transitionTo(state, options = {}) {
-      if (state === animationParams.state) return;
-
-      Object.assign(animationParams, { state, ...options });
+    transitionTo(state, prepareFn) {
+      currentAnimation = state;
+      if (prepareFn) prepareFn(sprite);
       animate();
+    },
+
+    get currentAnimation() {
+      return currentAnimation;
     }
   };
 };

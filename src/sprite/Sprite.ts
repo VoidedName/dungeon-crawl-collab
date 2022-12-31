@@ -1,3 +1,4 @@
+import { AnimationState } from '@/entity/Animatable';
 import {
   createSprite,
   type SpriteIdentifier,
@@ -16,5 +17,5 @@ export const resolveSprite = (id: SpriteId) => {
 };
 
 export const register = (id: SpriteId, spriteName: SpriteIdentifier) => {
-  spriteLookup.set(id, createSprite(spriteName));
+  spriteLookup.set(id, createSprite(spriteName, AnimationState.IDLE));
 };

@@ -9,9 +9,21 @@ export const AnimationSystem: (
   target: [AnimatableBrand, RenderableBrand],
   run: entities => {
     entities.forEach(e => {
-      const { transitionTo } = resolveSprite(e.renderable.sprite);
+      const { transitionTo, currentAnimation } = resolveSprite(
+        e.renderable.sprite
+      );
+      if (e.animatable.state === currentAnimation) return;
 
-      transitionTo(e.animatable.state, e.animatable.options);
+      transitionTo(e.animatable.state, sprite => {
+        sprite.loop = e.animatable.options.loop;
+        sprite.onComplete = () => {
+          if (!e.animatable.options.fallbackOnComplete) return;
+
+          e.animatable.state = e.animatable.options.fallbackOnComplete;
+          e.animatable.options.loop = true;
+          e.animatable.options.fallbackOnComplete = null;
+        };
+      });
     });
   }
 });
