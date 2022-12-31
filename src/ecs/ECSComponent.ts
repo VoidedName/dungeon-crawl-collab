@@ -1,3 +1,6 @@
+import type { BrandFromComponent, ECSComponentPros } from '@/ecs/types';
+import type { ECSEntity } from '@/ecs/ECSEntity';
+
 /**
  * A component represents a "property" of some sort that an entity can possess.
  *
@@ -24,3 +27,27 @@
 export type ECSComponent<T extends string, Props extends object = object> = {
   [key in T]: Props;
 };
+
+/**
+ * Generates a TypeGuard for a specific component
+ *
+ * @example
+ *
+ * const hasPlayer = has<Position>("position");
+ *
+ * if (hasPlayer(e)) {
+ *    e.position // do something with position
+ * }
+ */
+
+export const has =
+  <C extends ECSComponent<any>>(brand: BrandFromComponent<C>) =>
+  <E extends ECSEntity = ECSEntity>(e: E): e is E & C =>
+    brand in e;
+
+export const ecsComponent =
+  <C extends ECSComponent<any>>(brand: BrandFromComponent<C>) =>
+  (props: ECSComponentPros<C>) =>
+    ({
+      [brand]: props
+    } as unknown as C);
