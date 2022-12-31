@@ -1,3 +1,4 @@
+import type { AngleInDegrees } from '@/entity/components/Orientation';
 import type { Point } from './types';
 
 export const addVector = (vec1: Point, vec2: Point) => ({
@@ -36,4 +37,12 @@ export const divVector = (vec: Point, val: Point | number) => {
     x: vec.x / val.x,
     y: vec.y / val.y
   };
+};
+
+export const toAngle = (vec: Point): AngleInDegrees => {
+  const radians = Math.atan2(vec.y, vec.x);
+
+  const degrees = (180 * radians) / Math.PI;
+
+  return (360 + Math.round(degrees)) % 360;
 };

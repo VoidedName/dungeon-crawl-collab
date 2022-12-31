@@ -4,23 +4,14 @@ import type { Point } from '@/utils/types';
 
 export const VelocityBrand = 'velocity';
 type VelocityBrand = typeof VelocityBrand;
-export type Velocity = ECSComponent<
-  VelocityBrand,
-  {
-    speed: number;
-    target: Point;
-  }
->;
+export type Velocity = ECSComponent<VelocityBrand, Point>;
 
 export function hasVelocity<E extends ECSEntity>(e: E): e is E & Velocity {
   return VelocityBrand in e;
 }
 
-export const withVelocity =
-  (speed: number, target = { x: 0, y: 0 }) =>
-  () => ({
-    [VelocityBrand]: {
-      speed,
-      target
-    }
-  });
+export const withVelocity = (velocity: Point) => () => ({
+  [VelocityBrand]: {
+    velocity
+  }
+});

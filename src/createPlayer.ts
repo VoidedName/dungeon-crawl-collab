@@ -10,6 +10,8 @@ import {
 } from './renderer/createAnimatedSprite';
 import { AnimationState, withAnimatable } from './entity/components/Animatable';
 import { register } from './renderer/renderableCache';
+import { withStats } from './entity/components/Stats';
+import { withOrientation } from './entity/components/Orientation';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -29,7 +31,9 @@ export const createPlayer = async (
     .createEntity()
     .with(withPlayer())
     .with(withPosition(200, 100))
-    .with(withVelocity(5))
+    .with(withStats({ speed: 5 }))
+    .with(withVelocity({ x: 0, y: 0 }))
+    .with(withOrientation(0))
     .with(withRenderable(id))
     .with(withAnimatable(options.spriteName))
     .with(withMovementIntent())

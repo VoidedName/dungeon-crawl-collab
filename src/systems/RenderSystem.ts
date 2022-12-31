@@ -7,12 +7,16 @@ import {
 } from '@/entity/components/Renderable';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import type { RenderableId } from '@/renderer/renderableCache';
+import {
+  OrientationBrand,
+  type Orientation
+} from '@/entity/components/Orientation';
 
 export const RenderSystem: (
   resolveSprite: (sprite: RenderableId) => DisplayObject,
   app: Application
-) => ECSSystem<[Position, Renderable, Velocity]> = (resolveSprite, app) => ({
-  target: [PositionBrand, RenderableBrand, VelocityBrand],
+) => ECSSystem<[Position, Renderable, Orientation]> = (resolveSprite, app) => ({
+  target: [PositionBrand, RenderableBrand, OrientationBrand],
   run: entities => {
     entities.forEach(e => {
       const sprite = resolveSprite(e.renderable.sprite);
@@ -21,9 +25,10 @@ export const RenderSystem: (
         app.stage.addChild(sprite);
       }
 
-      // Change the sprite orientation according to where it's movings
-      if (e.velocity.target.x !== 0) {
-        sprite.scale.x = e.velocity.target.x < 0 ? -1 : 1;
+      const angle = (e.orientation.angle + 90) % 360;
+      const hasChangedDirection = angle % 180 !== 0;
+      if (hasChangedDirection) {
+        sprite.scale.x = angle > 180 ? -1 : 1;
       }
 
       sprite.position.set(e.position.x, e.position.y);
