@@ -83,6 +83,7 @@ export interface ECSWorld {
   deleteEntity(e: ECSEntityId): void;
   deleteEntity(e: ECSEntity): void;
   entities(): Iterable<ECSEntity>;
+  getEntity<E extends ECSEntity>(id: ECSEntityId): Maybe<E>;
 
   addComponent<C extends ECSComponent<any>>(
     e: ECSEntityId,
@@ -194,6 +195,15 @@ function internalEntities(internals: ECSInternals): ECSWorld['entities'] {
     return internals.entities.values();
   }
   return entities;
+}
+
+function internalGetEntity(internals: ECSInternals): ECSWorld['getEntity'] {
+  function getEntity<E extends ECSEntity>(id: ECSEntityId): Maybe<E> {
+    if (internals.entities.has(id))
+      return some(internals.entities.get(id) as E);
+    return none();
+  }
+  return getEntity;
 }
 
 function internalAddComponent(
@@ -387,6 +397,7 @@ export function createWorld(): ECSWorld {
     createEntity: internalCreateEntity(internals),
     deleteEntity: internalDeleteEntity(internals),
     entities: internalEntities(internals),
+    getEntity: internalGetEntity(internals),
     addComponent: internalAddComponent(internals),
     removeComponent: internalRemoveComponents(internals),
     entitiesByComponent: internalEntitiesByComponent(internals),

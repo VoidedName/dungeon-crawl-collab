@@ -49,6 +49,18 @@ describe('adding and removing entities', () => {
     world.deleteEntity([...world.entities()][0]!);
     expect([...world.entities()].length).toBe(1);
   });
+
+  test('get entity is none for entity that does not exist', () => {
+    expect(world.getEntity(42).isNone()).toBeTruthy();
+  });
+
+  test('get entity contains entity', () => {
+    const other = world.createEntity().build();
+    const id = world.createEntity().build();
+    expect(world.getEntity(id.entity_id).getOrElse(() => other)).toStrictEqual(
+      id
+    );
+  });
 });
 
 describe('adding and removing components', () => {
