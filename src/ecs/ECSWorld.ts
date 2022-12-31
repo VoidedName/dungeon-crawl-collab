@@ -10,7 +10,7 @@ import { none, some } from '@/utils/Maybe';
 /**
  * Mutably changes the entity by adding the component to it
  */
-export function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
   entity: E,
   component: () => C
 ): E & C {
@@ -20,7 +20,7 @@ export function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
 /**
  * Mutably changes the entity by removing the component from it
  */
-export function removeComponent<
+function removeComponent<
   E extends ECSEntity,
   C extends Exclude<keyof E, keyof ECSEntity>
 >(entity: E, component: C): Omit<E, C> {
