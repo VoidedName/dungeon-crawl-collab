@@ -12,6 +12,7 @@ import { AnimationState, withAnimatable } from './entity/components/Animatable';
 import { register } from './renderer/renderableCache';
 import { withStats } from './entity/components/Stats';
 import { withOrientation } from './entity/components/Orientation';
+import { withInteractIntent } from './entity/components/InteractIntent';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -37,5 +38,6 @@ export const createPlayer = async (
     .with(withRenderable(id))
     .with(withAnimatable(options.spriteName))
     .with(withMovementIntent())
+    .with(withInteractIntent())
     .build();
 };

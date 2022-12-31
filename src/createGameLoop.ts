@@ -20,13 +20,15 @@ import {
   keyboardMovementHandler
 } from './eventHandlers/keyboardMovement';
 import { playerAttackHandler } from './eventHandlers/playerAttack';
+import { playerInteractHandler } from './eventHandlers/playerInteract';
 
 export type GameLoop = { cleanup: () => void };
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
   KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
-  PLAYER_ATTACK: 'PLAYER_ATTACK'
+  PLAYER_ATTACK: 'PLAYER_ATTACK',
+  PLAYER_INTERACT: 'PLAYER_INTERACT'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -40,7 +42,15 @@ type PlayerAttackEvent = {
   payload: Point;
 };
 
-type QueueEvent = KeyboardMovementEvent | PlayerAttackEvent;
+type PlayerInteractEvent = {
+  type: typeof EventNames.PLAYER_INTERACT;
+  payload: any;
+};
+
+type QueueEvent =
+  | KeyboardMovementEvent
+  | PlayerAttackEvent
+  | PlayerInteractEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -53,6 +63,9 @@ const eventQueueReducer =
 
       case EventNames.PLAYER_ATTACK:
         return playerAttackHandler(payload, world);
+
+      case EventNames.PLAYER_INTERACT:
+        return playerInteractHandler(world);
 
       default:
         isNever(type);
