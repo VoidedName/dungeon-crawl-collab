@@ -65,7 +65,7 @@ const eventQueueReducer =
         return playerAttackHandler(payload, world);
 
       case EventNames.PLAYER_INTERACT:
-        return playerInteractHandler(world);
+        return playerInteractHandler(payload, world);
 
       default:
         isNever(type);
@@ -80,15 +80,14 @@ export async function createGameLoop(app: Application) {
   });
   const controls = createControls(queue);
 
-  await loadMap(app, world);
-
   world.addSystem('movement', MovementSystem);
   world.addSystem('render', RenderSystem(resolveSprite, app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
   world.addSystem('animation', AnimationSystem(resolveSprite));
-  world.addSystem('interactions', InteractionSystem(resolveSprite, world));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
 
-  createPlayer(world, { spriteName: 'wizard' });
+  await createPlayer(world, { spriteName: 'wizard' });
+  await loadMap(0, true, app, world);
 
   let rafId: number;
 

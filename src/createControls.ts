@@ -56,7 +56,7 @@ export const createControls = (queue: GameLoopQueue) => {
     if (isUseControl(control)) {
       queue.dispatch({
         type: EventNames.PLAYER_INTERACT,
-        payload: null
+        payload: val
       });
     }
   };

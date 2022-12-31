@@ -26,6 +26,7 @@ export const createPlayer = async (
     options.spriteName,
     AnimationState.IDLE
   );
+  sprite.zIndex = 1;
   await register(id, sprite);
 
   world
