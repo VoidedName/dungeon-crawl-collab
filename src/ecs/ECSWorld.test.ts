@@ -49,6 +49,18 @@ describe('adding and removing entities', () => {
     world.deleteEntity([...world.entities()][0]!);
     expect([...world.entities()].length).toBe(1);
   });
+
+  test('get entity is none for entity that does not exist', () => {
+    expect(world.getEntity(42).isNone()).toBeTruthy();
+  });
+
+  test('get entity contains entity', () => {
+    const other = world.createEntity().build();
+    const id = world.createEntity().build();
+    expect(world.getEntity(id.entity_id).getOrElse(() => other)).toStrictEqual(
+      id
+    );
+  });
 });
 
 describe('adding and removing components', () => {
@@ -202,5 +214,43 @@ describe('adding and removing systems', () => {
     world.runSystems();
 
     expect(data.length).toBe(0);
+  });
+});
+
+describe('globals', () => {
+  beforeEach(() => {
+    world = createWorld();
+  });
+
+  test('when unknown global is none', () => {
+    expect(world.get('me').isNone()).toBeTruthy();
+  });
+
+  test('on existing global then some', () => {
+    world.set('me', 'value');
+    expect(world.get('me').isSome()).toBeTruthy();
+  });
+
+  test('on existing global then has value', () => {
+    world.set('me', 'value');
+    expect(world.get('me').getOrElse(() => 'no')).toBe('value');
+  });
+
+  test('after delete global is none', () => {
+    world.set('me', 'value');
+    world.delete('me');
+    expect(world.get('me').isNone()).toBeTruthy();
+  });
+
+  test('globals contains all globals', () => {
+    world.set('me', 'value');
+    world.set('other', 'more value');
+
+    expect(
+      [...world.globals()].sort((a, b) => a[0].localeCompare(b[0]))
+    ).toStrictEqual([
+      ['me', 'value'],
+      ['other', 'more value']
+    ]);
   });
 });
