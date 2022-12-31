@@ -33,6 +33,8 @@ export const createGameRenderer = async ({
     resizeTo: canvas.parentElement!
   });
 
+  app.stage.sortableChildren = true;
+
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
   const onWindowResize = throttle(() => app.resize(), 100);
@@ -43,12 +45,11 @@ export const createGameRenderer = async ({
       id: 'wizard',
       initialAnimation: 'idle'
     });
+    sprite.zIndex = 1;
     sprite.position.set(app.screen.width / 2, app.screen.height / 2);
     app.stage.addChild(sprite);
     return sprite;
   };
-
-  await loadMap(app);
 
   const testSprite = await addTestSprite();
   addEntity({
@@ -57,7 +58,7 @@ export const createGameRenderer = async ({
     speed: PLAYER_SPEED
   } as TPlayerEntity);
 
-  createGameLoop(app);
+  await createGameLoop(app);
 
   return {
     cleanup() {
