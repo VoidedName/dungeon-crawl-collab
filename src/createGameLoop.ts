@@ -1,19 +1,24 @@
 import type { Application } from 'pixi.js';
 import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
-import { MovementSystem } from '@/systems/MovementSystem';
-import { RenderSystem } from '@/systems/RenderSystem';
-import { CameraSystem } from './systems/CameraSystem';
+import { isNever } from './utils/assertions';
+import type { Point, Values } from './utils/types';
+
+import { loadMap } from './MapManager';
 import { resolveSprite } from './sprite/Sprite';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
 import { createControls } from './createControls';
+
+import { MovementSystem } from '@/systems/MovementSystem';
+import { RenderSystem } from '@/systems/RenderSystem';
+import { CameraSystem } from './systems/CameraSystem';
+import { InteractionSystem } from './systems/InteractionSystem';
+import { AnimationSystem } from './systems/AnimationSystem';
+
 import {
   type Directions,
   keyboardMovementHandler
 } from './eventHandlers/keyboardMovement';
-import type { Point, Values } from './utils/types';
-import { isNever } from './utils/assertions';
-import { AnimationSystem } from './systems/AnimationSystem';
 import { playerAttackHandler } from './eventHandlers/playerAttack';
 
 export type GameLoop = { cleanup: () => void };
@@ -54,7 +59,7 @@ const eventQueueReducer =
     }
   };
 
-export function createGameLoop(app: Application) {
+export async function createGameLoop(app: Application) {
   const world = createWorld();
   const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
   app.stage.on('pointerdown', e => {
@@ -62,10 +67,13 @@ export function createGameLoop(app: Application) {
   });
   const controls = createControls(queue);
 
+  await loadMap(app, world);
+
   world.addSystem('movement', MovementSystem);
   world.addSystem('render', RenderSystem(resolveSprite, app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
   world.addSystem('animation', AnimationSystem(resolveSprite));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, world));
 
   createPlayer(world, { spriteName: 'wizard' });
 

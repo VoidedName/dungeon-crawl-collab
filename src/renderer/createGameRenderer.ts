@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 import type { AsyncReturnType } from '../utils/types';
 import { throttle } from '../utils/helpers';
-import { loadMap } from '@/MapManager';
 
 if (import.meta.env.DEV) {
   // @ts-ignore enables PIXI devtools
@@ -31,6 +30,7 @@ export const createGameRenderer = async ({
 
   const SCALE = 2;
   app.stage.scale.set(SCALE);
+  app.stage.sortableChildren = true;
 
   const onWindowResize = throttle(() => {
     app.resize();
@@ -38,8 +38,6 @@ export const createGameRenderer = async ({
   window.addEventListener('resize', onWindowResize);
 
   app.stage.interactive = true;
-
-  await loadMap(app);
 
   return {
     app,
