@@ -11,13 +11,17 @@ import type { Player } from './entity/components/Player';
 import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
 import { withCollidable } from './entity/components/Collidable';
-import { createTileset } from './renderer/createTileset';
+// import { createTileset } from './renderer/createTileset';
+
+// TODO: Fix this
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+const createTileSet = () => {};
 
 export type TMap = {
   level: number;
 };
 
-const maps = [
+export const maps = [
   [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 1, 2, 3, 2, 3, 2, 4, 0],
@@ -40,8 +44,8 @@ const maps = [
   ]
 ];
 
-const TILE_SIZE = 64;
-const HALF_TILE = TILE_SIZE / 2;
+export const TILE_SIZE = 64;
+export const HALF_TILE = TILE_SIZE / 2;
 
 const STAIRS_DOWN_ID = 5;
 const STAIRS_UP_ID = 6;
@@ -63,12 +67,12 @@ export async function loadMap(
   app: Application,
   world: ECSWorld
 ) {
-  sheet = await createTileset({
-    id: TILESET_ID,
-    tileSize: TILE_SIZE,
-    dimensions: { w: TILESET_COLUMNS * TILE_SIZE, h: TILESET_ROWS * TILE_SIZE },
-    path: tilesheetImage
-  });
+  // sheet = await createTileset({
+  //   id: TILESET_ID,
+  //   tileSize: TILE_SIZE,
+  //   dimensions: { w: TILESET_COLUMNS * TILE_SIZE, h: TILESET_ROWS * TILE_SIZE },
+  //   path: tilesheetImage
+  // });
 
   if (mapGroup) {
     mapGroup.destroy();
@@ -92,8 +96,8 @@ export async function loadMap(
       const tileId = row[j]!;
       const textureName = `${TILESET_ID}-${tileId}`;
       const tileContainer = new Container();
-      const tile = new Sprite(sheet.textures[textureName]);
-      tileContainer.addChild(tile);
+      // const tile = new Sprite(sheet.textures[textureName]);
+      // tileContainer.addChild(tile);
       tileContainer.position.set(j * TILE_SIZE, i * TILE_SIZE);
 
       if (tileId === STAIRS_DOWN_ID) {
