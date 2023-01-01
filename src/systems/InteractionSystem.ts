@@ -13,15 +13,13 @@ import type { DisplayObject } from 'pixi.js';
 
 export const InteractionSystem: (
   resolveSprite: (sprite: RenderableId) => DisplayObject,
-  app: Application, // TODO: ecs shouldn't know about pixi
-  world: ECSWorld
+  app: Application // TODO: ecs shouldn't know about pixi
 ) => ECSSystem<[Position, Interactable, Renderable]> = (
   resolveSprite,
-  app,
-  world
+  app
 ) => ({
   target: ['position', 'interactable', 'renderable'],
-  run: entities => {
+  run: (world, props, entities) => {
     entities.forEach(interactable => {
       const player = world.entitiesByComponent<
         [Player, Position, InteractIntent]

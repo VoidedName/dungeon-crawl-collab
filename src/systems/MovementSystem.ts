@@ -54,11 +54,9 @@ function isColliding(rect1: Rectangle, rect2: Rectangle) {
   );
 }
 
-export const MovementSystem: (
-  world: ECSWorld
-) => ECSSystem<
+export const MovementSystem: () => ECSSystem<
   [Position, MovementIntent, Velocity, Stats, Orientation, Size]
-> = world => ({
+> = () => ({
   target: [
     PositionBrand,
     MovementIntentBrand,
@@ -67,7 +65,7 @@ export const MovementSystem: (
     OrientationBrand,
     SizeBrand
   ],
-  run: entities => {
+  run: (world, props, entities) => {
     entities.forEach(e => {
       const collidables = world.entitiesByComponent<[Collidable]>([
         'collidable'

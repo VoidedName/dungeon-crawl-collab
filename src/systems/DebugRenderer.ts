@@ -8,10 +8,7 @@ export const DebugFlags = {
   map: 'debug:map' as const
 } satisfies Record<string, string>;
 
-export const DebugRenderer: (
-  app: Application,
-  world: ECSWorld
-) => ECSSystem<[]> = (app, world) => {
+export const DebugRenderer: (app: Application) => ECSSystem<[]> = app => {
   let currentStage = -1;
   const debugContainer = new Container();
   debugContainer.zIndex = Number.MAX_VALUE;
@@ -19,7 +16,7 @@ export const DebugRenderer: (
 
   return {
     target: [],
-    run: () => {
+    run: world => {
       const debugging = world
         .get<boolean>(DebugFlags.map)
         .getOrElse(() => false);
