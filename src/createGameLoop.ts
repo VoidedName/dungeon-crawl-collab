@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap, type TMap } from './MapManager';
+import { loadMap, maps, TILE_SIZE, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -20,6 +20,8 @@ import {
 } from './eventHandlers/keyboardMovement';
 import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
+import { Container, Graphics, Text } from 'pixi.js';
+import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 
 export type GameLoop = { cleanup: () => void };
 
@@ -83,13 +85,16 @@ export async function createGameLoop(app: Application) {
     level: 0
   } as TMap);
 
-  world.addSystem('movement', MovementSystem(world));
-  world.addSystem('render', RenderSystem(resolveSprite, app));
-  world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
+  world.set(DebugFlags.map, true);
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
+
+  world.addSystem('movement', MovementSystem(world));
+  world.addSystem('render', RenderSystem(resolveSprite, app));
+  world.addSystem('debug_renderer', DebugRenderer(app, world));
+  world.addSystem('camera', CameraSystem(resolveSprite, app));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
 
   let rafId: number;
 

@@ -17,7 +17,7 @@ export type TMap = {
   level: number;
 };
 
-const maps = [
+export const maps = [
   [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 1, 2, 3, 2, 3, 2, 4, 0],
@@ -40,8 +40,8 @@ const maps = [
   ]
 ];
 
-const TILE_SIZE = 64;
-const HALF_TILE = TILE_SIZE / 2;
+export const TILE_SIZE = 64;
+export const HALF_TILE = TILE_SIZE / 2;
 
 const STAIRS_DOWN_ID = 5;
 const STAIRS_UP_ID = 6;
