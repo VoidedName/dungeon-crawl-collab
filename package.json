@@ -16,7 +16,6 @@
     "format": "prettier .  --write"
   },
   "dependencies": {
-    "@iconify-json/game-icons": "^1.1.1",
     "@vueuse/core": "^9.9.0",
     "pixi-viewport": "^4.38.0",
     "pixi.js": "^7.0.5",
@@ -24,7 +23,7 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@iconify-json/mdi": "^1.1.40",
+    "@iconify-json/mdi": "^1.1.41",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/jsdom": "^20.0.1",
     "@types/node": "^18.11.12",
