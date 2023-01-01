@@ -20,7 +20,6 @@ import {
 } from './eventHandlers/keyboardMovement';
 import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
-import { Container, Graphics, Text } from 'pixi.js';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 
 export type GameLoop = { cleanup: () => void };
@@ -90,17 +89,17 @@ export async function createGameLoop(app: Application) {
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
 
-  world.addSystem('movement', MovementSystem(world));
+  world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveSprite, app));
-  world.addSystem('debug_renderer', DebugRenderer(app, world));
+  world.addSystem('debug_renderer', DebugRenderer(app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, app));
 
   let rafId: number;
 
-  function tick() {
+  function tick(delta: number) {
     queue.process();
-    world.runSystems();
+    world.runSystems({ delta });
     rafId = window.requestAnimationFrame(tick);
   }
 

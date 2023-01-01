@@ -3,7 +3,7 @@ import type { ECSComponent } from '@/ecs/ECSComponent';
 import { pipe } from '@/fp/pipe';
 import type { Intersect } from '@/utils/types';
 import type { BrandsFromComponents } from '@/ecs/types';
-import type { ECSSystem } from '@/ecs/ECSSystem';
+import type { ECSSystem, ECSSystemProps } from '@/ecs/ECSSystem';
 import type { Maybe } from '@/utils/Maybe';
 import { none, some } from '@/utils/Maybe';
 
@@ -114,7 +114,7 @@ export interface ECSWorld {
 
   removeSystem(name: string): void;
 
-  runSystems(): void;
+  runSystems(props: ECSSystemProps): void;
 
   /**
    * Sets a global with "name"
@@ -167,6 +167,7 @@ function getEntity<E extends ECSEntity>(
 }
 
 function internalCreateEntity(
+  ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['createEntity'] {
   function createEntity(): ECSEntityBuilder<ECSEntity> {
@@ -177,6 +178,7 @@ function internalCreateEntity(
 }
 
 function internalDeleteEntity(
+  ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['deleteEntity'] {
   function deleteEntity(e: ECSEntityId): void;
@@ -199,14 +201,20 @@ function internalDeleteEntity(
   return deleteEntity;
 }
 
-function internalEntities(internals: ECSInternals): ECSWorld['entities'] {
+function internalEntities(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['entities'] {
   function entities(): Iterable<ECSEntity> {
     return internals.entities.values();
   }
   return entities;
 }
 
-function internalGetEntity(internals: ECSInternals): ECSWorld['getEntity'] {
+function internalGetEntity(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['getEntity'] {
   function getEntity<E extends ECSEntity>(id: ECSEntityId): Maybe<E> {
     if (internals.entities.has(id))
       return some(internals.entities.get(id) as E);
@@ -216,6 +224,7 @@ function internalGetEntity(internals: ECSInternals): ECSWorld['getEntity'] {
 }
 
 function internalAddComponent(
+  ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['addComponent'] {
   function addComponent<C extends ECSComponent<any>>(
@@ -257,6 +266,7 @@ function internalAddComponent(
 }
 
 function internalRemoveComponents(
+  ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['removeComponent'] {
   function removeComponent<C extends ECSComponent<any>>(
@@ -296,6 +306,7 @@ function internalRemoveComponents(
 }
 
 function internalEntitiesByComponent(
+  ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['entitiesByComponent'] {
   function entitiesByComponent<C extends ECSComponent<any>[]>(
@@ -316,8 +327,11 @@ function internalEntitiesByComponent(
   return entitiesByComponent;
 }
 
-function internalAddSystem(internals: ECSInternals): ECSWorld['addSystem'] {
-  const entitiesByComponent = internalEntitiesByComponent(internals);
+function internalAddSystem(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['addSystem'] {
+  const entitiesByComponent = internalEntitiesByComponent(ecs, internals);
   function addSystem<T extends ECSComponent<any>[]>(
     name: string,
     system: ECSSystem<T>
@@ -338,6 +352,7 @@ function internalAddSystem(internals: ECSInternals): ECSWorld['addSystem'] {
 }
 
 function internalRemoveSystem(
+  ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['removeSystem'] {
   function removeSystem(name: string): void {
@@ -347,21 +362,27 @@ function internalRemoveSystem(
   return removeSystem;
 }
 
-function internalRunSystem(internals: ECSInternals): ECSWorld['runSystems'] {
-  function runSystems() {
+function internalRunSystem(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['runSystems'] {
+  function runSystems(props: ECSSystemProps) {
     internals.systems.forEach(([name, system]) => {
       const entities = [
         ...(internals.entitiesBySystem.get(name)?.values() ?? [])
       ]
         .map(e => internals.entities.get(e))
         .filter(e => e !== undefined) as ECSEntity[];
-      system.run(entities);
+      system.run(ecs(), props, entities);
     });
   }
   return runSystems;
 }
 
-function internalGet(internals: ECSInternals): ECSWorld['get'] {
+function internalGet(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['get'] {
   function get<T>(name: string) {
     if (internals.globals.has(name))
       return some(internals.globals.get(name) as T);
@@ -371,7 +392,10 @@ function internalGet(internals: ECSInternals): ECSWorld['get'] {
   return get;
 }
 
-function internalSet(internals: ECSInternals): ECSWorld['set'] {
+function internalSet(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['set'] {
   function set(name: string, global: any) {
     internals.globals.set(name, global);
   }
@@ -379,7 +403,10 @@ function internalSet(internals: ECSInternals): ECSWorld['set'] {
   return set;
 }
 
-function internalDelete(internals: ECSInternals): ECSWorld['delete'] {
+function internalDelete(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['delete'] {
   function remove(name: string) {
     internals.globals.delete(name);
   }
@@ -387,7 +414,10 @@ function internalDelete(internals: ECSInternals): ECSWorld['delete'] {
   return remove;
 }
 
-function internalGlobals(internals: ECSInternals): ECSWorld['globals'] {
+function internalGlobals(
+  ecs: () => ECSWorld,
+  internals: ECSInternals
+): ECSWorld['globals'] {
   function globals() {
     return internals.globals.entries();
   }
@@ -402,20 +432,27 @@ function internalGlobals(internals: ECSInternals): ECSWorld['globals'] {
 export function createWorld(): ECSWorld {
   const internals = createInternals();
 
-  return {
-    createEntity: internalCreateEntity(internals),
-    deleteEntity: internalDeleteEntity(internals),
-    entities: internalEntities(internals),
-    getEntity: internalGetEntity(internals),
-    addComponent: internalAddComponent(internals),
-    removeComponent: internalRemoveComponents(internals),
-    entitiesByComponent: internalEntitiesByComponent(internals),
-    addSystem: internalAddSystem(internals),
-    removeSystem: internalRemoveSystem(internals),
-    runSystems: internalRunSystem(internals),
-    set: internalSet(internals),
-    get: internalGet(internals),
-    delete: internalDelete(internals),
-    globals: internalGlobals(internals)
+  let ecsHandle: ECSWorld | null = null;
+  function ecs() {
+    return ecsHandle!;
+  }
+
+  ecsHandle = {
+    createEntity: internalCreateEntity(ecs, internals),
+    deleteEntity: internalDeleteEntity(ecs, internals),
+    entities: internalEntities(ecs, internals),
+    getEntity: internalGetEntity(ecs, internals),
+    addComponent: internalAddComponent(ecs, internals),
+    removeComponent: internalRemoveComponents(ecs, internals),
+    entitiesByComponent: internalEntitiesByComponent(ecs, internals),
+    addSystem: internalAddSystem(ecs, internals),
+    removeSystem: internalRemoveSystem(ecs, internals),
+    runSystems: internalRunSystem(ecs, internals),
+    set: internalSet(ecs, internals),
+    get: internalGet(ecs, internals),
+    delete: internalDelete(ecs, internals),
+    globals: internalGlobals(ecs, internals)
   };
+
+  return ecsHandle;
 }

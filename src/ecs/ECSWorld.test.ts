@@ -139,7 +139,7 @@ describe('adding and removing systems', () => {
     data: ECSEntity[]
   ) => ECSSystem<[TestComponentOne]> = data => ({
     target: ['one'],
-    run: entities => {
+    run: (ecs, props, entities) => {
       entities.forEach(e => data.push(e));
     }
   });
@@ -148,7 +148,7 @@ describe('adding and removing systems', () => {
     data: ECSEntity[]
   ) => ECSSystem<[TestComponentTwo]> = data => ({
     target: ['two'],
-    run: entities => {
+    run: (ecs, props, entities) => {
       entities.forEach(e => data.push(e));
     }
   });
@@ -157,7 +157,7 @@ describe('adding and removing systems', () => {
     data: ECSEntity[]
   ) => ECSSystem<[TestComponentOne, TestComponentTwo]> = data => ({
     target: ['one', 'two'],
-    run: entities => {
+    run: (ecs, props, entities) => {
       entities.forEach(e => data.push(e));
     }
   });
@@ -181,7 +181,7 @@ describe('adding and removing systems', () => {
   });
 
   test('run systems doesnt crash', () => {
-    world.runSystems();
+    world.runSystems({ delta: 17 });
   });
 
   test('runSystem runs systems with correct entities', () => {
@@ -198,7 +198,7 @@ describe('adding and removing systems', () => {
 
       const data: ECSEntity[] = [];
       world.addSystem(name, system(data));
-      world.runSystems();
+      world.runSystems({ delta: 17 });
 
       expect(data.length).toBe(result.length);
       expect(data.map(e => e.entity_id).sort()).toStrictEqual(
@@ -211,7 +211,7 @@ describe('adding and removing systems', () => {
     const data: ECSEntity[] = [];
     world.addSystem('two', TestSystemTwo(data));
     world.removeSystem('two');
-    world.runSystems();
+    world.runSystems({ delta: 17 });
 
     expect(data.length).toBe(0);
   });
