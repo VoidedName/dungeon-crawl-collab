@@ -2,9 +2,10 @@
   "extends": "./tsconfig.app.json",
   "exclude": [],
   "compilerOptions": {
+    "skipLibCheck": true,
     "composite": true,
     "lib": [],
-    "types": ["node", "jsdom"],
+    "types": ["node", "jsdom", "unplugin-icons/types/vue"],
     "outDir": "tsc-dist"
   }
 }
