@@ -1,0 +1,27 @@
+{ "frames": [
+   {
+    "filename": "base:.0",
+    "frame": { "x": 0, "y": 0, "w": 448, "h": 192 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 448, "h": 192 },
+    "sourceSize": { "w": 448, "h": 192 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.2.40-x64",
+  "image": "base.png",
+  "format": "RGBA8888",
+  "size": { "w": 448, "h": 192 },
+  "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+   { "name": "Tiles", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
