@@ -34,10 +34,4 @@ export const keyboardMovementHandler = (
   player.movement_intent.down = directions.down;
   player.movement_intent.left = directions.left;
   player.movement_intent.right = directions.right;
-
-  const isMoving = Object.values(directions).some(d => d === true);
-
-  player.animatable.state = isMoving
-    ? AnimationState.RUNNING
-    : AnimationState.IDLE;
 };

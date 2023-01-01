@@ -1,7 +1,5 @@
-import type { sprites } from '@/assets/sprites';
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
-import type { SpriteName } from '@/renderer/createAnimatedSprite';
 import type { RenderableId } from '@/renderer/renderableCache';
 
 export const RenderableBrand = 'renderable';

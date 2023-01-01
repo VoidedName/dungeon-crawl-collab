@@ -13,7 +13,6 @@ import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
-import { AnimationSystem } from './systems/AnimationSystem';
 
 import {
   type Directions,
@@ -72,7 +71,6 @@ export async function createGameLoop(app: Application) {
   world.addSystem('movement', MovementSystem);
   world.addSystem('render', RenderSystem(resolveSprite, app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('animation', AnimationSystem(resolveSprite));
   world.addSystem('interactions', InteractionSystem(resolveSprite, world));
 
   createPlayer(world, { spriteName: 'wizard' });
