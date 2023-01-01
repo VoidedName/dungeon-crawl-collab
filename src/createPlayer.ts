@@ -32,7 +32,7 @@ export const createPlayer = async (
 
   world
     .createEntity()
-    .with(playerComponent)
+    .with(playerComponent({ level: 0 }))
     .with(positionComponent({ x: 200, y: 100 }))
     .with(withSize(64, 64))
     .with(withStats({ speed: 5 }))
