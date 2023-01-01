@@ -1,4 +1,3 @@
-import type { EventQueue } from './createEventQueue';
 import { useKeydownOnce } from './composables/useKeydownOnce';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
 
@@ -6,6 +5,7 @@ export const Controls = ['up', 'down', 'left', 'right', 'use'] as const;
 
 export const movementControls = ['up', 'down', 'left', 'right'];
 const isMovementControl = (key: string) => movementControls.includes(key);
+const isUseControl = (key: string) => key === 'use';
 
 export type Control = typeof Controls[number];
 
@@ -51,6 +51,12 @@ export const createControls = (queue: GameLoopQueue) => {
       queue.dispatch({
         type: EventNames.KEYBOARD_MOVEMENT,
         payload: controls
+      });
+    }
+    if (isUseControl(control)) {
+      queue.dispatch({
+        type: EventNames.PLAYER_INTERACT,
+        payload: val
       });
     }
   };

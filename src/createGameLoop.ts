@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap } from './MapManager';
+import { loadMap, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -19,13 +19,15 @@ import {
   keyboardMovementHandler
 } from './eventHandlers/keyboardMovement';
 import { playerAttackHandler } from './eventHandlers/playerAttack';
+import { playerInteractHandler } from './eventHandlers/playerInteract';
 
 export type GameLoop = { cleanup: () => void };
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
   KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
-  PLAYER_ATTACK: 'PLAYER_ATTACK'
+  PLAYER_ATTACK: 'PLAYER_ATTACK',
+  PLAYER_INTERACT: 'PLAYER_INTERACT'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -39,7 +41,15 @@ type PlayerAttackEvent = {
   payload: Point;
 };
 
-type QueueEvent = KeyboardMovementEvent | PlayerAttackEvent;
+type PlayerInteractEvent = {
+  type: typeof EventNames.PLAYER_INTERACT;
+  payload: any;
+};
+
+type QueueEvent =
+  | KeyboardMovementEvent
+  | PlayerAttackEvent
+  | PlayerInteractEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -52,6 +62,9 @@ const eventQueueReducer =
 
       case EventNames.PLAYER_ATTACK:
         return playerAttackHandler(payload, world);
+
+      case EventNames.PLAYER_INTERACT:
+        return playerInteractHandler(payload, world);
 
       default:
         isNever(type);
@@ -66,14 +79,19 @@ export async function createGameLoop(app: Application) {
   });
   const controls = createControls(queue);
 
-  await loadMap(app, world);
+  world.set('map', {
+    level: 0
+  } as TMap);
 
-  world.addSystem('movement', MovementSystem);
+  world.addSystem('movement', MovementSystem(world));
   world.addSystem('render', RenderSystem(resolveSprite, app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('interactions', InteractionSystem(resolveSprite, world));
+  world.addSystem('animation', AnimationSystem(resolveSprite));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
 
-  createPlayer(world, { spriteName: 'wizard' });
+
+  await createPlayer(world, { spriteName: 'wizard' });
+  await loadMap(0, true, app, world);
 
   let rafId: number;
 

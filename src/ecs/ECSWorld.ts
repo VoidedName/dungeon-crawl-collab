@@ -4,11 +4,13 @@ import { pipe } from '@/fp/pipe';
 import type { Intersect } from '@/utils/types';
 import type { BrandsFromComponents } from '@/ecs/types';
 import type { ECSSystem } from '@/ecs/ECSSystem';
+import type { Maybe } from '@/utils/Maybe';
+import { none, some } from '@/utils/Maybe';
 
 /**
  * Mutably changes the entity by adding the component to it
  */
-export function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
   entity: E,
   component: () => C
 ): E & C {
@@ -18,7 +20,7 @@ export function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
 /**
  * Mutably changes the entity by removing the component from it
  */
-export function removeComponent<
+function removeComponent<
   E extends ECSEntity,
   C extends Exclude<keyof E, keyof ECSEntity>
 >(entity: E, component: C): Omit<E, C> {
@@ -81,6 +83,7 @@ export interface ECSWorld {
   deleteEntity(e: ECSEntityId): void;
   deleteEntity(e: ECSEntity): void;
   entities(): Iterable<ECSEntity>;
+  getEntity<E extends ECSEntity>(id: ECSEntityId): Maybe<E>;
 
   addComponent<C extends ECSComponent<any>>(
     e: ECSEntityId,
@@ -112,6 +115,23 @@ export interface ECSWorld {
   removeSystem(name: string): void;
 
   runSystems(): void;
+
+  /**
+   * Sets a global with "name"
+   */
+  set(name: string, global: any): void;
+
+  /**
+   * Gets a global with "name"
+   */
+  get<T>(name: string): Maybe<T>;
+
+  /**
+   * Deletes a global with "name"
+   */
+  delete(name: string): void;
+
+  globals(): Iterable<[string, any]>;
 }
 
 /**
@@ -123,6 +143,7 @@ type ECSInternals = {
   nextEntityId: ECSEntityId;
   systems: [string, ECSSystem<any>][];
   entitiesBySystem: Map<string, Set<ECSEntityId>>;
+  globals: Map<string, any>;
 };
 
 function createInternals(): ECSInternals {
@@ -131,7 +152,8 @@ function createInternals(): ECSInternals {
     entities: new Map<ECSEntityId, ECSEntity>(),
     nextEntityId: 0,
     systems: [],
-    entitiesBySystem: new Map<string, Set<ECSEntityId>>()
+    entitiesBySystem: new Map<string, Set<ECSEntityId>>(),
+    globals: new Map<string, any>()
   };
 }
 
@@ -182,6 +204,15 @@ function internalEntities(internals: ECSInternals): ECSWorld['entities'] {
     return internals.entities.values();
   }
   return entities;
+}
+
+function internalGetEntity(internals: ECSInternals): ECSWorld['getEntity'] {
+  function getEntity<E extends ECSEntity>(id: ECSEntityId): Maybe<E> {
+    if (internals.entities.has(id))
+      return some(internals.entities.get(id) as E);
+    return none();
+  }
+  return getEntity;
 }
 
 function internalAddComponent(
@@ -330,6 +361,40 @@ function internalRunSystem(internals: ECSInternals): ECSWorld['runSystems'] {
   return runSystems;
 }
 
+function internalGet(internals: ECSInternals): ECSWorld['get'] {
+  function get<T>(name: string) {
+    if (internals.globals.has(name))
+      return some(internals.globals.get(name) as T);
+    return none<T>();
+  }
+
+  return get;
+}
+
+function internalSet(internals: ECSInternals): ECSWorld['set'] {
+  function set(name: string, global: any) {
+    internals.globals.set(name, global);
+  }
+
+  return set;
+}
+
+function internalDelete(internals: ECSInternals): ECSWorld['delete'] {
+  function remove(name: string) {
+    internals.globals.delete(name);
+  }
+
+  return remove;
+}
+
+function internalGlobals(internals: ECSInternals): ECSWorld['globals'] {
+  function globals() {
+    return internals.globals.entries();
+  }
+
+  return globals;
+}
+
 /**
  * Creates a new ECSWorld instance.
  * @see ECSWorld
@@ -341,11 +406,16 @@ export function createWorld(): ECSWorld {
     createEntity: internalCreateEntity(internals),
     deleteEntity: internalDeleteEntity(internals),
     entities: internalEntities(internals),
+    getEntity: internalGetEntity(internals),
     addComponent: internalAddComponent(internals),
     removeComponent: internalRemoveComponents(internals),
     entitiesByComponent: internalEntitiesByComponent(internals),
     addSystem: internalAddSystem(internals),
     removeSystem: internalRemoveSystem(internals),
-    runSystems: internalRunSystem(internals)
+    runSystems: internalRunSystem(internals),
+    set: internalSet(internals),
+    get: internalGet(internals),
+    delete: internalDelete(internals),
+    globals: internalGlobals(internals)
   };
 }
