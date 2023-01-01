@@ -14,6 +14,7 @@ export const DebugRenderer: (
 ) => ECSSystem<[]> = (app, world) => {
   let currentStage = -1;
   const debugContainer = new Container();
+  debugContainer.zIndex = Number.MAX_VALUE;
   app.stage.addChild(debugContainer);
 
   return {
