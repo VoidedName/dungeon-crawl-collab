@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap } from './MapManager';
+import { loadMap, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -79,6 +79,10 @@ export async function createGameLoop(app: Application) {
     queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
   });
   const controls = createControls(queue);
+
+  world.set('map', {
+    level: 0
+  } as TMap);
 
   world.addSystem('movement', MovementSystem(world));
   world.addSystem('render', RenderSystem(resolveSprite, app));

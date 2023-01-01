@@ -5,7 +5,7 @@ import type { InteractIntent } from '@/entity/components/InteractIntent';
 import type { Player } from '@/entity/components/Player';
 import type { Position } from '@/entity/components/Position';
 import type { Renderable } from '@/entity/components/Renderable';
-import { loadMap } from '@/MapManager';
+import { loadMap, type TMap } from '@/MapManager';
 import type { RenderableId } from '@/renderer/renderableCache';
 import { dist } from '@/utils/math';
 import type { Application } from 'pixi.js';
@@ -45,12 +45,17 @@ export const InteractionSystem: (
           player.interact_intent.canInteract = true;
         }, player.interact_intent.cooldown);
 
-        if (interactable.interactable.type === 'stairsUp') {
-          player.player.level--;
-          loadMap(player.player.level, false, app, world);
-        } else if (interactable.interactable.type === 'stairsDown') {
-          player.player.level++;
-          loadMap(player.player.level, true, app, world);
+        const mapGlobalMaybe = world.get<TMap>('map');
+        if (mapGlobalMaybe.isSome()) {
+          const mapGlobal = mapGlobalMaybe.get();
+
+          if (interactable.interactable.type === 'stairsUp') {
+            mapGlobal.level--;
+            loadMap(mapGlobal.level, false, app, world);
+          } else if (interactable.interactable.type === 'stairsDown') {
+            mapGlobal.level++;
+            loadMap(mapGlobal.level, true, app, world);
+          }
         }
       }
     });

@@ -12,6 +12,10 @@ import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
 import { withCollidable } from './entity/components/Collidable';
 
+export type TMap = {
+  level: number;
+};
+
 const maps = [
   [
     [4, 3, 3, 3, 4, 0, 0, 0, 0],
