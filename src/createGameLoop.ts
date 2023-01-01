@@ -86,9 +86,7 @@ export async function createGameLoop(app: Application) {
   world.addSystem('movement', MovementSystem(world));
   world.addSystem('render', RenderSystem(resolveSprite, app));
   world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('animation', AnimationSystem(resolveSprite));
   world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
-
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
