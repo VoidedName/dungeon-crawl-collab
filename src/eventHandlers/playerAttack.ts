@@ -1,3 +1,4 @@
+import { scheduleAnimation } from '@/renderer/AnimationManager';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import {
   AnimatableBrand,
@@ -9,8 +10,10 @@ import {
   RenderableBrand,
   type Renderable
 } from '@/entity/components/Renderable';
-import { objectAssign } from '@/utils/helpers';
 import type { Point } from '@/utils/types';
+
+// temporary code while we don't have a proper AttackSystem
+let isAttacking = false;
 
 export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   const [player] = world.entitiesByComponent<[Player, Animatable, Renderable]>([
@@ -20,10 +23,15 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   ]);
 
   if (!player) return;
+  if (isAttacking) return;
+  isAttacking = true;
 
-  player.animatable.state = AnimationState.ATTACKING;
-  objectAssign(player.animatable.options, {
+  scheduleAnimation(player.renderable.sprite, {
+    state: AnimationState.ATTACKING,
+    spriteName: player.animatable.spriteName,
     loop: false,
-    fallbackOnComplete: AnimationState.IDLE
+    onExit() {
+      isAttacking = false;
+    }
   });
 };

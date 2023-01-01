@@ -31,3 +31,5 @@ export const objectAssign = <T extends AnyObject>(
   obj: T,
   ...partials: Partial<T>[]
 ): T => Object.assign(obj, ...partials);
+
+export const noop = () => void 0;
