@@ -7,6 +7,7 @@ import { withPosition, type Position } from './entity/components/Position';
 import { Text } from 'pixi.js';
 import { withRenderable } from './entity/components/Renderable';
 import { register } from './renderer/renderableCache';
+import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
 import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
@@ -158,7 +159,12 @@ export async function loadMap(
             )
           )
           .with(withMapObject())
-          .with(withPosition(globalPos.x + HALF_TILE, globalPos.y + HALF_TILE))
+          .with(
+            positionComponent({
+              x: globalPos.x + HALF_TILE,
+              y: globalPos.y + HALF_TILE
+            })
+          )
           .with(withRenderable(STAIRS_DOWN_RENDERABLE_ID))
           .build();
       } else if (tileId === STAIRS_UP_ID) {
