@@ -3,10 +3,10 @@ import { Container, Sprite } from 'pixi.js';
 import tilesheetImage from './assets/tilesheet.png';
 import type { ECSWorld } from './ecs/ECSWorld';
 import { withInteractable } from './entity/components/Interactable';
-import { withPosition } from './entity/components/Position';
 import { Text } from 'pixi.js';
 import { withRenderable } from './entity/components/Renderable';
 import { register } from './renderer/renderableCache';
+import { positionComponent } from '@/entity/components/Position';
 
 const map = [
   [4, 3, 3, 3, 4, 0, 0, 0],
@@ -93,7 +93,12 @@ export async function loadMap(app: PIXI.Application, world: ECSWorld) {
         world
           .createEntity()
           .with(withInteractable('descend', STAIRS_PICKUP_RADIUS))
-          .with(withPosition(globalPos.x + HALF_TILE, globalPos.y + HALF_TILE))
+          .with(
+            positionComponent({
+              x: globalPos.x + HALF_TILE,
+              y: globalPos.y + HALF_TILE
+            })
+          )
           .with(withRenderable(STAIRS_RENDERABLE_ID))
           .build();
       }
