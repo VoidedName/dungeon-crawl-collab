@@ -248,17 +248,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@iconify-json/game-icons@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@iconify-json/game-icons/-/game-icons-1.1.1.tgz#8e1c36485b785868dc32c4602aefaae07d89debd"
-  integrity sha512-D/v2MJwb1zUs8qg+dCjt1QqHFy+7v5GC/8xij3RK0AScVZKpphazl5E/qd6OqCQHYZWtgNrLDPxJRIOhCxa78g==
-  dependencies:
-    "@iconify/types" "*"
-
-"@iconify-json/mdi@^1.1.40":
-  version "1.1.40"
-  resolved "https://registry.yarnpkg.com/@iconify-json/mdi/-/mdi-1.1.40.tgz#48119bed85b8fdfd5f0175b9ea7617fd8215fc0e"
-  integrity sha512-0CeAVzCyKQzBdkDa0hOECVLtXvaTqGYuy9ZR7caM6+HBJYXJW9aDUcYVFv9byrDfZ3lVAfus1CjZlZEa+HBM4A==
+"@iconify-json/mdi@^1.1.41":
+  version "1.1.41"
+  resolved "https://registry.yarnpkg.com/@iconify-json/mdi/-/mdi-1.1.41.tgz#a0afc26fd031e298baa5dc439743dffee1e3f437"
+  integrity sha512-nMT3k6cH48qi66m2mYDOh4YPW3BgSD+VLNXP7Z3LHNgKoGVLpA76AKWzYGshhyprebBGNXAk+72mlLLQSIojzQ==
   dependencies:
     "@iconify/types" "*"
 
