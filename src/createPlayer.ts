@@ -13,6 +13,7 @@ import { withStats } from './entity/components/Stats';
 import { withOrientation } from './entity/components/Orientation';
 import { withInteractIntent } from './entity/components/InteractIntent';
 import { positionComponent } from '@/entity/components/Position';
+import { withSize } from './entity/components/Size';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -26,12 +27,14 @@ export const createPlayer = async (
     options.spriteName,
     AnimationState.IDLE
   );
+  sprite.zIndex = 1;
   await register(id, sprite);
 
   world
     .createEntity()
     .with(playerComponent)
     .with(positionComponent({ x: 200, y: 100 }))
+    .with(withSize(64, 64))
     .with(withStats({ speed: 5 }))
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withOrientation(0))

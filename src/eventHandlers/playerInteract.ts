@@ -5,11 +5,14 @@ import {
 } from '@/entity/components/InteractIntent';
 import { PlayerBrand, type Player } from '@/entity/components/Player';
 
-export const playerInteractHandler = (world: ECSWorld) => {
+export const playerInteractHandler = (
+  isInteracting: boolean,
+  world: ECSWorld
+) => {
   const [player] = world.entitiesByComponent<[Player, InteractIntent]>([
     PlayerBrand,
     InteractIntentBrand
   ]);
   if (!player) return;
-  player.interact_intent.isInteracting = true;
+  player.interact_intent.isInteracting = isInteracting;
 };
