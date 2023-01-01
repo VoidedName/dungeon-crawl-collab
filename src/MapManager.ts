@@ -1,6 +1,5 @@
-import * as PIXI from 'pixi.js';
-import { Container, Sprite } from 'pixi.js';
-import tilesheetImage from './assets/tilesheet.png';
+import { Application, Container, Sprite } from 'pixi.js';
+import tilesheetImage from './assets/tilesets/base.png';
 import type { ECSWorld } from './ecs/ECSWorld';
 import { withInteractable } from './entity/components/Interactable';
 import type { Position } from './entity/components/Position';
@@ -12,6 +11,7 @@ import type { Player } from './entity/components/Player';
 import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
 import { withCollidable } from './entity/components/Collidable';
+import { createTileset } from './renderer/createTileset';
 
 export type TMap = {
   level: number;
@@ -19,22 +19,24 @@ export type TMap = {
 
 const maps = [
   [
-    [4, 3, 3, 3, 4, 0, 0, 0, 0],
-    [4, 1, 1, 1, 3, 3, 3, 3, 4],
-    [4, 1, 5, 1, 1, 1, 1, 1, 4],
-    [4, 1, 1, 1, 1, 1, 6, 1, 4],
-    [4, 1, 1, 1, 1, 1, 1, 1, 4],
-    [4, 1, 1, 1, 2, 2, 2, 2, 4],
-    [4, 1, 1, 1, 4, 0, 0, 0, 0],
-    [4, 1, 1, 1, 4, 0, 0, 0, 0],
-    [4, 2, 2, 2, 4, 0, 0, 0, 0]
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 2, 3, 2, 3, 2, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 1, 9, 5, 9, 9, 6, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 15, 16, 16, 16, 16, 16, 18, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]
   ],
   [
-    [4, 3, 3, 3, 3, 3, 3, 3, 4],
-    [4, 1, 1, 1, 1, 1, 1, 1, 4],
-    [4, 1, 6, 1, 1, 1, 1, 1, 4],
-    [4, 1, 1, 1, 1, 1, 1, 1, 4],
-    [4, 2, 2, 2, 2, 2, 2, 2, 4]
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 2, 3, 2, 3, 2, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 1, 9, 9, 6, 9, 9, 4, 0],
+    [0, 1, 9, 9, 9, 9, 9, 4, 0],
+    [0, 15, 16, 13, 9, 12, 16, 18, 0]
   ]
 ];
 
@@ -46,60 +48,27 @@ const STAIRS_UP_ID = 6;
 const STAIRS_DOWN_RENDERABLE_ID = 'StairsDown';
 const STAIRS_UP_RENDERABLE_ID = 'StairsUp';
 const STAIRS_INTERACT_RADIUS = TILE_SIZE * 1.25;
-const tileIdMap = new Map([
-  [0, null],
-  [1, 'floor'],
-  [2, 'wall_bottom'],
-  [3, 'wall_top'],
-  [4, 'wall_side'],
-  [STAIRS_DOWN_ID, 'stairs_down'],
-  [STAIRS_UP_ID, 'stairs_up']
-]);
+const TILESET_ID = 'base';
+const TILESET_ROWS = 3;
+const TILESET_COLUMNS = 7;
 
 const collidableTypes = [2, 3, 4];
-
-function getFrameDetail(index = 0) {
-  return {
-    frame: { x: TILE_SIZE * index, y: 0, w: TILE_SIZE, h: TILE_SIZE },
-    sourceSize: { w: TILE_SIZE, h: TILE_SIZE },
-    spriteSourceSize: { x: 0, y: 0 }
-  };
-}
 
 let mapGroup: Container;
 let sheet: any;
 
-async function loadMapSpriteSheet() {
-  if (!sheet) {
-    const mapTileSheetTexture = await PIXI.Assets.load(tilesheetImage);
-
-    const data: PIXI.ISpritesheetData = {
-      frames: {
-        floor: getFrameDetail(0),
-        wall_bottom: getFrameDetail(1),
-        wall_top: getFrameDetail(2),
-        wall_side: getFrameDetail(3),
-        stairs_down: getFrameDetail(4),
-        stairs_up: getFrameDetail(5)
-      },
-      meta: {
-        scale: '1'
-      }
-    };
-
-    sheet = new PIXI.Spritesheet(await mapTileSheetTexture, data);
-    await sheet.parse();
-  }
-  return sheet;
-}
-
 export async function loadMap(
   level: number,
   spawnAtStairsUp: boolean,
-  app: PIXI.Application,
+  app: Application,
   world: ECSWorld
 ) {
-  await loadMapSpriteSheet();
+  sheet = await createTileset({
+    id: TILESET_ID,
+    tileSize: TILE_SIZE,
+    dimensions: { w: TILESET_COLUMNS * TILE_SIZE, h: TILESET_ROWS * TILE_SIZE },
+    path: tilesheetImage
+  });
 
   if (mapGroup) {
     mapGroup.destroy();
@@ -121,8 +90,7 @@ export async function loadMap(
     const row = map[i]!;
     for (let j = 0; j < row.length; j++) {
       const tileId = row[j]!;
-      if (!tileIdMap.has(tileId)) continue;
-      const textureName = tileIdMap.get(tileId)!;
+      const textureName = `${TILESET_ID}-${tileId}`;
       const tileContainer = new Container();
       const tile = new Sprite(sheet.textures[textureName]);
       tileContainer.addChild(tile);
