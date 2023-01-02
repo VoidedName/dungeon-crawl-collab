@@ -24,6 +24,8 @@ import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
 import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
+import { createAudioManager } from './createAudioManager';
+import { createEffectManager } from './createEffectManager';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -107,6 +109,9 @@ const setup = async (app: Application, world: ECSWorld) => {
   } as TMap);
 
   world.set(DebugFlags.map, false);
+
+  world.set('audio', createAudioManager());
+  world.set('effects', createEffectManager(app));
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);

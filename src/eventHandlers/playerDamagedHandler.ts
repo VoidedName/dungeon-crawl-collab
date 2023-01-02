@@ -1,3 +1,4 @@
+import type { TAudioManager } from '@/createAudioManager';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import { PlayerBrand, type Player } from '@/entity/components/Player';
 import {
@@ -25,6 +26,12 @@ export const playerDamagedHandler = (
   player.stats.current.health = Math.max(
     0,
     player.stats.current.health - damage
+  );
+  world.get<TAudioManager>('audio').match(
+    audioManager => {
+      audioManager.play('ouch');
+    },
+    () => console.warn('no audio manager set')
   );
   const playerSprite = resolveSprite(player.renderable.sprite) as Sprite;
   playerSprite.tint = 0xff0000;
