@@ -13,7 +13,8 @@ const FLASH_DURATION = 150;
 export const playerDamagedHandler = (
   damage: number,
   world: ECSWorld,
-  resolveSprite: (sprite: RenderableId) => DisplayObject
+  resolveSprite: (sprite: RenderableId) => DisplayObject,
+  navigateTo: (path: string) => void
 ) => {
   const [player] = world.entitiesByComponent<[Player, Stats, Renderable]>([
     PlayerBrand,
@@ -33,5 +34,6 @@ export const playerDamagedHandler = (
 
   if (player.stats.current.health <= 0) {
     alert('you dead');
+    navigateTo('/');
   }
 };

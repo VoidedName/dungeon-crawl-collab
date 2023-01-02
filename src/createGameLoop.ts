@@ -71,7 +71,7 @@ type QueueEvent =
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
 const eventQueueReducer =
-  (world: ECSWorld) =>
+  (world: ECSWorld, navigateTo: (path: string) => void) =>
   ({ type, payload }: QueueEvent) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
@@ -84,7 +84,7 @@ const eventQueueReducer =
         return playerInteractHandler(payload, world);
 
       case EventNames.PLAYER_DAMAGED:
-        return playerDamagedHandler(payload, world, resolveSprite);
+        return playerDamagedHandler(payload, world, resolveSprite, navigateTo);
 
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);
@@ -94,9 +94,14 @@ const eventQueueReducer =
     }
   };
 
-export async function createGameLoop(app: Application) {
+export async function createGameLoop(
+  app: Application,
+  navigateTo: (path: string) => void
+) {
   const world = createWorld();
-  const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
+  const queue = createEventQueue<QueueEvent>(
+    eventQueueReducer(world, navigateTo)
+  );
   app.stage.on('pointerdown', e => {
     queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
   });
