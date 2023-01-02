@@ -1,0 +1,32 @@
+{
+  "frames": [
+    {
+      "filename": "trap:idle.0",
+      "frame": { "x": 0, "y": 0, "w": 56, "h": 43 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 56, "h": 43 },
+      "sourceSize": { "w": 56, "h": 43 },
+      "duration": 100
+    }
+  ],
+  "meta": {
+    "app": "https://www.aseprite.org/",
+    "version": "1.2.40-x64",
+    "image": "trap.png",
+    "format": "RGBA8888",
+    "size": { "w": 56, "h": 43 },
+    "scale": "1",
+    "frameTags": [
+      { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+    ],
+    "layers": [{ "name": "Body", "opacity": 255, "blendMode": "normal" }],
+    "slices": [
+      {
+        "name": "body",
+        "color": "#0000ffff",
+        "keys": [{ "frame": 0, "bounds": { "x": 0, "y": 0, "w": 56, "h": 43 } }]
+      }
+    ]
+  }
+}

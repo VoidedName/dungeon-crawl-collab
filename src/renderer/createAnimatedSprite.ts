@@ -5,7 +5,7 @@ import {
   parseAsperiteAnimationSheet
 } from '@/utils/aseprite';
 import type { AnimationState } from '@/entity/components/Animatable';
-import type { AnimatedSprite, Renderer } from 'pixi.js';
+import type { AnimatedSprite } from 'pixi.js';
 import { resolveSprite, type RenderableId } from './renderableCache';
 
 export type SpriteName = keyof typeof sprites;
