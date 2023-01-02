@@ -1,3 +1,5 @@
+import type { TAudioManager } from '@/createAudioManager';
+import type { TEffectManager } from '@/createEffectManager';
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { Interactable } from '@/entity/components/Interactable';
 import type { InteractIntent } from '@/entity/components/InteractIntent';
@@ -46,12 +48,29 @@ export const InteractionSystem: (
         if (mapGlobalMaybe.isSome()) {
           const mapGlobal = mapGlobalMaybe.get();
 
-          if (interactable.interactable.type === 'stairsUp') {
-            mapGlobal.level--;
-            loadMap(mapGlobal.level, false, app, world);
-          } else if (interactable.interactable.type === 'stairsDown') {
-            mapGlobal.level++;
-            loadMap(mapGlobal.level, true, app, world);
+          if (
+            ['stairsUp', 'stairsDown'].includes(interactable.interactable.type)
+          ) {
+            world.get<TAudioManager>('audio').match(
+              audioManager => {
+                audioManager.play('stairs');
+              },
+              () => console.warn('no audio manager set')
+            );
+            world.get<TEffectManager>('effects').match(
+              effectsManager => {
+                effectsManager.fadeScreenOut(() => {
+                  if (interactable.interactable.type === 'stairsUp') {
+                    mapGlobal.level--;
+                    loadMap(mapGlobal.level, false, app, world);
+                  } else if (interactable.interactable.type === 'stairsDown') {
+                    mapGlobal.level++;
+                    loadMap(mapGlobal.level, true, app, world);
+                  }
+                });
+              },
+              () => console.warn('no audio manager set')
+            );
           }
         }
       }
