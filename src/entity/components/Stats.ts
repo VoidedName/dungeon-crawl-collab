@@ -3,6 +3,7 @@ import type { ECSEntity } from '@/ecs/ECSEntity';
 
 export type StatsDescriptors = {
   speed: number;
+  health: number;
 };
 
 export type EntityStats = {

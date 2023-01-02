@@ -1,5 +1,4 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { ECSWorld } from '@/ecs/ECSWorld';
 import type { Interactable } from '@/entity/components/Interactable';
 import type { InteractIntent } from '@/entity/components/InteractIntent';
 import type { Player } from '@/entity/components/Player';
