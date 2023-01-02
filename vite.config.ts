@@ -23,7 +23,6 @@ export default defineConfig({
     checker({
       vueTsc: { tsconfigPath: './tsconfig.app.json' }
     }),
-
     AutoImport({
       include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/, /\.md$/],
       imports: ['vue', '@vueuse/core', VueRouterAutoImports]

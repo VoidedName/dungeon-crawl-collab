@@ -8,7 +8,6 @@ useEventListener('keyup', e => {
 });
 
 const ecsApi = useEcsApi();
-console.log(ecsApi.value);
 </script>
 
 <template>
