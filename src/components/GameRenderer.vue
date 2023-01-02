@@ -9,12 +9,14 @@ const canvasEl = ref<HTMLCanvasElement>();
 let renderer: GameRenderer;
 let loop: GameLoop;
 
+const router = useRouter();
+
 onMounted(async () => {
   if (!canvasEl.value) return;
   renderer = await createGameRenderer({
     canvas: canvasEl.value
   });
-  loop = await createGameLoop(renderer.app);
+  loop = await createGameLoop(renderer.app, path => router.push(path));
 });
 
 onUnmounted(() => {

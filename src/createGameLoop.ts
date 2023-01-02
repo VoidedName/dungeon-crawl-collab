@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap, maps, TILE_SIZE, type TMap } from './MapManager';
+import { loadMap, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -13,6 +13,7 @@ import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
+import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
 
 import {
   type Directions,
@@ -21,6 +22,7 @@ import {
 import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
+import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
 
 export type GameLoop = { cleanup: () => void };
 
@@ -28,7 +30,9 @@ export type GameLoop = { cleanup: () => void };
 export const EventNames = {
   KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
   PLAYER_ATTACK: 'PLAYER_ATTACK',
-  PLAYER_INTERACT: 'PLAYER_INTERACT'
+  PLAYER_INTERACT: 'PLAYER_INTERACT',
+  PLAYER_DAMAGED: 'PLAYER_DAMAGED',
+  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -47,15 +51,27 @@ type PlayerInteractEvent = {
   payload: any;
 };
 
+type PlayerDamagedEvent = {
+  type: typeof EventNames.PLAYER_DAMAGED;
+  payload: number;
+};
+
+type ToggleDebugOverlayEvent = {
+  type: typeof EventNames.TOGGLE_DEBUG_OVERLAY;
+  payload: any;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
-  | PlayerInteractEvent;
+  | PlayerInteractEvent
+  | PlayerDamagedEvent
+  | ToggleDebugOverlayEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
 const eventQueueReducer =
-  (world: ECSWorld) =>
+  (world: ECSWorld, navigateTo: (path: string) => void) =>
   ({ type, payload }: QueueEvent) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
@@ -67,14 +83,25 @@ const eventQueueReducer =
       case EventNames.PLAYER_INTERACT:
         return playerInteractHandler(payload, world);
 
+      case EventNames.PLAYER_DAMAGED:
+        return playerDamagedHandler(payload, world, resolveSprite, navigateTo);
+
+      case EventNames.TOGGLE_DEBUG_OVERLAY:
+        return debugOverlayHandler(world);
+
       default:
         isNever(type);
     }
   };
 
-export async function createGameLoop(app: Application) {
+export async function createGameLoop(
+  app: Application,
+  navigateTo: (path: string) => void
+) {
   const world = createWorld();
-  const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
+  const queue = createEventQueue<QueueEvent>(
+    eventQueueReducer(world, navigateTo)
+  );
   app.stage.on('pointerdown', e => {
     queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
   });
@@ -84,7 +111,7 @@ export async function createGameLoop(app: Application) {
     level: 0
   } as TMap);
 
-  world.set(DebugFlags.map, true);
+  world.set(DebugFlags.map, false);
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);

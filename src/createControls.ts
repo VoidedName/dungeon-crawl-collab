@@ -1,11 +1,23 @@
 import { useKeydownOnce } from './composables/useKeydownOnce';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
 
-export const Controls = ['up', 'down', 'left', 'right', 'use'] as const;
+export const Controls = [
+  'up',
+  'down',
+  'left',
+  'right',
+  'use',
+  'seppuku',
+  'toggleDebug'
+] as const;
 
 export const movementControls = ['up', 'down', 'left', 'right'];
-const isMovementControl = (key: string) => movementControls.includes(key);
-const isUseControl = (key: string) => key === 'use';
+const isMovementControl = (key: Control) => movementControls.includes(key);
+const isUseControl = (key: Control) => key === 'use';
+
+// TODO: this is a temp way to hurt the player, will be removed soon
+const isSeppukuControl = (key: Control) => key === 'seppuku';
+const isDebugControl = (key: Control) => key === 'toggleDebug';
 
 export type Control = typeof Controls[number];
 
@@ -14,7 +26,9 @@ const configuration = {
   KeyA: 'left',
   KeyW: 'up',
   KeyS: 'down',
-  KeyE: 'use'
+  KeyE: 'use',
+  KeyP: 'seppuku',
+  Backquote: 'toggleDebug'
 } as Record<string, Control>;
 
 const controls = {
@@ -22,7 +36,9 @@ const controls = {
   down: false,
   left: false,
   right: false,
-  use: false
+  use: false,
+  seppuku: false,
+  toggleDebug: false
 };
 
 export function getConfiguration() {
@@ -42,10 +58,10 @@ export function getControls() {
 }
 
 export const createControls = (queue: GameLoopQueue) => {
-  const handler = (val: boolean) => (e: KeyboardEvent) => {
+  const handler = (isKeyDown: boolean) => (e: KeyboardEvent) => {
     const control = configuration[e.code];
     if (!control) return;
-    setControl(control, val);
+    setControl(control, isKeyDown);
 
     if (isMovementControl(control)) {
       queue.dispatch({
@@ -56,7 +72,20 @@ export const createControls = (queue: GameLoopQueue) => {
     if (isUseControl(control)) {
       queue.dispatch({
         type: EventNames.PLAYER_INTERACT,
-        payload: val
+        payload: isKeyDown
+      });
+    }
+    if (isSeppukuControl(control) && isKeyDown) {
+      queue.dispatch({
+        type: EventNames.PLAYER_DAMAGED,
+        payload: 1
+      });
+    }
+
+    if (isDebugControl(control) && isKeyDown) {
+      queue.dispatch({
+        type: EventNames.TOGGLE_DEBUG_OVERLAY,
+        payload: undefined
       });
     }
   };
