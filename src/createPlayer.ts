@@ -35,7 +35,8 @@ export const createPlayer = async (
     state: AnimationState.IDLE,
     spriteName: options.spriteName
   });
-  world
+
+  return world
     .createEntity()
     .with(playerComponent)
     .with(positionComponent({ x: 200, y: 100 }))

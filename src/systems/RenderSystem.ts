@@ -61,17 +61,17 @@ export const RenderSystem: (
         triggerMovementAnimation(e);
       }
 
-      if (hasPlayer(e)) {
-        const shouldSetOrientation =
-          getAnimationState(e.renderable.sprite) !== AnimationState.ATTACKING;
-
+      const shouldSetOrientation =
+        getAnimationState(e.renderable.sprite) !== AnimationState.ATTACKING;
+      if (hasPlayer(e) && shouldSetOrientation) {
         // not sure why it's marked at private, this information is pretty useful
         // this might be a pixi 7 oversight, as they replaced InteractionManager with EventSystem
         // anywho, this gives us mouse position relative to the app stage
         const mousePosition = (app.renderer.events as any).rootPointerEvent
           .global as Point;
 
-        const scaleX = mousePosition.x < e.position.x ? -1 : 1;
+        const scaleX =
+          mousePosition.x < sprite.toGlobal({ x: 0, y: 0 }).x ? -1 : 1;
         sprite.scale.set(scaleX, 1);
       }
     });

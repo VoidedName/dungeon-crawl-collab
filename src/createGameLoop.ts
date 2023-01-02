@@ -24,6 +24,8 @@ import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
 import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
+import { createCamera } from './createCamera';
+import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -31,7 +33,8 @@ export const EventNames = {
   PLAYER_ATTACK: 'PLAYER_ATTACK',
   PLAYER_INTERACT: 'PLAYER_INTERACT',
   PLAYER_DAMAGED: 'PLAYER_DAMAGED',
-  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY'
+  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
+  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -60,12 +63,18 @@ type ToggleDebugOverlayEvent = {
   payload: any;
 };
 
+type SetCameraOffsetEvent = {
+  type: typeof EventNames.SET_CAMERA_OFFSET;
+  payload: Point;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
   | PlayerInteractEvent
   | PlayerDamagedEvent
-  | ToggleDebugOverlayEvent;
+  | ToggleDebugOverlayEvent
+  | SetCameraOffsetEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -96,6 +105,9 @@ const eventQueueReducer =
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);
 
+      case EventNames.SET_CAMERA_OFFSET:
+        return setCameraOffsetHandler(payload, world);
+
       default:
         isNever(type);
     }
@@ -108,7 +120,8 @@ const setup = async (app: Application, world: ECSWorld) => {
 
   world.set(DebugFlags.map, false);
 
-  await createPlayer(world, { spriteName: 'wizard' });
+  const player = await createPlayer(world, { spriteName: 'wizard' });
+  createCamera(world, player.entity_id);
   await loadMap(0, true, app, world);
 };
 
@@ -120,12 +133,10 @@ export function createGameLoop(
   const queue = createEventQueue<QueueEvent>(
     eventQueueReducer(world, navigateTo)
   );
-  const controls = createControls(queue);
-
-  // @FIXME temporaty code to test out the attack animation, where should this live ?
-  renderer.app.stage.on('pointerdown', e => {
-    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
-  });
+  const controls = createControls(
+    renderer.app.view as HTMLCanvasElement,
+    queue
+  );
 
   setup(renderer.app, world);
 

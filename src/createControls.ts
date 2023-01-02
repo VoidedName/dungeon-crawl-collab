@@ -1,5 +1,6 @@
 import { useKeydownOnce } from './composables/useKeydownOnce';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
+import { mulVector } from './utils/vectors';
 
 export const Controls = [
   'up',
@@ -57,11 +58,14 @@ export function getControls() {
   return controls;
 }
 
-export const createControls = (queue: GameLoopQueue) => {
-  const handler = (isKeyDown: boolean) => (e: KeyboardEvent) => {
+export const createControls = (
+  canvas: HTMLCanvasElement,
+  queue: GameLoopQueue
+) => {
+  const keyboardHandler = (isOn: boolean) => (e: KeyboardEvent) => {
     const control = configuration[e.code];
     if (!control) return;
-    setControl(control, isKeyDown);
+    setControl(control, isOn);
 
     if (isMovementControl(control)) {
       queue.dispatch({
@@ -72,17 +76,17 @@ export const createControls = (queue: GameLoopQueue) => {
     if (isUseControl(control)) {
       queue.dispatch({
         type: EventNames.PLAYER_INTERACT,
-        payload: isKeyDown
+        payload: isOn
       });
     }
-    if (isSeppukuControl(control) && isKeyDown) {
+    if (isSeppukuControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.PLAYER_DAMAGED,
         payload: 1
       });
     }
 
-    if (isDebugControl(control) && isKeyDown) {
+    if (isDebugControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.TOGGLE_DEBUG_OVERLAY,
         payload: undefined
@@ -90,16 +94,43 @@ export const createControls = (queue: GameLoopQueue) => {
     }
   };
 
-  const onKeyDown = handler(true);
-  const onKeyUp = handler(false);
+  const onMousemove = (e: MouseEvent) => {
+    const offsetThreshold = 100;
+    const scaleFactor = 1.5;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const offset = { x: 0, y: 0 };
+    if (mouseX < offsetThreshold) {
+      offset.x = offsetThreshold - mouseX;
+    }
+    if (rect.width - mouseX < offsetThreshold) {
+      offset.x = -(offsetThreshold - (rect.width - mouseX));
+    }
+    if (mouseY < offsetThreshold) {
+      offset.y = offsetThreshold - mouseY;
+    }
+    if (rect.height - mouseY < offsetThreshold) {
+      offset.y = -(offsetThreshold - (rect.height - mouseY));
+    }
+    queue.dispatch({
+      type: EventNames.SET_CAMERA_OFFSET,
+      payload: mulVector(offset, scaleFactor)
+    });
+  };
+  const onKeyDown = keyboardHandler(true);
+  const onKeyUp = keyboardHandler(false);
 
   useKeydownOnce(onKeyDown, window);
   window.addEventListener('keyup', onKeyUp);
+  canvas.addEventListener('mousemove', onMousemove);
 
   return {
     cleanup: () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      canvas.removeEventListener('mousemove', onMousemove);
     }
   };
 };
