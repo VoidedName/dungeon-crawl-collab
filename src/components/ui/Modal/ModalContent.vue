@@ -5,6 +5,13 @@ import { useSlotProps } from '@/composables/useSlotProps';
 import Surface from '../Surface.vue';
 import ModalHeader from './ModalHeader.vue';
 
+type Props = {
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+};
+
+const props = withDefaults(defineProps<Props>(), { size: 'md' });
+const maxWidth = computed(() => `var(--breakpoints-${props.size})`);
+
 const modal = useModal();
 const { title } = modal;
 const slotProps = useSlotProps(modal);
@@ -12,30 +19,27 @@ const slots = useSlots();
 </script>
 
 <template>
-  <TransitionChild as="template" appear>
-    <DialogPanel as="div" class="modal-content">
-      <Surface class="inner">
-        <slot name="header" v-bind="slotProps">
-          <ModalHeader v-if="title" />
-        </slot>
+  <DialogPanel as="div" class="modal-content">
+    <Surface class="inner">
+      <slot name="header" v-bind="slotProps">
+        <ModalHeader v-if="title" />
+      </slot>
 
-        <div class="body">
-          <slot v-bind="slotProps" />
-        </div>
+      <div class="body">
+        <slot v-bind="slotProps" />
+      </div>
 
-        <footer v-if="slots.footer">
-          <slot name="footer" v-bind="slotProps" />
-        </footer>
-      </Surface>
-    </DialogPanel>
-  </TransitionChild>
+      <footer v-if="slots.footer">
+        <slot name="footer" v-bind="slotProps" />
+      </footer>
+    </Surface>
+  </DialogPanel>
 </template>
 
 <style scoped lang="postcss">
 .modal-content {
-  --max-width: var(--breakpoints-md);
   width: 100%;
-  max-width: var(--max-width);
+  max-width: v-bind(maxWidth);
   transition: all var(--duration-2);
   align-self: flex-start;
   overflow-y: auto;

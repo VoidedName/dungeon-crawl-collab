@@ -24,7 +24,7 @@ onUnmounted(() => {
 
 <template>
   <div class="game-renderer">
-    <PauseMenu />
+    <PauseMenu v-if="ecsApi" />
     <canvas ref="canvasEl" />
   </div>
 </template>

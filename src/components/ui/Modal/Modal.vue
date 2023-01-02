@@ -21,29 +21,18 @@ useModalProvider({
   closable: toRef(props, 'closable'),
   title: toRef(props, 'title')
 });
+
+const onClose = () => {
+  if (props.closable) vModel.value = false;
+};
 </script>
 
 <template>
   <TransitionRoot appear :show="vModel" as="template">
-    <Dialog
-      as="div"
-      class="modal"
-      relative
-      :static="!closable"
-      @close="vModel = false"
-    >
-      <div
-        ref="containerEl"
-        fixed
-        inset-0
-        overflow-y-auto
-        grid
-        justify-items-center
-        un-children="col-start-1 row-start-1"
-      >
-        <TransitionChild appear as="template">
-          <div class="backdrop" />
-        </TransitionChild>
+    <Dialog as="div" class="modal" relative :static="closable" @close="onClose">
+      <div ref="containerEl">
+        <div class="backdrop" />
+
         <slot />
       </div>
     </Dialog>
@@ -54,21 +43,21 @@ useModalProvider({
 .modal {
   position: relative;
   z-index: 10;
-
-  & > div {
-    position: fixed;
-    inset: 0;
-    overflow-y: auto;
-    display: grid;
-    justify-items: center;
-
-    > * {
-      grid-column: 1;
-      grid-row: 1;
-    }
-  }
+  color: white;
 }
 
+.modal > div {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  display: grid;
+  justify-items: center;
+}
+
+.modal > div > * {
+  grid-column: 1;
+  grid-row: 1;
+}
 .backdrop {
   position: fixed;
   inset: 0;

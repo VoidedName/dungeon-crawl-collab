@@ -25,15 +25,15 @@ const slotProps = useSlotProps(modal);
 
 <style scoped lang="postcss">
 .modal-header {
-  padding: var(--space-4) var(--space-2);
+  padding-block: var(--space-4);
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
+}
 
-  & > h2 {
-    font-size: var(--text-size-5);
-  }
+.modal-header > h2 {
+  font-size: var(--text-size-5);
 }
 </style>

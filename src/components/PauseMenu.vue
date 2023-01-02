@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { Modal, ModalContent, ModalHeader } from './ui/Modal';
+import { useEcsApi } from '@/composables/useEcsApi';
+import { Modal, ModalContent } from './ui/Modal';
 
 const isOpened = ref(false);
-
 useEventListener('keyup', e => {
-  if (e.code === 'Escape' && !isOpened.value) isOpened.value = true;
+  if (e.code === 'Escape') isOpened.value = !isOpened.value;
 });
+
+const ecsApi = useEcsApi();
+console.log(ecsApi.value);
 </script>
 
 <template>
-  <Modal v-model:is-opened="isOpened">
-    <ModalContent>
-      <button>Hello</button>
-    </ModalContent>
+  <Modal v-model:is-opened="isOpened" title="Game Menu" :closable="false">
+    <ModalContent>This is the pause menu</ModalContent>
   </Modal>
 </template>
+
 <style scoped></style>
