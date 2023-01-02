@@ -34,7 +34,7 @@ export const RenderSystem: (
     const triggerMovementAnimation = (
       e: typeof entities[number] & Animatable
     ) => {
-      const isMoving = e.velocity.x !== 0 || e.velocity.y !== 0;
+      const isMoving = (e.velocity.x ?? 0) !== 0 || (e.velocity.y ?? 0) !== 0;
 
       const newState = isMoving ? AnimationState.RUNNING : AnimationState.IDLE;
       const currentState = getAnimationState(e.renderable.sprite);

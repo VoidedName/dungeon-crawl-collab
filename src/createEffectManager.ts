@@ -12,7 +12,7 @@ export function createEffectManager(app: Application) {
       app.stage.addChild(overlay);
 
       const interval = setInterval(() => {
-        overlay.alpha += 0.05;
+        overlay.alpha += 0.025;
         if (overlay.alpha >= 1) {
           clearInterval(interval);
           overlay.destroy();
