@@ -20,6 +20,8 @@ export type Directions = {
   right: boolean;
 };
 
+export type Direction = keyof Directions;
+
 export const keyboardMovementHandler = (
   directions: Directions,
   world: ECSWorld
