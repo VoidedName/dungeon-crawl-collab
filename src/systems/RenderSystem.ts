@@ -1,5 +1,5 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Application, DisplayObject } from 'pixi.js';
+import type { Application, DisplayObject, Point } from 'pixi.js';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import {
   type Renderable,
@@ -20,6 +20,7 @@ import {
   hasAnimatable,
   type Animatable
 } from '@/entity/components/Animatable';
+import { hasPlayer } from '@/entity/components/MovementIntent';
 
 export const RenderSystem: (
   resolveSprite: (sprite: RenderableId) => DisplayObject,
@@ -53,20 +54,26 @@ export const RenderSystem: (
         app.stage.addChild(sprite);
       }
 
-      const angle = (e.orientation.angle + 90) % 360;
-      const hasChangedDirection = angle % 180 !== 0;
+      sprite.position.set(e.position.x, e.position.y);
 
-      if (
-        hasChangedDirection &&
-        getAnimationState(e.renderable.sprite) !== AnimationState.ATTACKING // temporary code
-      ) {
-        sprite.scale.x = angle > 180 ? -1 : 1;
-      }
-
+      // temporary - scheduling animation should be tied to an entity state machine
       if (hasAnimatable(e)) {
         triggerMovementAnimation(e);
       }
-      sprite.position.set(e.position.x, e.position.y);
+
+      if (hasPlayer(e)) {
+        const shouldSetOrientation =
+          getAnimationState(e.renderable.sprite) !== AnimationState.ATTACKING;
+
+        // not sure why it's marked at private, this information is pretty useful
+        // this might be a pixi 7 oversight, as they replaced InteractionManager with EventSystem
+        // anywho, this gives us mouse position relative to the app stage
+        const mousePosition = (app.renderer.events as any).rootPointerEvent
+          .global as Point;
+
+        const scaleX = mousePosition.x < e.position.x ? -1 : 1;
+        sprite.scale.set(scaleX, 1);
+      }
     });
   }
 });

@@ -11,14 +11,14 @@ import type { Position } from '@/entity/components/Position';
 import type { Size } from '@/entity/components/Size';
 
 export const HitBoxId = {
-  BODY: 'body'
+  BODY_COLLISION: 'body'
 };
 
-export type HitBoxId = Values<typeof HitBoxId>;
+export type HitboxId = Values<typeof HitBoxId>;
 
 export type GetHitboxOptions = {
   entity: Readonly<Renderable & Animatable & Position & Size>;
-  hitboxId: HitBoxId;
+  hitboxId: HitboxId;
   animationState: AnimationState;
 };
 

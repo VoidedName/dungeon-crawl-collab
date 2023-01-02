@@ -6,3 +6,6 @@ export const dist = (p1: Point, p2: Point) => {
 
   return Math.sqrt(diffX ** 2 + diffY ** 2);
 };
+
+export const clamp = (num: number, min: number, max: number) =>
+  Math.min(Math.max(num, min), max);

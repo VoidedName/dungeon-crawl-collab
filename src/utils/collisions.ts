@@ -1,6 +1,5 @@
-import type { Direction } from '@/eventHandlers/keyboardMovement';
 import { dist } from './math';
-import type { Circle, Nullable, Point, Rectangle } from './types';
+import type { Circle, Point, Rectangle } from './types';
 
 export const pointRectCollision = (point: Point, rect: Rectangle) =>
   point.x >= rect.x &&
@@ -44,12 +43,15 @@ export const rectRectCollision = (rect1: Rectangle, rect2: Rectangle) =>
 export const directionAwareRectRectCollision = (
   rect1: Rectangle,
   rect2: Rectangle
-): Nullable<Direction> => {
-  if (rect1.x < rect2.x + rect2.w) return 'right';
-  if (rect1.x + rect1.w > rect2.x) return 'left';
+): { up: number; down: number; left: number; right: number } => {
+  if (!rectRectCollision(rect1, rect2)) {
+    return { left: 0, right: 0, up: 0, down: 0 };
+  }
 
-  if (rect1.y < rect2.y + rect2.h) return 'down';
-  if (rect1.h + rect1.y > rect2.y) return 'up';
-
-  return null;
+  return {
+    left: rect2.x < rect1.x ? 0 : rect1.w - (rect2.x - rect1.x),
+    right: rect1.x < rect2.x ? 0 : rect2.w - (rect1.x - rect2.x),
+    up: rect2.y < rect1.y ? 0 : rect1.h - (rect2.y - rect1.y),
+    down: rect1.y < rect2.y ? 0 : rect2.h - (rect1.y - rect2.y)
+  };
 };

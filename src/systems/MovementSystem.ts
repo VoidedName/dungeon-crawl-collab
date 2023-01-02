@@ -1,5 +1,6 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { ECSWorld } from '@/ecs/ECSWorld';
+import { hasAnimatable } from '@/entity/components/Animatable';
 import type { Collidable } from '@/entity/components/Collidable';
 import {
   MovementIntentBrand,
@@ -10,10 +11,21 @@ import {
   type Orientation
 } from '@/entity/components/Orientation';
 import { PositionBrand, type Position } from '@/entity/components/Position';
+import { hasRenderable } from '@/entity/components/Renderable';
 import { SizeBrand, type Size } from '@/entity/components/Size';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import type { Directions } from '@/eventHandlers/keyboardMovement';
+import { getAnimationState } from '@/renderer/AnimationManager';
+import {
+  entityToRect,
+  getSpriteHitbox,
+  HitBoxId
+} from '@/renderer/spriteHitbox';
+import {
+  directionAwareRectRectCollision,
+  rectRectCollision
+} from '@/utils/collisions';
 import type { Point, Rectangle } from '@/utils/types';
 import { addVector, mulVector, subVector, toAngle } from '@/utils/vectors';
 
@@ -66,21 +78,48 @@ export const MovementSystem: () => ECSSystem<
     SizeBrand
   ],
   run: (world, props, entities) => {
+    const collidables = world.entitiesByComponent<[Collidable]>(['collidable']);
+
     entities.forEach(e => {
-      const collidables = world.entitiesByComponent<[Collidable]>([
-        'collidable'
-      ]);
+      const getHitbox = () =>
+        hasRenderable(e) && hasAnimatable(e)
+          ? getSpriteHitbox({
+              entity: e,
+              hitboxId: HitBoxId.BODY_COLLISION,
+              animationState: getAnimationState(e.renderable.sprite)!
+            })
+          : entityToRect(e);
+
+      // snap back position to closest safe spot, to avoid getting stuck in a wall
+      // this involves getting the potential overlaps with a collidable, in all 4 directions
+      // then applying the minimal corrections possible to fix potential issues
+      // there are a few cases this doesnt covers for now
+      // - correcting in both the horizontal and vertical axis: potentially we could get stuck in a corner ? I guess fixing one direction should be enough
+      // - having a large sprite going completely through a collidable: the directionAware collision check does not cover it because skill issue on my part è_é
+      for (const collidable of collidables) {
+        const { left, right, up, down } = directionAwareRectRectCollision(
+          getHitbox(),
+          collidable.collidable.hitbox
+        );
+        const horizontalCorrection = left > right ? -left : right;
+        const verticalCorrection = up > down ? -up : down;
+        if (horizontalCorrection === 0 && verticalCorrection === 0) continue;
+
+        if (Math.abs(horizontalCorrection) < Math.abs(verticalCorrection)) {
+          console.log('snap back horizontal', horizontalCorrection);
+          e.position.x += horizontalCorrection;
+        } else {
+          console.log('snap back vertical', horizontalCorrection);
+          e.position.y += verticalCorrection;
+        }
+      }
+
       const prevVelocity = e.velocity;
       e.velocity = computeVelocity(e.movement_intent, e.stats.current.speed);
       e.position = addVector(e.position, { x: e.velocity.x, y: 0 });
+
       for (const collidable of collidables) {
-        if (
-          isColliding(collidable.collidable.hitbox, {
-            x: e.position.x - e.size.w / 2,
-            y: e.position.y - e.size.h / 2,
-            ...e.size
-          })
-        ) {
+        if (rectRectCollision(collidable.collidable.hitbox, getHitbox())) {
           e.position = subVector(e.position, { x: e.velocity.x, y: 0 });
           break;
         }
@@ -88,20 +127,10 @@ export const MovementSystem: () => ECSSystem<
 
       e.position = addVector(e.position, { x: 0, y: e.velocity.y });
       for (const collidable of collidables) {
-        if (
-          isColliding(collidable.collidable.hitbox, {
-            x: e.position.x - e.size.w / 2,
-            y: e.position.y - e.size.h / 2,
-            ...e.size
-          })
-        ) {
+        if (rectRectCollision(collidable.collidable.hitbox, getHitbox())) {
           e.position = subVector(e.position, { x: 0, y: e.velocity.y });
           break;
         }
-      }
-
-      if (prevVelocity.x !== e.velocity.x) {
-        e.orientation.angle = toAngle(e.velocity);
       }
     });
   }
