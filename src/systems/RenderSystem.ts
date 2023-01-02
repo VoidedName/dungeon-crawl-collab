@@ -29,7 +29,7 @@ export const RenderSystem: (
   app
 ) => ({
   target: [PositionBrand, RenderableBrand, OrientationBrand, VelocityBrand],
-  run: entities => {
+  run: (ecs, props, entities) => {
     const triggerMovementAnimation = (
       e: typeof entities[number] & Animatable
     ) => {

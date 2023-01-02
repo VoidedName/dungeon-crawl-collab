@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap, type TMap } from './MapManager';
+import { loadMap, maps, TILE_SIZE, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -20,6 +20,7 @@ import {
 } from './eventHandlers/keyboardMovement';
 import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
+import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 
 export type GameLoop = { cleanup: () => void };
 
@@ -83,22 +84,23 @@ export async function createGameLoop(app: Application) {
     level: 0
   } as TMap);
 
-  world.addSystem('movement', MovementSystem(world));
-  world.addSystem('render', RenderSystem(resolveSprite, app));
-  world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('interactions', InteractionSystem(resolveSprite, app, world));
+  world.set(DebugFlags.map, true);
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
 
-  function tick() {
-    console.log('tick');
+  world.addSystem('movement', MovementSystem());
+  world.addSystem('render', RenderSystem(resolveSprite, app));
+  world.addSystem('debug_renderer', DebugRenderer(app));
+  world.addSystem('camera', CameraSystem(resolveSprite, app));
+  world.addSystem('interactions', InteractionSystem(resolveSprite, app));
+
+  function tick(delta: number) {
     queue.process();
-    world.runSystems();
+    world.runSystems({ delta });
   }
 
   app.ticker.add(tick);
-  app.ticker.maxFPS = 1;
 
   return {
     cleanup() {

@@ -14,7 +14,7 @@ export const CameraSystem: (
   app: Application
 ) => ECSSystem<[Player, Position, Renderable]> = (resolveSprite, app) => ({
   target: [PlayerBrand, PositionBrand, RenderableBrand],
-  run: entities => {
+  run: (ecs, props, entities) => {
     const player = entities[0];
     if (!app || !player) return;
 
