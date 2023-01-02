@@ -1,30 +1,30 @@
 <script setup lang="ts">
-import { createGameLoop, type GameLoop } from '@/createGameLoop';
-import {
-  createGameRenderer,
-  type GameRenderer
-} from '@/renderer/createGameRenderer.js';
+import { useEcsApiProvider } from '@/composables/useEcsApi';
+import { createGameLoop, type ECSApi } from '@/createGameLoop';
+import { createGameRenderer } from '@/renderer/createGameRenderer.js';
+import PauseMenu from './PauseMenu.vue';
 
 const canvasEl = ref<HTMLCanvasElement>();
-let renderer: GameRenderer;
-let loop: GameLoop;
+const ecsApi = useEcsApiProvider();
 
 onMounted(async () => {
   if (!canvasEl.value) return;
-  renderer = await createGameRenderer({
-    canvas: canvasEl.value
-  });
-  loop = await createGameLoop(renderer.app);
+
+  ecsApi.value = createGameLoop(
+    await createGameRenderer({
+      canvas: canvasEl.value
+    })
+  );
 });
 
 onUnmounted(() => {
-  renderer?.cleanup();
-  loop?.cleanup();
+  ecsApi.value?.cleanup();
 });
 </script>
 
 <template>
   <div class="game-renderer">
+    <PauseMenu />
     <canvas ref="canvasEl" />
   </div>
 </template>

@@ -21,8 +21,7 @@ import {
 import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
-
-export type GameLoop = { cleanup: () => void };
+import type { GameRenderer } from './renderer/createGameRenderer';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -54,6 +53,14 @@ type QueueEvent =
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
+export type ECSApi = {
+  cleanup: () => void;
+  getEntities: ECSWorld['entitiesByComponent'];
+  getGlobal: ECSWorld['get'];
+  dispatch: GameLoopQueue['dispatch'];
+  on: () => void; // to be defined
+};
+
 const eventQueueReducer =
   (world: ECSWorld) =>
   ({ type, payload }: QueueEvent) => {
@@ -72,14 +79,7 @@ const eventQueueReducer =
     }
   };
 
-export async function createGameLoop(app: Application) {
-  const world = createWorld();
-  const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
-  app.stage.on('pointerdown', e => {
-    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
-  });
-  const controls = createControls(queue);
-
+const setup = async (app: Application, world: ECSWorld) => {
   world.set('map', {
     level: 0
   } as TMap);
@@ -88,23 +88,46 @@ export async function createGameLoop(app: Application) {
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
+};
+
+export function createGameLoop(renderer: GameRenderer): ECSApi {
+  const world = createWorld();
+  const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
+  const controls = createControls(queue);
+
+  // @FIXME temporaty code to test out the attack animation, where should this live ?
+  renderer.app.stage.on('pointerdown', e => {
+    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
+  });
+
+  setup(renderer.app, world);
 
   world.addSystem('movement', MovementSystem());
-  world.addSystem('render', RenderSystem(resolveSprite, app));
-  world.addSystem('debug_renderer', DebugRenderer(app));
-  world.addSystem('camera', CameraSystem(resolveSprite, app));
-  world.addSystem('interactions', InteractionSystem(resolveSprite, app));
+  world.addSystem('render', RenderSystem(resolveSprite, renderer.app));
+  world.addSystem('debug_renderer', DebugRenderer(renderer.app));
+  world.addSystem('camera', CameraSystem(resolveSprite, renderer.app));
+  world.addSystem(
+    'interactions',
+    InteractionSystem(resolveSprite, renderer.app)
+  );
 
   function tick(delta: number) {
     queue.process();
     world.runSystems({ delta });
   }
 
-  app.ticker.add(tick);
+  renderer.app.ticker.add(tick);
 
   return {
     cleanup() {
+      renderer.cleanup();
       controls.cleanup();
+    },
+    getEntities: world.entitiesByComponent,
+    getGlobal: world.get,
+    dispatch: queue.dispatch,
+    on: () => {
+      console.log('ecsApi.on not implemented yet');
     }
   };
 }
