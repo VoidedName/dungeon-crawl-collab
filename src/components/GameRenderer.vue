@@ -7,13 +7,16 @@ import PauseMenu from './PauseMenu.vue';
 const canvasEl = ref<HTMLCanvasElement>();
 const ecsApi = useEcsApiProvider();
 
+const router = useRouter();
+
 onMounted(async () => {
   if (!canvasEl.value) return;
 
   ecsApi.value = createGameLoop(
     await createGameRenderer({
       canvas: canvasEl.value
-    })
+    }),
+    path => router.push(path)
   );
 });
 

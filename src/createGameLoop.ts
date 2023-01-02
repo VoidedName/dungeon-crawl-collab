@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap, maps, TILE_SIZE, type TMap } from './MapManager';
+import { loadMap, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -13,6 +13,7 @@ import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
+import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
 
 import {
   type Directions,
@@ -22,12 +23,15 @@ import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
+import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
   KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
   PLAYER_ATTACK: 'PLAYER_ATTACK',
-  PLAYER_INTERACT: 'PLAYER_INTERACT'
+  PLAYER_INTERACT: 'PLAYER_INTERACT',
+  PLAYER_DAMAGED: 'PLAYER_DAMAGED',
+  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -46,10 +50,22 @@ type PlayerInteractEvent = {
   payload: any;
 };
 
+type PlayerDamagedEvent = {
+  type: typeof EventNames.PLAYER_DAMAGED;
+  payload: number;
+};
+
+type ToggleDebugOverlayEvent = {
+  type: typeof EventNames.TOGGLE_DEBUG_OVERLAY;
+  payload: any;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
-  | PlayerInteractEvent;
+  | PlayerInteractEvent
+  | PlayerDamagedEvent
+  | ToggleDebugOverlayEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -62,7 +78,7 @@ export type ECSApi = {
 };
 
 const eventQueueReducer =
-  (world: ECSWorld) =>
+  (world: ECSWorld, navigateTo: (path: string) => void) =>
   ({ type, payload }: QueueEvent) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
@@ -74,6 +90,12 @@ const eventQueueReducer =
       case EventNames.PLAYER_INTERACT:
         return playerInteractHandler(payload, world);
 
+      case EventNames.PLAYER_DAMAGED:
+        return playerDamagedHandler(payload, world, resolveSprite, navigateTo);
+
+      case EventNames.TOGGLE_DEBUG_OVERLAY:
+        return debugOverlayHandler(world);
+
       default:
         isNever(type);
     }
@@ -84,15 +106,20 @@ const setup = async (app: Application, world: ECSWorld) => {
     level: 0
   } as TMap);
 
-  world.set(DebugFlags.map, true);
+  world.set(DebugFlags.map, false);
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
 };
 
-export function createGameLoop(renderer: GameRenderer): ECSApi {
+export function createGameLoop(
+  renderer: GameRenderer,
+  navigateTo: (path: string) => void
+): ECSApi {
   const world = createWorld();
-  const queue = createEventQueue<QueueEvent>(eventQueueReducer(world));
+  const queue = createEventQueue<QueueEvent>(
+    eventQueueReducer(world, navigateTo)
+  );
   const controls = createControls(queue);
 
   // @FIXME temporaty code to test out the attack animation, where should this live ?
