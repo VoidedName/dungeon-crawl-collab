@@ -1,6 +1,6 @@
 import { useKeydownOnce } from './composables/useKeydownOnce';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
-import { mulVector } from './utils/vectors';
+import { mulVector, subVector } from './utils/vectors';
 
 export const Controls = [
   'up',
@@ -95,28 +95,20 @@ export const createControls = (
   };
 
   const onMousemove = (e: MouseEvent) => {
-    const offsetThreshold = 100;
-    const scaleFactor = 1.5;
+    const scaleFactor = -0.1;
     const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const mouse = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+    const center = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    };
 
-    const offset = { x: 0, y: 0 };
-    if (mouseX < offsetThreshold) {
-      offset.x = offsetThreshold - mouseX;
-    }
-    if (rect.width - mouseX < offsetThreshold) {
-      offset.x = -(offsetThreshold - (rect.width - mouseX));
-    }
-    if (mouseY < offsetThreshold) {
-      offset.y = offsetThreshold - mouseY;
-    }
-    if (rect.height - mouseY < offsetThreshold) {
-      offset.y = -(offsetThreshold - (rect.height - mouseY));
-    }
     queue.dispatch({
       type: EventNames.SET_CAMERA_OFFSET,
-      payload: mulVector(offset, scaleFactor)
+      payload: mulVector(subVector(mouse, center), scaleFactor)
     });
   };
   const onKeyDown = keyboardHandler(true);
