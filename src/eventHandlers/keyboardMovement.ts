@@ -1,8 +1,7 @@
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import {
   AnimatableBrand,
-  type Animatable,
-  AnimationState
+  type Animatable
 } from '@/entity/components/Animatable';
 import {
   MovementIntentBrand,

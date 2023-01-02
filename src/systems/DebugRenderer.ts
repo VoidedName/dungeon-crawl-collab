@@ -1,8 +1,6 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import { maps, TILE_SIZE, type TMap } from '@/MapManager';
 import { Application, Container, Graphics, Text } from 'pixi.js';
-import type { ECSWorld } from '@/ecs/ECSWorld';
-import * as console from 'console';
 
 export const DebugFlags = {
   map: 'debug:map' as const
@@ -20,7 +18,12 @@ export const DebugRenderer: (app: Application) => ECSSystem<[]> = app => {
       const debugging = world
         .get<boolean>(DebugFlags.map)
         .getOrElse(() => false);
-      if (!debugging) return;
+
+      debugContainer.visible = debugging;
+
+      if (!debugging) {
+        return;
+      }
 
       world.get<TMap>('map').match(
         map => {
