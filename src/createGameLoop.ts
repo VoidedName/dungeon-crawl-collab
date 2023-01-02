@@ -127,7 +127,6 @@ const setup = async (app: Application, world: ECSWorld) => {
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
 
-  await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
 };
 
