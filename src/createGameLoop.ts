@@ -115,17 +115,25 @@ const eventQueueReducer =
     }
   };
 
-const setup = async (app: Application, world: ECSWorld) => {
+const setup = async (
+  app: Application,
+  world: ECSWorld,
+  queue: GameLoopQueue
+) => {
   world.set('map', {
     level: 0
   } as TMap);
 
   world.set(DebugFlags.map, false);
+  world.set('audio', createAudioManager());
+  world.set('effects', createEffectManager(app));
+
+  app.stage.on('pointerdown', e => {
+    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: { x: 0, y: 0 } });
+  });
 
   const player = await createPlayer(world, { spriteName: 'wizard' });
   createCamera(world, player.entity_id);
-  world.set('audio', createAudioManager());
-  world.set('effects', createEffectManager(app));
 
   await loadMap(0, true, app, world);
 };
@@ -143,7 +151,7 @@ export function createGameLoop(
     queue
   );
 
-  setup(renderer.app, world);
+  setup(renderer.app, world, queue);
 
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveSprite, renderer.app));
