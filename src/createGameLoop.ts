@@ -7,6 +7,7 @@ import { loadMap, type TMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
+import { createTrap } from './createTrap';
 import { createControls } from './createControls';
 
 import { MovementSystem } from '@/systems/MovementSystem';
@@ -115,6 +116,7 @@ const setup = async (app: Application, world: ECSWorld) => {
 
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
+  await createTrap(world, { spriteName: 'trap' });
 };
 
 export function createGameLoop(
