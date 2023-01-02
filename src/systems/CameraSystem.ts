@@ -1,27 +1,44 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import { PlayerBrand, type Player } from '@/entity/components/Player';
-import { PositionBrand, type Position } from '@/entity/components/Position';
+import { CameraBrand, type Camera } from '@/entity/components/Camera';
 import {
-  RenderableBrand,
-  type Renderable
-} from '@/entity/components/Renderable';
+  PositionBrand,
+  type Position,
+  hasPosition
+} from '@/entity/components/Position';
 import { SCALE } from '@/renderer/createGameRenderer';
 import type { RenderableId } from '@/renderer/renderableCache';
+import { addVector } from '@/utils/vectors';
 import type { Application, DisplayObject } from 'pixi.js';
+import { isDefined } from '@/utils/assertions';
 
 export const CameraSystem: (
   resolveSprite: (sprite: RenderableId) => DisplayObject,
   app: Application
-) => ECSSystem<[Player, Position, Renderable]> = (resolveSprite, app) => ({
-  target: [PlayerBrand, PositionBrand, RenderableBrand],
+) => ECSSystem<[Camera, Position]> = (resolveSprite, app) => ({
+  target: [CameraBrand, PositionBrand],
   run: (ecs, props, entities) => {
-    const player = entities[0];
-    if (!app || !player) return;
+    const [e] = entities;
+    if (!e) return;
 
-    const { x: playerX, y: playerY } = player.position;
-    const cx = playerX * -1 * SCALE + app.screen.width / 2;
+    const applyFollow = () => {
+      if (!isDefined(e.camera.following)) return;
 
-    const cy = playerY * -1 * SCALE + app.screen.height / 2;
-    app.stage.position.set(cx, cy);
+      const maybeEntity = ecs.getEntity(e.camera.following);
+
+      if (!maybeEntity.isSome()) return;
+      const player = maybeEntity.get();
+
+      if (!hasPosition(player)) return;
+
+      const { x: playerX, y: playerY } = player.position;
+      e.position.x = playerX * -1 * SCALE + app.screen.width / 2;
+      e.position.y = playerY * -1 * SCALE + app.screen.height / 2;
+    };
+
+    applyFollow();
+
+    const withOffset = addVector(e.position, e.camera.offset);
+
+    app.stage.position.set(withOffset.x, withOffset.y);
   }
 });

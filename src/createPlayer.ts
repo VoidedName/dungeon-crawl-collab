@@ -14,6 +14,7 @@ import { withOrientation } from './entity/components/Orientation';
 import { withInteractIntent } from './entity/components/InteractIntent';
 import { positionComponent } from '@/entity/components/Position';
 import { withSize } from './entity/components/Size';
+import { scheduleAnimation } from './renderer/AnimationManager';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -30,7 +31,12 @@ export const createPlayer = async (
   sprite.zIndex = 1;
   await register(id, sprite);
 
-  world
+  scheduleAnimation(id, {
+    state: AnimationState.IDLE,
+    spriteName: options.spriteName
+  });
+
+  return world
     .createEntity()
     .with(playerComponent)
     .with(positionComponent({ x: 200, y: 100 }))

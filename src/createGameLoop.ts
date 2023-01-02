@@ -24,6 +24,8 @@ import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
 import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
+import { createCamera } from './createCamera';
+import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
 import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
 
@@ -33,7 +35,8 @@ export const EventNames = {
   PLAYER_ATTACK: 'PLAYER_ATTACK',
   PLAYER_INTERACT: 'PLAYER_INTERACT',
   PLAYER_DAMAGED: 'PLAYER_DAMAGED',
-  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY'
+  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
+  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -62,12 +65,18 @@ type ToggleDebugOverlayEvent = {
   payload: any;
 };
 
+type SetCameraOffsetEvent = {
+  type: typeof EventNames.SET_CAMERA_OFFSET;
+  payload: Point;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
   | PlayerInteractEvent
   | PlayerDamagedEvent
-  | ToggleDebugOverlayEvent;
+  | ToggleDebugOverlayEvent
+  | SetCameraOffsetEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -98,22 +107,34 @@ const eventQueueReducer =
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);
 
+      case EventNames.SET_CAMERA_OFFSET:
+        return setCameraOffsetHandler(payload, world);
+
       default:
         isNever(type);
     }
   };
 
-const setup = async (app: Application, world: ECSWorld) => {
+const setup = async (
+  app: Application,
+  world: ECSWorld,
+  queue: GameLoopQueue
+) => {
   world.set('map', {
     level: 0
   } as TMap);
 
   world.set(DebugFlags.map, false);
-
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
 
-  await createPlayer(world, { spriteName: 'wizard' });
+  app.stage.on('pointerdown', e => {
+    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: { x: 0, y: 0 } });
+  });
+
+  const player = await createPlayer(world, { spriteName: 'wizard' });
+  createCamera(world, player.entity_id);
+
   await loadMap(0, true, app, world);
 };
 
@@ -125,14 +146,12 @@ export function createGameLoop(
   const queue = createEventQueue<QueueEvent>(
     eventQueueReducer(world, navigateTo)
   );
-  const controls = createControls(queue);
+  const controls = createControls(
+    renderer.app.view as HTMLCanvasElement,
+    queue
+  );
 
-  // @FIXME temporaty code to test out the attack animation, where should this live ?
-  renderer.app.stage.on('pointerdown', e => {
-    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: e.global });
-  });
-
-  setup(renderer.app, world);
+  setup(renderer.app, world, queue);
 
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveSprite, renderer.app));

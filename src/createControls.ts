@@ -1,5 +1,6 @@
 import { useKeydownOnce } from './composables/useKeydownOnce';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
+import { mulVector, subVector } from './utils/vectors';
 
 export const Controls = [
   'up',
@@ -57,11 +58,14 @@ export function getControls() {
   return controls;
 }
 
-export const createControls = (queue: GameLoopQueue) => {
-  const handler = (isKeyDown: boolean) => (e: KeyboardEvent) => {
+export const createControls = (
+  canvas: HTMLCanvasElement,
+  queue: GameLoopQueue
+) => {
+  const keyboardHandler = (isOn: boolean) => (e: KeyboardEvent) => {
     const control = configuration[e.code];
     if (!control) return;
-    setControl(control, isKeyDown);
+    setControl(control, isOn);
 
     if (isMovementControl(control)) {
       queue.dispatch({
@@ -72,17 +76,17 @@ export const createControls = (queue: GameLoopQueue) => {
     if (isUseControl(control)) {
       queue.dispatch({
         type: EventNames.PLAYER_INTERACT,
-        payload: isKeyDown
+        payload: isOn
       });
     }
-    if (isSeppukuControl(control) && isKeyDown) {
+    if (isSeppukuControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.PLAYER_DAMAGED,
         payload: 1
       });
     }
 
-    if (isDebugControl(control) && isKeyDown) {
+    if (isDebugControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.TOGGLE_DEBUG_OVERLAY,
         payload: undefined
@@ -90,16 +94,35 @@ export const createControls = (queue: GameLoopQueue) => {
     }
   };
 
-  const onKeyDown = handler(true);
-  const onKeyUp = handler(false);
+  const onMousemove = (e: MouseEvent) => {
+    const scaleFactor = -0.1;
+    const rect = canvas.getBoundingClientRect();
+    const mouse = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+    const center = {
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2
+    };
+
+    queue.dispatch({
+      type: EventNames.SET_CAMERA_OFFSET,
+      payload: mulVector(subVector(mouse, center), scaleFactor)
+    });
+  };
+  const onKeyDown = keyboardHandler(true);
+  const onKeyUp = keyboardHandler(false);
 
   useKeydownOnce(onKeyDown, window);
   window.addEventListener('keyup', onKeyUp);
+  canvas.addEventListener('mousemove', onMousemove);
 
   return {
     cleanup: () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      canvas.removeEventListener('mousemove', onMousemove);
     }
   };
 };
