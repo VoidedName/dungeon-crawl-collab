@@ -46,3 +46,13 @@ export const toAngle = (vec: Point): AngleInDegrees => {
 
   return (360 + Math.round(degrees)) % 360;
 };
+
+export const normalizeVector = ({ x, y }: Point) => {
+  const len = Math.hypot(x, y);
+  if (len === 0)
+    return {
+      x: 0,
+      y: 0
+    };
+  return { x: x / len, y: y / len };
+};

@@ -273,7 +273,7 @@
     ],
     "slices": [
       {
-        "name": "hitbox",
+        "name": "body",
         "color": "#0000ffff",
         "keys": [
           { "frame": 0, "bounds": { "x": 7, "y": 7, "w": 47, "h": 53 } },

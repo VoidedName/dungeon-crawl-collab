@@ -91,19 +91,17 @@ export async function createGameLoop(app: Application) {
   await createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
 
-  let rafId: number;
-
   function tick() {
+    console.log('tick');
     queue.process();
     world.runSystems();
-    rafId = window.requestAnimationFrame(tick);
   }
 
-  rafId = window.requestAnimationFrame(tick);
+  app.ticker.add(tick);
+  app.ticker.maxFPS = 1;
 
   return {
     cleanup() {
-      window.cancelAnimationFrame(rafId);
       controls.cleanup();
     }
   };

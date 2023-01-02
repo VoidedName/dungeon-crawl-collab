@@ -1,5 +1,6 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { ECSWorld } from '@/ecs/ECSWorld';
+import { hasAnimatable } from '@/entity/components/Animatable';
 import type { Collidable } from '@/entity/components/Collidable';
 import {
   MovementIntentBrand,
@@ -10,22 +11,30 @@ import {
   type Orientation
 } from '@/entity/components/Orientation';
 import { PositionBrand, type Position } from '@/entity/components/Position';
+import { hasRenderable } from '@/entity/components/Renderable';
 import { SizeBrand, type Size } from '@/entity/components/Size';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
-import type { Directions } from '@/eventHandlers/keyboardMovement';
-import type { Point, Rectangle } from '@/utils/types';
-import { addVector, mulVector, subVector, toAngle } from '@/utils/vectors';
-
-function normalize({ x, y }: { x: number; y: number }) {
-  const len = Math.hypot(x, y);
-  if (len === 0)
-    return {
-      x: 0,
-      y: 0
-    };
-  return { x: x / len, y: y / len };
-}
+import type { Direction, Directions } from '@/eventHandlers/keyboardMovement';
+import { getAnimationState } from '@/renderer/AnimationManager';
+import {
+  HitBoxId,
+  entityToRect,
+  getSpriteHitbox
+} from '@/renderer/spriteHitbox';
+import {
+  rectRectCollision,
+  directionAwareRectRectCollision
+} from '@/utils/collisions';
+import type { Point } from '@/utils/types';
+import {
+  addVector,
+  mulVector,
+  normalizeVector,
+  subVector,
+  toAngle
+} from '@/utils/vectors';
+import { isNever } from '@/utils/assertions';
 
 export function computeVelocity(directions: Directions, speed: number): Point {
   let dx = 0;
@@ -42,16 +51,7 @@ export function computeVelocity(directions: Directions, speed: number): Point {
   if (directions.down) {
     dy += 1;
   }
-  return mulVector(normalize({ x: dx, y: dy }), speed);
-}
-
-function isColliding(rect1: Rectangle, rect2: Rectangle) {
-  return (
-    rect1.x < rect2.x + rect2.w &&
-    rect1.x + rect1.w > rect2.x &&
-    rect1.y < rect2.y + rect2.h &&
-    rect1.h + rect1.y > rect2.y
-  );
+  return mulVector(normalizeVector({ x: dx, y: dy }), speed);
 }
 
 export const MovementSystem: (
@@ -68,21 +68,55 @@ export const MovementSystem: (
     SizeBrand
   ],
   run: entities => {
+    const collidables = world.entitiesByComponent<[Collidable]>(['collidable']);
+
     entities.forEach(e => {
-      const collidables = world.entitiesByComponent<[Collidable]>([
-        'collidable'
-      ]);
+      const getHitbox = () =>
+        hasRenderable(e) && hasAnimatable(e)
+          ? getSpriteHitbox({
+              entity: e,
+              hitboxId: HitBoxId.BODY,
+              animationState: getAnimationState(e.renderable.sprite)!
+            })
+          : entityToRect(e);
+
+      const snapBack = (collidable: Collidable, direction: Direction) => {
+        switch (direction) {
+          case 'left':
+            e.position.x = collidable.collidable.hitbox.x - e.size.w;
+            return;
+          case 'right':
+            e.position.x =
+              collidable.collidable.hitbox.x + collidable.collidable.hitbox.w;
+            return;
+          case 'up':
+            e.position.y = collidable.collidable.hitbox.y - e.size.h;
+            return;
+          case 'down':
+            e.position.y =
+              collidable.collidable.hitbox.y + collidable.collidable.hitbox.h;
+            return;
+          default:
+            isNever(direction);
+        }
+      };
+      console.groupCollapsed();
+      for (const collidable of collidables) {
+        const collision = directionAwareRectRectCollision(
+          getHitbox(),
+          collidable.collidable.hitbox
+        );
+        console.log(collidable.entity_id, collision);
+        if (collision) snapBack(collidable, collision);
+      }
+
+      console.groupEnd();
       const prevVelocity = e.velocity;
       e.velocity = computeVelocity(e.movement_intent, e.stats.current.speed);
+
       e.position = addVector(e.position, { x: e.velocity.x, y: 0 });
       for (const collidable of collidables) {
-        if (
-          isColliding(collidable.collidable.hitbox, {
-            x: e.position.x - e.size.w / 2,
-            y: e.position.y - e.size.h / 2,
-            ...e.size
-          })
-        ) {
+        if (rectRectCollision(collidable.collidable.hitbox, getHitbox())) {
           e.position = subVector(e.position, { x: e.velocity.x, y: 0 });
           break;
         }
@@ -90,13 +124,7 @@ export const MovementSystem: (
 
       e.position = addVector(e.position, { x: 0, y: e.velocity.y });
       for (const collidable of collidables) {
-        if (
-          isColliding(collidable.collidable.hitbox, {
-            x: e.position.x - e.size.w / 2,
-            y: e.position.y - e.size.h / 2,
-            ...e.size
-          })
-        ) {
+        if (rectRectCollision(collidable.collidable.hitbox, getHitbox())) {
           e.position = subVector(e.position, { x: 0, y: e.velocity.y });
           break;
         }

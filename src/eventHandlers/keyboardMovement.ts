@@ -1,8 +1,7 @@
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import {
   AnimatableBrand,
-  type Animatable,
-  AnimationState
+  type Animatable
 } from '@/entity/components/Animatable';
 import {
   MovementIntentBrand,
@@ -20,6 +19,8 @@ export type Directions = {
   left: boolean;
   right: boolean;
 };
+
+export type Direction = keyof Directions;
 
 export const keyboardMovementHandler = (
   directions: Directions,
