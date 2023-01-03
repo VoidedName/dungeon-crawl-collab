@@ -26,7 +26,7 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   if (isAttacking) return;
   isAttacking = true;
 
-  scheduleAnimation(player.renderable.sprite, {
+  scheduleAnimation(player.entity_id, {
     state: AnimationState.ATTACKING,
     spriteName: player.animatable.spriteName,
     loop: false,

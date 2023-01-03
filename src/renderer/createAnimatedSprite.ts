@@ -6,7 +6,8 @@ import {
 } from '@/utils/aseprite';
 import type { AnimationState } from '@/entity/components/Animatable';
 import type { AnimatedSprite } from 'pixi.js';
-import { resolveSprite, type RenderableId } from './renderableCache';
+import { resolveSprite } from './renderableCache';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export type SpriteName = keyof typeof sprites;
 
@@ -14,7 +15,7 @@ const textureCache = new Map<string, Promise<PIXI.Texture>>();
 const spritesheetCache = new Map<PIXI.Texture, PIXI.Spritesheet>();
 
 export const updateTextures = async (
-  id: RenderableId,
+  id: ECSEntityId,
   spriteName: SpriteName,
   animation: AnimationState
 ) => {
@@ -40,7 +41,6 @@ export const getSpritesheet = async (id: SpriteName) => {
   }
 
   const texture = await textureCache.get(url)!;
-
   if (!spritesheetCache.has(texture)) {
     const spriteSheetData = parseAsperiteAnimationSheet(meta);
     const spritesheet = new PIXI.Spritesheet(texture, spriteSheetData);

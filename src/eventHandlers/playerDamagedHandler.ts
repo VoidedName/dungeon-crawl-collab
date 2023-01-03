@@ -1,4 +1,5 @@
 import type { TAudioManager } from '@/createAudioManager';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import { PlayerBrand, type Player } from '@/entity/components/Player';
 import {
@@ -6,7 +7,6 @@ import {
   type Renderable
 } from '@/entity/components/Renderable';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
-import type { RenderableId } from '@/renderer/renderableCache';
 import type { DisplayObject, Sprite } from 'pixi.js';
 
 const FLASH_DURATION = 150;
@@ -14,7 +14,7 @@ const FLASH_DURATION = 150;
 export const playerDamagedHandler = (
   damage: number,
   world: ECSWorld,
-  resolveSprite: (sprite: RenderableId) => DisplayObject,
+  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
   navigateTo: (path: string) => void
 ) => {
   const [player] = world.entitiesByComponent<[Player, Stats, Renderable]>([
@@ -33,7 +33,7 @@ export const playerDamagedHandler = (
     },
     () => console.warn('no audio manager set')
   );
-  const playerSprite = resolveSprite(player.renderable.sprite) as Sprite;
+  const playerSprite = resolveSprite(player.entity_id) as Sprite;
   playerSprite.tint = 0xff0000;
   setTimeout(() => {
     playerSprite.tint = 0xffffff;

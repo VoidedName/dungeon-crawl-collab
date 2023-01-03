@@ -6,15 +6,13 @@ import {
   hasPosition
 } from '@/entity/components/Position';
 import { SCALE } from '@/renderer/createGameRenderer';
-import type { RenderableId } from '@/renderer/renderableCache';
 import { addVector } from '@/utils/vectors';
-import type { Application, DisplayObject } from 'pixi.js';
+import type { Application } from 'pixi.js';
 import { isDefined } from '@/utils/assertions';
 
 export const CameraSystem: (
-  resolveSprite: (sprite: RenderableId) => DisplayObject,
   app: Application
-) => ECSSystem<[Camera, Position]> = (resolveSprite, app) => ({
+) => ECSSystem<[Camera, Position]> = app => ({
   target: [CameraBrand, PositionBrand],
   run: (ecs, props, entities) => {
     const [e] = entities;

@@ -1,9 +1,10 @@
 import type { AnimatedSprite } from 'pixi.js';
-import { resolveSprite, type RenderableId } from './renderableCache';
+import { resolveSprite } from './renderableCache';
 import { updateTextures, type SpriteName } from './createAnimatedSprite';
 import type { AnimationState } from '../entity/components/Animatable';
 import type { Nullable } from 'vitest';
 import { noop } from '@vueuse/core';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export type AnimationScheduler = {
   schedule: (
@@ -24,9 +25,9 @@ type AnimationRequiredOptions = {
 };
 type AnimationOptions = AnimationRequiredOptions & AnimationOptionals;
 
-const schedulersCache = new Map<RenderableId, AnimationScheduler>();
+const schedulersCache = new Map<ECSEntityId, AnimationScheduler>();
 
-const getScheduler = (id: RenderableId) => {
+const getScheduler = (id: ECSEntityId) => {
   if (!schedulersCache.has(id)) {
     schedulersCache.set(
       id,
@@ -38,9 +39,9 @@ const getScheduler = (id: RenderableId) => {
 };
 
 type CreateSchedulerOptions = {
-  resolveSprite: (id: RenderableId) => AnimatedSprite;
+  resolveSprite: (id: ECSEntityId) => AnimatedSprite;
   updateTextures: (
-    id: RenderableId,
+    id: ECSEntityId,
     spriteName: SpriteName,
     animation: AnimationState
   ) => Promise<void>;
@@ -54,7 +55,7 @@ const defaultOptions: AnimationOptionals = {
 };
 
 export const createScheduler = (
-  id: RenderableId,
+  id: ECSEntityId,
   { resolveSprite, updateTextures }: CreateSchedulerOptions
 ): AnimationScheduler => {
   const sprite = resolveSprite(id);
@@ -118,7 +119,7 @@ export const createScheduler = (
 };
 
 export const scheduleAnimation = (
-  id: RenderableId,
+  id: ECSEntityId,
   options: AnimationRequiredOptions & Partial<AnimationOptionals>
 ) => {
   const scheduler = getScheduler(id);
@@ -126,7 +127,7 @@ export const scheduleAnimation = (
   return scheduler.schedule(options);
 };
 
-export const getAnimationState = (id: RenderableId) => {
+export const getAnimationState = (id: ECSEntityId) => {
   const scheduler = getScheduler(id);
 
   return scheduler.getState();

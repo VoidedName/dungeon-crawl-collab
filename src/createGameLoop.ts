@@ -158,7 +158,7 @@ export function createGameLoop(
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveSprite, renderer.app));
   world.addSystem('debug_renderer', DebugRenderer(renderer.app));
-  world.addSystem('camera', CameraSystem(resolveSprite, renderer.app));
+  world.addSystem('camera', CameraSystem(renderer.app));
   world.addSystem(
     'interactions',
     InteractionSystem(resolveSprite, renderer.app)

@@ -4,7 +4,6 @@ import type { ECSWorld } from './ecs/ECSWorld';
 import { withInteractable } from './entity/components/Interactable';
 import type { Position } from './entity/components/Position';
 import { Text } from 'pixi.js';
-import { withRenderable } from './entity/components/Renderable';
 import { register } from './renderer/renderableCache';
 import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
@@ -12,6 +11,7 @@ import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
 import { withCollidable } from './entity/components/Collidable';
 import { createTileset } from './renderer/createTileset';
+import { renderableComponent } from './entity/components/Renderable';
 
 export type TMap = {
   level: number;
@@ -45,8 +45,6 @@ export const HALF_TILE = TILE_SIZE / 2;
 
 const STAIRS_DOWN_ID = 5;
 const STAIRS_UP_ID = 6;
-const STAIRS_DOWN_RENDERABLE_ID = 'StairsDown';
-const STAIRS_UP_RENDERABLE_ID = 'StairsUp';
 const STAIRS_INTERACT_RADIUS = TILE_SIZE * 1.25;
 const TILESET_ID = 'base';
 const TILESET_ROWS = 3;
@@ -107,7 +105,6 @@ export async function loadMap(
         text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
         text.position.set(0, -30);
         text.visible = false;
-        register(STAIRS_DOWN_RENDERABLE_ID, text);
 
         tileContainer.addChild(text);
 
@@ -120,7 +117,7 @@ export async function loadMap(
           });
         }
 
-        world
+        const entity = world
           .createEntity()
           .with(
             withInteractable(
@@ -137,8 +134,10 @@ export async function loadMap(
               y: globalPos.y + HALF_TILE
             })
           )
-          .with(withRenderable(STAIRS_DOWN_RENDERABLE_ID))
+          .with(renderableComponent)
           .build();
+
+        register(entity.entity_id, text);
       } else if (tileId === STAIRS_UP_ID) {
         const text = new Text('Ascend', {
           fontFamily: 'Arial',
@@ -150,7 +149,6 @@ export async function loadMap(
         text.visible = false;
         text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
         text.position.set(0, -30);
-        register(STAIRS_UP_RENDERABLE_ID, text);
 
         tileContainer.addChild(text);
 
@@ -163,7 +161,7 @@ export async function loadMap(
           });
         }
 
-        world
+        const entity = world
           .createEntity()
           .with(
             withInteractable(
@@ -180,8 +178,9 @@ export async function loadMap(
               y: globalPos.y + HALF_TILE
             })
           )
-          .with(withRenderable(STAIRS_UP_RENDERABLE_ID))
+          .with(renderableComponent)
           .build();
+        register(entity.entity_id, text);
       } else if (collidableTypes.includes(tileId)) {
         const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
 

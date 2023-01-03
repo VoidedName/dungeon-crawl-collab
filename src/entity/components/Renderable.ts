@@ -1,27 +1,7 @@
-import type { ECSComponent } from '@/ecs/ECSComponent';
-import type { ECSEntity } from '@/ecs/ECSEntity';
-import type { RenderableId } from '@/renderer/renderableCache';
+import { ecsComponent, has, type ECSComponent } from '@/ecs/ECSComponent';
 
 export const RenderableBrand = 'renderable';
 type RenderableBrand = typeof RenderableBrand;
-export type Renderable = ECSComponent<
-  RenderableBrand,
-  {
-    sprite: RenderableId;
-  }
->;
-
-export function hasRenderable<E extends ECSEntity>(e: E): e is E & Renderable {
-  return RenderableBrand in e;
-}
-
-export function renderableComponent(id: RenderableId): Renderable {
-  return {
-    [RenderableBrand]: {
-      sprite: id
-    }
-  };
-}
-
-export const withRenderable = (id: RenderableId) => () =>
-  renderableComponent(id);
+export type Renderable = ECSComponent<RenderableBrand>;
+export const renderableComponent = ecsComponent<Renderable>(RenderableBrand);
+export const hasPlayer = has<Renderable>(RenderableBrand);
