@@ -9,8 +9,7 @@ import { SCALE } from '@/renderer/createGameRenderer';
 import { addVector } from '@/utils/vectors';
 import type { Application } from 'pixi.js';
 import { isDefined } from '@/utils/assertions';
-
-const lerp = (a: number, b: number, w: number) => a + (b - a) * w;
+import { lerp } from '@/utils/math';
 
 export const CameraSystem: (
   app: Application
