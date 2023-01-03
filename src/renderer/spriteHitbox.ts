@@ -34,10 +34,10 @@ export const getSpriteHitbox = ({
   hitboxId,
   animationState
 }: GetHitboxOptions): Rectangle => {
-  const { meta } = sprites[entity.animatable.spriteName];
+  const { asepriteMeta } = sprites[entity.animatable.spriteName];
 
   const sprite = resolveSprite<AnimatedSprite>(entity.entity_id);
-  const animation = meta.meta.frameTags.find(
+  const animation = asepriteMeta.meta.frameTags.find(
     tag => tag.name === animationState
   );
 
@@ -46,7 +46,7 @@ export const getSpriteHitbox = ({
     return entityToRect(entity);
   }
 
-  const slice = meta.meta.slices.find(s => s.name === hitboxId);
+  const slice = asepriteMeta.meta.slices.find(s => s.name === hitboxId);
 
   if (!slice) {
     console.warn(`Could not get hitbox from slice ${hitboxId}`);

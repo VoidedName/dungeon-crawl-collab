@@ -1,8 +1,8 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { DisplayObject } from 'pixi.js';
+import { hasRenderable } from '@/entity/components/Renderable';
 import { DeleteBrand, type Delete } from '@/entity/components/Delete';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
-import { hasRenderable } from '@/entity/components/Renderable';
 
 export const DeleteSystem: (
   resolveSprite: (sprite: ECSEntityId) => DisplayObject

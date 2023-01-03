@@ -100,10 +100,8 @@ export const MovementSystem: () => ECSSystem<
         if (horizontalCorrection === 0 && verticalCorrection === 0) continue;
 
         if (Math.abs(horizontalCorrection) < Math.abs(verticalCorrection)) {
-          console.log('snap back horizontal', horizontalCorrection);
           e.position.x += horizontalCorrection;
         } else {
-          console.log('snap back vertical', horizontalCorrection);
           e.position.y += verticalCorrection;
         }
       }

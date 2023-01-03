@@ -10,7 +10,7 @@ import { none, some } from '@/utils/Maybe';
 /**
  * Mutably changes the entity by adding the component to it
  */
-function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+function addComponent<E extends ECSEntity, C extends ECSComponent<string>>(
   entity: E,
   component: () => C
 ): E & C {
@@ -29,7 +29,7 @@ function removeComponent<
 }
 
 export type ECSEntityBuilder<T extends ECSEntity> = {
-  with<C extends ECSComponent<any>>(
+  with<C extends ECSComponent<string>>(
     component: () => C
   ): ECSEntityBuilder<T & C>;
   build(): T;
@@ -40,7 +40,7 @@ function entityBuilder<T extends ECSEntity>(
   build = pipe<ECSEntity, T>((e: ECSEntity) => e as T)
 ): ECSEntityBuilder<T> {
   return {
-    with<C extends ECSComponent<any>>(
+    with<C extends ECSComponent<string>>(
       component: () => C
     ): ECSEntityBuilder<T & C> {
       return entityBuilder(
@@ -85,29 +85,29 @@ export interface ECSWorld {
   entities(): Iterable<ECSEntity>;
   getEntity<E extends ECSEntity>(id: ECSEntityId): Maybe<E>;
 
-  addComponent<C extends ECSComponent<any>>(
+  addComponent<C extends ECSComponent<string>>(
     e: ECSEntityId,
     component: () => C
   ): (ECSEntity & C) | undefined;
-  addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+  addComponent<E extends ECSEntity, C extends ECSComponent<string>>(
     e: E,
     component: () => C
   ): E & C;
 
-  removeComponent<C extends ECSComponent<any>>(
+  removeComponent<C extends ECSComponent<string>>(
     entity: ECSEntityId,
     component: C extends ECSComponent<infer S> ? S : never
   ): ECSEntity | undefined;
-  removeComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+  removeComponent<E extends ECSEntity, C extends ECSComponent<string>>(
     entity: E,
     component: C extends ECSComponent<infer S> ? S : never
   ): Omit<E, keyof C>;
 
-  entitiesByComponent<C extends ECSComponent<any>[]>(
+  entitiesByComponent<C extends ECSComponent<string>[]>(
     keys: BrandsFromComponents<C>
   ): Array<ECSEntity & Intersect<C>>;
 
-  addSystem<T extends ECSComponent<any>[]>(
+  addSystem<T extends ECSComponent<string>[]>(
     name: string,
     system: ECSSystem<T>
   ): void;
@@ -227,15 +227,15 @@ function internalAddComponent(
   ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['addComponent'] {
-  function addComponent<C extends ECSComponent<any>>(
+  function addComponent<C extends ECSComponent<string>>(
     e: ECSEntityId,
     component: () => C
   ): (ECSEntity & C) | undefined;
-  function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+  function addComponent<E extends ECSEntity, C extends ECSComponent<string>>(
     e: E,
     component: () => C
   ): E & C;
-  function addComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+  function addComponent<E extends ECSEntity, C extends ECSComponent<string>>(
     e: E | ECSEntityId,
     component: () => C
   ): (E & C) | ((ECSEntity & C) | undefined) {
@@ -269,11 +269,11 @@ function internalRemoveComponents(
   ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['removeComponent'] {
-  function removeComponent<C extends ECSComponent<any>>(
+  function removeComponent<C extends ECSComponent<string>>(
     entity: ECSEntityId,
     component: C extends ECSComponent<infer S> ? S : never
   ): ECSEntity | undefined;
-  function removeComponent<E extends ECSEntity, C extends ECSComponent<any>>(
+  function removeComponent<E extends ECSEntity, C extends ECSComponent<string>>(
     entity: E,
     component: C extends ECSComponent<infer S> ? S : never
   ): Omit<E, keyof C>;
@@ -309,7 +309,7 @@ function internalEntitiesByComponent(
   ecs: () => ECSWorld,
   internals: ECSInternals
 ): ECSWorld['entitiesByComponent'] {
-  function entitiesByComponent<C extends ECSComponent<any>[]>(
+  function entitiesByComponent<C extends ECSComponent<string>[]>(
     keys: BrandsFromComponents<C>
   ): (ECSEntity & Intersect<C>)[] {
     if (keys.length === 0) return [];
@@ -332,7 +332,7 @@ function internalAddSystem(
   internals: ECSInternals
 ): ECSWorld['addSystem'] {
   const entitiesByComponent = internalEntitiesByComponent(ecs, internals);
-  function addSystem<T extends ECSComponent<any>[]>(
+  function addSystem<T extends ECSComponent<string>[]>(
     name: string,
     system: ECSSystem<T>
   ) {

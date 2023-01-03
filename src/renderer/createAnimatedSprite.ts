@@ -1,20 +1,34 @@
-import { sprites } from '@/assets/sprites';
+import { sprites, texturesBundle } from '@/assets/sprites';
 import * as PIXI from 'pixi.js';
-import {
-  createSpritesheetFrameObject,
-  parseAsperiteAnimationSheet
-} from '@/utils/aseprite';
+import { createSpritesheetFrameObject } from '@/utils/aseprite';
 import type { AnimationState } from '@/entity/components/Animatable';
-import type { AnimatedSprite } from 'pixi.js';
+import { Assets, type AnimatedSprite, type Texture } from 'pixi.js';
 import { resolveSprite } from './renderableCache';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export type SpriteName = keyof typeof sprites;
 
-const textureCache = new Map<string, Promise<PIXI.Texture>>();
+type TexturesMap = Record<keyof typeof sprites, Texture>;
+let texturesMap: TexturesMap;
+
+export const loadSpriteTextures = async () => {
+  await Assets.addBundle('spriteTextures', texturesBundle);
+
+  texturesMap = await Assets.loadBundle('spriteTextures');
+  await Promise.all(
+    Object.entries(texturesMap).map(async ([spriteName, texture]) => {
+      const { meta } = sprites[spriteName as SpriteName];
+
+      const spritesheet = new PIXI.Spritesheet(texture, meta);
+      spritesheetCache.set(texture, spritesheet);
+      return spritesheet.parse();
+    })
+  );
+};
+
 const spritesheetCache = new Map<PIXI.Texture, PIXI.Spritesheet>();
 
-export const updateTextures = async (
+export const updateTextures = (
   id: ECSEntityId,
   spriteName: SpriteName,
   animation: AnimationState
@@ -22,47 +36,34 @@ export const updateTextures = async (
   const { meta } = sprites[spriteName];
 
   const sprite = resolveSprite<AnimatedSprite>(id);
-  const spriteSheetData = parseAsperiteAnimationSheet(meta);
 
   sprite.textures = createSpritesheetFrameObject(
     animation,
-    await getSpritesheet(spriteName),
-    spriteSheetData
+    getSpritesheet(spriteName),
+    meta
   );
 
   sprite.play();
 };
 
-export const getSpritesheet = async (id: SpriteName) => {
-  const { url, meta } = sprites[id];
+export const getSpritesheet = (id: SpriteName) => {
+  const texture = texturesMap[id];
 
-  if (!textureCache.has(url)) {
-    textureCache.set(url, PIXI.Assets.load(url) as Promise<PIXI.Texture>);
-  }
-
-  const texture = await textureCache.get(url)!;
-  if (!spritesheetCache.has(texture)) {
-    const spriteSheetData = parseAsperiteAnimationSheet(meta);
-    const spritesheet = new PIXI.Spritesheet(texture, spriteSheetData);
-    spritesheetCache.set(texture, spritesheet);
-    await spritesheet.parse();
+  if (!texture) {
+    throw new Error(`Could not get texture for sprite ${id}`);
   }
 
   return spritesheetCache.get(texture)!;
 };
 
-export const createAnimatedSprite = async (
+export const createAnimatedSprite = (
   id: SpriteName,
   initialAnimation: AnimationState
 ) => {
   const { meta } = sprites[id];
-  const spriteSheetData = parseAsperiteAnimationSheet(meta);
+
   const sprite = new PIXI.AnimatedSprite(
-    createSpritesheetFrameObject(
-      initialAnimation,
-      await getSpritesheet(id),
-      spriteSheetData
-    )
+    createSpritesheetFrameObject(initialAnimation, getSpritesheet(id), meta)
   );
 
   sprite.anchor.set(0.5, 0.5);

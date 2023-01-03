@@ -110,7 +110,9 @@ export function parseAsperiteAnimationSheet(
           .map(frame => frame.filename)
       ])
     ),
-    meta: { scale: '1' }
+    meta: {
+      scale: '1'
+    }
   };
 }
 

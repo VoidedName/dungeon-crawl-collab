@@ -1,12 +1,12 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Application, DisplayObject } from 'pixi.js';
+import type { DisplayObject } from 'pixi.js';
 import {
   type Renderable,
   RenderableBrand
 } from '@/entity/components/Renderable';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
-import { PoisionBrand } from '@/entity/components/Poision';
-import type { Poision } from '@/entity/components/Poision';
+import { PoisonBrand } from '@/entity/components/Poison';
+import type { Poison } from '@/entity/components/Poison';
 import { flashRed } from '@/createEffectManager';
 import { deleteComponent } from '@/entity/components/Delete';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
@@ -15,26 +15,26 @@ const DAMAGE_INTERVAL = 1000;
 
 let lastTick = Date.now();
 
-export const PoisionSystem: (
+export const PoisonSystem: (
   resolveSprite: (sprite: ECSEntityId) => DisplayObject
-) => ECSSystem<[Poision, Renderable, Stats]> = resolveSprite => ({
-  target: [PoisionBrand, RenderableBrand, StatsBrand],
+) => ECSSystem<[Poison, Renderable, Stats]> = resolveSprite => ({
+  target: [PoisonBrand, RenderableBrand, StatsBrand],
   run: (ecs, props, entities) => {
     const now = Date.now();
     const delta = now - lastTick;
     lastTick = now;
 
     entities.forEach(entity => {
-      if (entity.poision.duration !== Number.POSITIVE_INFINITY) {
-        entity.poision.duration -= delta;
+      if (entity.poison.duration !== Number.POSITIVE_INFINITY) {
+        entity.poison.duration -= delta;
       }
-      if (entity.poision.duration <= 0) {
-        ecs.removeComponent(entity, PoisionBrand);
+      if (entity.poison.duration <= 0) {
+        ecs.removeComponent(entity, PoisonBrand);
       }
-      entity.poision.nextDamageIn -= delta;
-      if (entity.poision.nextDamageIn <= 0) {
-        entity.poision.nextDamageIn = DAMAGE_INTERVAL;
-        entity.stats.current.health -= entity.poision.damage;
+      entity.poison.nextDamageIn -= delta;
+      if (entity.poison.nextDamageIn <= 0) {
+        entity.poison.nextDamageIn = DAMAGE_INTERVAL;
+        entity.stats.current.health -= entity.poison.damage;
         flashRed(resolveSprite, entity.entity_id);
 
         if (entity.stats.current.health <= 0) {

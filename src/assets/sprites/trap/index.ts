@@ -1,7 +1,9 @@
 import url from './trap.png';
-import meta from './trap.json';
+import asepriteMeta from './trap.json';
+import { parseAsperiteAnimationSheet } from '@/utils/aseprite';
 
 export const trap = {
   url,
-  meta
+  asepriteMeta: asepriteMeta,
+  meta: parseAsperiteAnimationSheet(asepriteMeta)
 };

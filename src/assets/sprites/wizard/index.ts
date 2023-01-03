@@ -1,7 +1,9 @@
 import url from './wizard.png';
-import meta from './wizard.json';
+import asepriteMeta from './wizard.json';
+import { parseAsperiteAnimationSheet } from '@/utils/aseprite';
 
 export const wizard = {
   url,
-  meta
+  asepriteMeta: asepriteMeta,
+  meta: parseAsperiteAnimationSheet(asepriteMeta)
 };
