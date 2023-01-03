@@ -1,5 +1,5 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { Application, DisplayObject } from 'pixi.js';
+import type { DisplayObject } from 'pixi.js';
 import {
   type Renderable,
   RenderableBrand
@@ -16,8 +16,7 @@ const DAMAGE_INTERVAL = 1000;
 let lastTick = Date.now();
 
 export const PoisonSystem: (
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
-  app: Application
+  resolveSprite: (sprite: ECSEntityId) => DisplayObject
 ) => ECSSystem<[Poison, Renderable, Stats]> = resolveSprite => ({
   target: [PoisonBrand, RenderableBrand, StatsBrand],
   run: (ecs, props, entities) => {

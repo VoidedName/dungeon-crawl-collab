@@ -1,6 +1,7 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import { hasAnimatable } from '@/entity/components/Animatable';
 import type { Collidable } from '@/entity/components/Collidable';
+import { hasImmoveable } from '@/entity/components/Immoveable';
 import {
   MovementIntentBrand,
   type MovementIntent
@@ -70,6 +71,10 @@ export const MovementSystem: () => ECSSystem<
     const collidables = world.entitiesByComponent<[Collidable]>(['collidable']);
 
     entities.forEach(e => {
+      if (hasImmoveable(e)) {
+        return;
+      }
+
       const getHitbox = () =>
         hasAnimatable(e)
           ? getSpriteHitbox({
