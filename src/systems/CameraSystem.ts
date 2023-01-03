@@ -10,6 +10,8 @@ import { addVector } from '@/utils/vectors';
 import type { Application } from 'pixi.js';
 import { isDefined } from '@/utils/assertions';
 
+const lerp = (a: number, b: number, w: number) => a + (b - a) * w;
+
 export const CameraSystem: (
   app: Application
 ) => ECSSystem<[Camera, Position]> = app => ({
@@ -36,7 +38,9 @@ export const CameraSystem: (
     applyFollow();
 
     const withOffset = addVector(e.position, e.camera.offset);
-
-    app.stage.position.set(withOffset.x, withOffset.y);
+    app.stage.position.set(
+      lerp(app.stage.position.x, withOffset.x, 0.1),
+      lerp(app.stage.position.y, withOffset.y, 0.1)
+    );
   }
 });
