@@ -11,6 +11,7 @@ import { loadMap, type TMap } from '@/MapManager';
 import { dist } from '@/utils/math';
 import type { Application } from 'pixi.js';
 import type { DisplayObject } from 'pixi.js';
+import { immoveableComponent } from '@/entity/components/Immoveable';
 
 export const InteractionSystem: (
   resolveSprite: (sprite: ECSEntityId) => DisplayObject,
@@ -51,6 +52,7 @@ export const InteractionSystem: (
           if (
             ['stairsUp', 'stairsDown'].includes(interactable.interactable.type)
           ) {
+            world.addComponent(player, immoveableComponent);
             world.get<TAudioManager>('audio').match(
               audioManager => {
                 audioManager.play('stairs');
@@ -60,6 +62,7 @@ export const InteractionSystem: (
             world.get<TEffectManager>('effects').match(
               effectsManager => {
                 effectsManager.fadeScreenOut(() => {
+                  world.removeComponent(player, 'immoveable');
                   if (interactable.interactable.type === 'stairsUp') {
                     mapGlobal.level--;
                     loadMap(mapGlobal.level, false, app, world);

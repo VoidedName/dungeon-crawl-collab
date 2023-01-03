@@ -11,6 +11,7 @@ import {
   type Renderable
 } from '@/entity/components/Renderable';
 import type { Point } from '@/utils/types';
+import { hasImmoveable } from '@/entity/components/Immoveable';
 
 // temporary code while we don't have a proper AttackSystem
 let isAttacking = false;
@@ -24,6 +25,7 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
 
   if (!player) return;
   if (isAttacking) return;
+  if (hasImmoveable(player)) return;
   isAttacking = true;
 
   scheduleAnimation(player.entity_id, {
