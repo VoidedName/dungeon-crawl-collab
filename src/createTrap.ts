@@ -10,20 +10,14 @@ import { withStats } from './entity/components/Stats';
 import { positionComponent } from '@/entity/components/Position';
 import { withVelocity } from './entity/components/Velocity';
 import { withOrientation } from './entity/components/Orientation';
-import { poisionComponent } from './entity/components/Poision';
+import { poisonComponent } from './entity/components/Poison';
 
 export type CreateTrapOptions = {
   spriteName: SpriteName;
 };
 
-export const createTrap = async (
-  world: ECSWorld,
-  options: CreateTrapOptions
-) => {
-  const sprite = await createAnimatedSprite(
-    options.spriteName,
-    AnimationState.IDLE
-  );
+export const createTrap = (world: ECSWorld, options: CreateTrapOptions) => {
+  const sprite = createAnimatedSprite(options.spriteName, AnimationState.IDLE);
 
   const trap = world
     .createEntity()
@@ -34,7 +28,7 @@ export const createTrap = async (
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withAnimatable(options.spriteName))
     .with(
-      poisionComponent({
+      poisonComponent({
         damage: 1,
         duration: Number.POSITIVE_INFINITY,
         nextDamageIn: 1000

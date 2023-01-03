@@ -3,7 +3,7 @@ import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
 import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
-import { loadMap, type TMap } from './MapManager';
+import { loadMap } from './MapManager';
 import { resolveSprite } from './renderer/renderableCache';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
@@ -30,7 +30,8 @@ import { createCamera } from './createCamera';
 import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
 import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
-import { PoisionSystem } from './systems/PoisionSystem';
+import { PoisonSystem } from './systems/PoisonSystem';
+import { loadSpriteTextures } from './renderer/createAnimatedSprite';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -118,28 +119,24 @@ const eventQueueReducer =
     }
   };
 
-const setup = async (
-  app: Application,
-  world: ECSWorld,
-  queue: GameLoopQueue
-) => {
-  world.set('map', {
-    level: 0
-  } as TMap);
-
+const setup = async (app: Application, world: ECSWorld) => {
+  world.set('map', { level: 0 });
   world.set(DebugFlags.map, false);
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
 
-  app.stage.on('pointerdown', e => {
-    queue.dispatch({ type: EventNames.PLAYER_ATTACK, payload: { x: 0, y: 0 } });
-  });
-
-  const player = await createPlayer(world, { spriteName: 'wizard' });
-  createCamera(world, player.entity_id);
-
+  // @FIXME at the moment we cannot load the texture and the map in parallel
+  // because the map needs a player, and the player needs its textures to create the sprite
+  // the fix would be to rip out the async part of loadMap, which is just creating the tileSet
+  // another possible fix would be to place the player on the map spawn point somewhere else, removing the dependency to the player
+  // The whole map loading process will probably be completely revamped fairly soon, so no need to overthink it for now, just to parallel load some things
+  await loadSpriteTextures();
+  const player = createPlayer(world, { spriteName: 'wizard' });
   await loadMap(0, true, app, world);
-  await createTrap(world, { spriteName: 'trap' });
+
+  const camera = createCamera(world, player.entity_id);
+  camera.camera.following = player.entity_id;
+  createTrap(world, { spriteName: 'trap' });
 };
 
 export function createGameLoop(
@@ -150,12 +147,7 @@ export function createGameLoop(
   const queue = createEventQueue<QueueEvent>(
     eventQueueReducer(world, navigateTo)
   );
-  const controls = createControls(
-    renderer.app.view as HTMLCanvasElement,
-    queue
-  );
-
-  setup(renderer.app, world, queue);
+  const controls = createControls(renderer.app, queue);
 
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveSprite, renderer.app));
@@ -165,7 +157,7 @@ export function createGameLoop(
     'interactions',
     InteractionSystem(resolveSprite, renderer.app)
   );
-  world.addSystem('poision', PoisionSystem(resolveSprite, renderer.app));
+  world.addSystem('poison', PoisonSystem(resolveSprite, renderer.app));
   world.addSystem('destroy', DeleteSystem(resolveSprite));
 
   function tick(delta: number) {
@@ -173,7 +165,9 @@ export function createGameLoop(
     world.runSystems({ delta });
   }
 
-  renderer.app.ticker.add(tick);
+  setup(renderer.app, world).then(() => {
+    renderer.app.ticker.add(tick);
+  });
 
   return {
     cleanup() {
