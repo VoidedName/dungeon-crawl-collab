@@ -1,7 +1,6 @@
 import type { ECSWorld } from './ecs/ECSWorld';
 import { withMovementIntent } from './entity/components/MovementIntent';
 import { playerComponent } from './entity/components/Player';
-import { withRenderable } from './entity/components/Renderable';
 import { withVelocity } from './entity/components/Velocity';
 import {
   createAnimatedSprite,
@@ -15,6 +14,7 @@ import { withInteractIntent } from './entity/components/InteractIntent';
 import { positionComponent } from '@/entity/components/Position';
 import { withSize } from './entity/components/Size';
 import { scheduleAnimation } from './renderer/AnimationManager';
+import { renderableComponent } from './entity/components/Renderable';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -23,20 +23,13 @@ export const createPlayer = async (
   world: ECSWorld,
   options: CreatePlayerOptions
 ) => {
-  const id = 'PLAYER';
   const sprite = await createAnimatedSprite(
     options.spriteName,
     AnimationState.IDLE
   );
   sprite.zIndex = 1;
-  await register(id, sprite);
 
-  scheduleAnimation(id, {
-    state: AnimationState.IDLE,
-    spriteName: options.spriteName
-  });
-
-  return world
+  const player = world
     .createEntity()
     .with(playerComponent)
     .with(positionComponent({ x: 200, y: 100 }))
@@ -44,9 +37,17 @@ export const createPlayer = async (
     .with(withStats({ speed: 5, health: 10 }))
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withOrientation(0))
-    .with(withRenderable(id))
+    .with(renderableComponent)
     .with(withAnimatable(options.spriteName))
     .with(withMovementIntent())
     .with(withInteractIntent())
     .build();
+
+  register(player.entity_id, sprite);
+  scheduleAnimation(player.entity_id, {
+    state: AnimationState.IDLE,
+    spriteName: options.spriteName
+  });
+
+  return player;
 };

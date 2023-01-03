@@ -1,5 +1,6 @@
 import type { TAudioManager } from '@/createAudioManager';
 import type { TEffectManager } from '@/createEffectManager';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { Interactable } from '@/entity/components/Interactable';
 import type { InteractIntent } from '@/entity/components/InteractIntent';
@@ -7,13 +8,12 @@ import type { Player } from '@/entity/components/Player';
 import type { Position } from '@/entity/components/Position';
 import type { Renderable } from '@/entity/components/Renderable';
 import { loadMap, type TMap } from '@/MapManager';
-import type { RenderableId } from '@/renderer/renderableCache';
 import { dist } from '@/utils/math';
 import type { Application } from 'pixi.js';
 import type { DisplayObject } from 'pixi.js';
 
 export const InteractionSystem: (
-  resolveSprite: (sprite: RenderableId) => DisplayObject,
+  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
   app: Application // TODO: ecs shouldn't know about pixi
 ) => ECSSystem<[Position, Interactable, Renderable]> = (
   resolveSprite,
@@ -28,7 +28,7 @@ export const InteractionSystem: (
       if (!player) return;
       if (!interactable.interactable.isEnabled) return;
       const distance = dist(interactable.position, player.position);
-      const text = resolveSprite(interactable.renderable.sprite);
+      const text = resolveSprite(interactable.entity_id);
       const isNear = distance < interactable.interactable.interactionRadius;
       text.visible = isNear;
 

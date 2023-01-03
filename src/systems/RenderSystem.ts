@@ -6,7 +6,6 @@ import {
   RenderableBrand
 } from '@/entity/components/Renderable';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
-import type { RenderableId } from '@/renderer/renderableCache';
 import {
   OrientationBrand,
   type Orientation
@@ -21,9 +20,10 @@ import {
   type Animatable
 } from '@/entity/components/Animatable';
 import { hasPlayer } from '@/entity/components/MovementIntent';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export const RenderSystem: (
-  resolveSprite: (sprite: RenderableId) => DisplayObject,
+  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
   app: Application
 ) => ECSSystem<[Position, Renderable, Orientation, Velocity]> = (
   resolveSprite,
@@ -37,10 +37,10 @@ export const RenderSystem: (
       const isMoving = (e.velocity.x ?? 0) !== 0 || (e.velocity.y ?? 0) !== 0;
 
       const newState = isMoving ? AnimationState.RUNNING : AnimationState.IDLE;
-      const currentState = getAnimationState(e.renderable.sprite);
+      const currentState = getAnimationState(e.entity_id);
 
       if (newState !== currentState) {
-        scheduleAnimation(e.renderable.sprite, {
+        scheduleAnimation(e.entity_id, {
           state: isMoving ? AnimationState.RUNNING : AnimationState.IDLE,
           spriteName: e.animatable.spriteName
         });
@@ -48,7 +48,7 @@ export const RenderSystem: (
     };
 
     entities.forEach(e => {
-      const sprite = resolveSprite(e.renderable.sprite);
+      const sprite = resolveSprite(e.entity_id);
 
       if (!sprite.parent) {
         app.stage.addChild(sprite);
@@ -62,7 +62,7 @@ export const RenderSystem: (
       }
 
       const shouldSetOrientation =
-        getAnimationState(e.renderable.sprite) !== AnimationState.ATTACKING;
+        getAnimationState(e.entity_id) !== AnimationState.ATTACKING;
       if (hasPlayer(e) && shouldSetOrientation) {
         // not sure why it's marked at private, this information is pretty useful
         // this might be a pixi 7 oversight, as they replaced InteractionManager with EventSystem

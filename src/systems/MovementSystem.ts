@@ -1,5 +1,4 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { ECSWorld } from '@/ecs/ECSWorld';
 import { hasAnimatable } from '@/entity/components/Animatable';
 import type { Collidable } from '@/entity/components/Collidable';
 import {
@@ -11,7 +10,6 @@ import {
   type Orientation
 } from '@/entity/components/Orientation';
 import { PositionBrand, type Position } from '@/entity/components/Position';
-import { hasRenderable } from '@/entity/components/Renderable';
 import { SizeBrand, type Size } from '@/entity/components/Size';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
@@ -26,8 +24,8 @@ import {
   directionAwareRectRectCollision,
   rectRectCollision
 } from '@/utils/collisions';
-import type { Point, Rectangle } from '@/utils/types';
-import { addVector, mulVector, subVector, toAngle } from '@/utils/vectors';
+import type { Point } from '@/utils/types';
+import { addVector, mulVector, subVector } from '@/utils/vectors';
 
 function normalize({ x, y }: { x: number; y: number }) {
   const len = Math.hypot(x, y);
@@ -57,15 +55,6 @@ export function computeVelocity(directions: Directions, speed: number): Point {
   return mulVector(normalize({ x: dx, y: dy }), speed);
 }
 
-function isColliding(rect1: Rectangle, rect2: Rectangle) {
-  return (
-    rect1.x < rect2.x + rect2.w &&
-    rect1.x + rect1.w > rect2.x &&
-    rect1.y < rect2.y + rect2.h &&
-    rect1.h + rect1.y > rect2.y
-  );
-}
-
 export const MovementSystem: () => ECSSystem<
   [Position, MovementIntent, Velocity, Stats, Orientation, Size]
 > = () => ({
@@ -82,11 +71,11 @@ export const MovementSystem: () => ECSSystem<
 
     entities.forEach(e => {
       const getHitbox = () =>
-        hasRenderable(e) && hasAnimatable(e)
+        hasAnimatable(e)
           ? getSpriteHitbox({
               entity: e,
               hitboxId: HitBoxId.BODY_COLLISION,
-              animationState: getAnimationState(e.renderable.sprite)!
+              animationState: getAnimationState(e.entity_id)!
             })
           : entityToRect(e);
 
@@ -114,7 +103,6 @@ export const MovementSystem: () => ECSSystem<
         }
       }
 
-      const prevVelocity = e.velocity;
       e.velocity = computeVelocity(e.movement_intent, e.stats.current.speed);
       e.position = addVector(e.position, { x: e.velocity.x, y: 0 });
 

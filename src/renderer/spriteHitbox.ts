@@ -6,10 +6,9 @@ import { resolveSprite } from './renderableCache';
 import { sprites } from '@/assets/sprites';
 import type { AnimatedSprite } from 'pixi.js';
 import type { Rectangle, Values } from '@/utils/types';
-import type { Renderable } from '@/entity/components/Renderable';
 import type { Position } from '@/entity/components/Position';
 import type { Size } from '@/entity/components/Size';
-
+import type { ECSEntity } from '@/ecs/ECSEntity';
 export const HitBoxId = {
   BODY_COLLISION: 'body'
 };
@@ -17,7 +16,7 @@ export const HitBoxId = {
 export type HitboxId = Values<typeof HitBoxId>;
 
 export type GetHitboxOptions = {
-  entity: Readonly<Renderable & Animatable & Position & Size>;
+  entity: Readonly<ECSEntity & Animatable & Position & Size>;
   hitboxId: HitboxId;
   animationState: AnimationState;
 };
@@ -37,7 +36,7 @@ export const getSpriteHitbox = ({
 }: GetHitboxOptions): Rectangle => {
   const { meta } = sprites[entity.animatable.spriteName];
 
-  const sprite = resolveSprite<AnimatedSprite>(entity.renderable.sprite);
+  const sprite = resolveSprite<AnimatedSprite>(entity.entity_id);
   const animation = meta.meta.frameTags.find(
     tag => tag.name === animationState
   );
