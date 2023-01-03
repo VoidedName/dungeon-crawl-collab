@@ -12,6 +12,7 @@ import {
 } from '@/entity/components/Orientation';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import { SizeBrand, type Size } from '@/entity/components/Size';
+import { hasStateAware } from '@/entity/components/StateAware';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import type { Directions } from '@/eventHandlers/keyboardMovement';
@@ -27,6 +28,8 @@ import {
 } from '@/utils/collisions';
 import type { Point } from '@/utils/types';
 import { addVector, mulVector, subVector } from '@/utils/vectors';
+import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
+import { PlayerState } from '@/stateMachines/player';
 
 function normalize({ x, y }: { x: number; y: number }) {
   const len = Math.hypot(x, y);
@@ -73,6 +76,10 @@ export const MovementSystem: () => ECSSystem<
     entities.forEach(e => {
       if (hasImmoveable(e)) {
         return;
+      }
+      if (hasStateAware(e)) {
+        const machine = resolveStateMachine(e.entity_id);
+        if (machine.getSnapshot().value !== PlayerState.RUNNING) return;
       }
 
       const getHitbox = () =>
