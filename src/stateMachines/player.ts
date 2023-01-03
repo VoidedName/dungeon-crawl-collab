@@ -1,13 +1,11 @@
-import type { TAudioManager } from '@/createAudioManager';
+import { createMachine, interpret } from 'xstate';
+import type { Values } from '@/utils/types';
 import type { PlayerEntity } from '@/createPlayer';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import { AnimationState } from '@/entity/components/Animatable';
 import { scheduleAnimation } from '@/renderer/AnimationManager';
-import { resolveRenderable } from '@/renderer/renderableManager';
 import { getAnimationDuration } from '@/renderer/renderableUtils';
-import type { Values } from '@/utils/types';
-import type { AnimatedSprite } from 'pixi.js';
-import { createMachine, interpret } from 'xstate';
+import { playerHitFX, playerHitEndFX } from '@/fx/player';
 
 export const PlayerState = {
   IDLE: 'idle',
@@ -82,7 +80,6 @@ export const createPlayerStateMachine = (
 
           after: {
             // @FIXME I didn't manage to tell it "go back to the previous state". this is probably me being a noob at xstate
-            // The current fix is to fire running events continuously on keydown, instead of doing it just once...meh
             ATTACK_DELAY: {
               target: PlayerState.IDLE
             }
@@ -96,21 +93,10 @@ export const createPlayerStateMachine = (
               state: AnimationState.HIT,
               loop: false
             });
-
-            world.get<TAudioManager>('audio').match(
-              audioManager => {
-                audioManager.play('ouch');
-              },
-              () => console.warn('no audio manager set')
-            );
-            const sprite = resolveRenderable<AnimatedSprite>(entity.entity_id);
-            sprite.tint = 0xff0000;
+            playerHitFX(entity, world);
           },
 
-          exit: () => {
-            const sprite = resolveRenderable<AnimatedSprite>(entity.entity_id);
-            sprite.tint = 0xffffff;
-          },
+          exit: () => playerHitEndFX(entity),
 
           after: {
             HIT_DELAY: {
@@ -123,6 +109,7 @@ export const createPlayerStateMachine = (
     {
       delays: {
         ATTACK_DELAY: () =>
+          // @TODO factor in stats like attack speed etc
           getAnimationDuration(
             entity.animatable.spriteName,
             AnimationState.ATTACKING
@@ -134,7 +121,5 @@ export const createPlayerStateMachine = (
     }
   );
 
-  const interpreter = interpret(machine).start();
-
-  return interpreter;
+  return interpret(machine).start();
 };
