@@ -119,6 +119,22 @@ const eventQueueReducer =
     }
   };
 
+type SetupAction =
+  | {
+      type: 'START';
+    }
+  | {
+      type: 'WORKING';
+      handle: Promise<any>;
+      progress: number;
+    }
+  | {
+      type: 'DONE';
+    }
+  | {
+      type: 'ERROR';
+    };
+
 const setup = async (app: Application, world: ECSWorld) => {
   world.set('map', { level: 0 });
   world.set(DebugFlags.map, false);
@@ -139,13 +155,50 @@ const setup = async (app: Application, world: ECSWorld) => {
   createTrap(world, { spriteName: 'trap' });
 };
 
-type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
+let setupStatus: SetupAction;
+const pollingSetup = (
+  status: SetupAction,
+  app: Application,
+  world: ECSWorld
+): SetupAction => {
+  switch (status.type) {
+    case 'START':
+      // eslint-disable-next-line no-case-declarations
+      const status: SetupAction = {
+        type: 'WORKING',
+        progress: 0,
+        handle: setup(app, world)
+      };
+      status.handle.then(() => {
+        if (setupStatus === status) {
+          setupStatus = { type: 'DONE' };
+        }
+      });
+      setupStatus = status;
+      return setupStatus;
+    case 'WORKING':
+      switch (setupStatus.type) {
+        case 'WORKING':
+        case 'DONE':
+          return setupStatus;
+
+        case 'START':
+        case 'ERROR':
+          return { type: 'ERROR' };
+      }
+  }
+  return { type: 'ERROR' };
+};
+
+type GameState =
+  | { type: 'RUNNING' }
+  | { type: 'SETUP'; setupAction: SetupAction };
 
 export function createGameLoop(
   renderer: GameRenderer,
   navigateTo: (path: string) => void
 ): ECSApi {
-  let state: GameState = { type: 'SETUP' };
+  let state: GameState = { type: 'SETUP', setupAction: { type: 'START' } };
   const world = createWorld();
   const queue = createEventQueue<QueueEvent>(
     eventQueueReducer(world, navigateTo)
@@ -166,15 +219,25 @@ export function createGameLoop(
   function tick(delta: number) {
     switch (state.type) {
       case 'SETUP':
-        setup(renderer.app, world).then(() => (state = { type: 'RUNNING' }));
-        state = { type: 'LOADING' };
+        state.setupAction = pollingSetup(
+          state.setupAction,
+          renderer.app,
+          world
+        );
+        switch (state.setupAction.type) {
+          case 'DONE':
+            state = { type: 'RUNNING' };
+            break;
+          case 'WORKING':
+            // update ui
+            break;
+          default:
+          // handle error
+        }
         break;
       case 'RUNNING':
         queue.process();
         world.runSystems({ delta });
-        break;
-      case 'LOADING':
-        // update loading ui
         break;
       default:
       // should never happen, maybe panic here
