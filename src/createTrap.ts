@@ -10,6 +10,7 @@ import { withStats } from './entity/components/Stats';
 import { positionComponent } from '@/entity/components/Position';
 import { withVelocity } from './entity/components/Velocity';
 import { withOrientation } from './entity/components/Orientation';
+import { poisionComponent } from './entity/components/Poision';
 
 export type CreateTrapOptions = {
   spriteName: SpriteName;
@@ -32,6 +33,13 @@ export const createTrap = async (
     .with(withOrientation(0))
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withAnimatable(options.spriteName))
+    .with(
+      poisionComponent({
+        damage: 1,
+        duration: Number.POSITIVE_INFINITY,
+        nextDamageIn: 1000
+      })
+    )
     .build();
 
   register(trap.entity_id, sprite);

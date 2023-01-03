@@ -1,5 +1,18 @@
 export type TEffectManager = ReturnType<typeof createEffectManager>;
-import { Graphics, type Application } from 'pixi.js';
+import { DisplayObject, Graphics, Sprite, type Application } from 'pixi.js';
+import type { RenderableId } from './renderer/renderableCache';
+
+export function flashRed(
+  resolveSprite: (sprite: RenderableId) => DisplayObject,
+  spriteId: RenderableId
+) {
+  const FLASH_DURATION = 150;
+  const playerSprite = resolveSprite(spriteId) as Sprite;
+  playerSprite.tint = 0xff0000;
+  setTimeout(() => {
+    playerSprite.tint = 0xffffff;
+  }, FLASH_DURATION);
+}
 
 export function createEffectManager(app: Application) {
   return {

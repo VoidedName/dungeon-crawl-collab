@@ -14,6 +14,7 @@ import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
+import { DeleteSystem } from './systems/DeleteSystem';
 import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
 
 import {
@@ -29,6 +30,7 @@ import { createCamera } from './createCamera';
 import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
 import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
+import { PoisionSystem } from './systems/PoisionSystem';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -163,6 +165,8 @@ export function createGameLoop(
     'interactions',
     InteractionSystem(resolveSprite, renderer.app)
   );
+  world.addSystem('poision', PoisionSystem(resolveSprite, renderer.app));
+  world.addSystem('destroy', DeleteSystem(resolveSprite));
 
   function tick(delta: number) {
     queue.process();
