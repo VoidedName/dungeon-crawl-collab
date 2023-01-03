@@ -44,7 +44,7 @@ type CreateSchedulerOptions = {
     id: ECSEntityId,
     spriteName: SpriteName,
     animation: AnimationState
-  ) => Promise<void>;
+  ) => void;
 };
 
 const defaultOptions: AnimationOptionals = {

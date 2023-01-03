@@ -19,14 +19,8 @@ import { renderableComponent } from './entity/components/Renderable';
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
 };
-export const createPlayer = async (
-  world: ECSWorld,
-  options: CreatePlayerOptions
-) => {
-  const sprite = await createAnimatedSprite(
-    options.spriteName,
-    AnimationState.IDLE
-  );
+export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
+  const sprite = createAnimatedSprite(options.spriteName, AnimationState.IDLE);
   sprite.zIndex = 1;
 
   const player = world
