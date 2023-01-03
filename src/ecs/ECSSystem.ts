@@ -5,10 +5,10 @@ import type { BrandsFromComponents } from '@/ecs/types';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 
 export type ECSSystemProps = {
-  delta: number;
+  readonly delta: number;
 };
 
-export interface ECSSystem<Cs extends ECSComponent<any>[]> {
+export interface ECSSystem<Cs extends ECSComponent<string>[]> {
   readonly target: BrandsFromComponents<Cs>;
   readonly run: (
     ecs: ECSWorld,
