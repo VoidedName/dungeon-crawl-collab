@@ -43,11 +43,11 @@ export type ECSComponent<T extends string, Props extends {} = {}> = {
  * }
  */
 export const has =
-  <C extends ECSComponent<any>>(brand: BrandFromComponent<C>) =>
+  <C extends ECSComponent<string>>(brand: BrandFromComponent<C>) =>
   <E extends ECSEntity = ECSEntity>(e: E): e is E & C =>
     brand in e;
 
-type ECSComponentBuilder<C extends ECSComponent<any>> =
+type ECSComponentBuilder<C extends ECSComponent<string>> =
   ECSComponentPros<C> extends Record<string, never>
     ? () => C
     : (props: ECSComponentPros<C>) => () => C;
@@ -61,7 +61,7 @@ type ECSComponentBuilder<C extends ECSComponent<any>> =
  *
  * const positionComponent = position({x: 4, y: 5})
  */
-export const ecsComponent = <C extends ECSComponent<any>>(
+export const ecsComponent = <C extends ECSComponent<string>>(
   brand: BrandFromComponent<C>
 ): ECSComponentBuilder<C> =>
   ((props?: ECSComponentPros<C>) => {
