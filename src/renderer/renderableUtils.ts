@@ -9,6 +9,8 @@ import type { Rectangle, Values } from '@/utils/types';
 import type { Position } from '@/entity/components/Position';
 import type { Size } from '@/entity/components/Size';
 import type { ECSEntity } from '@/ecs/ECSEntity';
+import type { SpriteName } from './createAnimatedSprite';
+
 export const HitBoxId = {
   BODY_COLLISION: 'body'
 };
@@ -67,4 +69,21 @@ export const getSpriteHitbox = ({
     w: frame.bounds.w,
     h: frame.bounds.h
   };
+};
+
+export const getAnimationDuration = (
+  spriteName: SpriteName,
+  name: AnimationState
+) => {
+  const { asepriteMeta } = sprites[spriteName];
+
+  const animation = asepriteMeta.meta.frameTags.find(tag => tag.name === name);
+  if (!animation) {
+    console.warn(`Animation not found on ${spriteName}:  ${name}`);
+    return 0;
+  }
+
+  return asepriteMeta.frames
+    .slice(animation.from, animation.to + 1)
+    .reduce((total, frame) => total + frame.duration, 0);
 };

@@ -20,7 +20,7 @@ import {
   entityToRect,
   getSpriteHitbox,
   HitBoxId
-} from '@/renderer/spriteHitbox';
+} from '@/renderer/renderableUtils';
 import {
   directionAwareRectRectCollision,
   rectRectCollision

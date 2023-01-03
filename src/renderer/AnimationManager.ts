@@ -65,12 +65,13 @@ export const createScheduler = (
   let currentIterationCount = 0;
 
   const shouldSkip = () => {
-    if (!current) return true;
-    return (
-      current.loop &&
-      (current.minLoopIterationCount === 0 ||
-        current.minLoopIterationCount < currentIterationCount)
-    );
+    return true;
+    // if (!current) return true;
+    // return (
+    //   current.loop &&
+    //   (current.minLoopIterationCount === 0 ||
+    //     current.minLoopIterationCount < currentIterationCount)
+    // );
   };
   const next = () => {
     if (!current) return;

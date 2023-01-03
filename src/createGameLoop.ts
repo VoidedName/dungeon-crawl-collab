@@ -106,12 +106,7 @@ const eventQueueReducer =
         return playerInteractHandler(payload, world);
 
       case EventNames.PLAYER_DAMAGED:
-        return playerDamagedHandler(
-          payload,
-          world,
-          resolveRenderable,
-          navigateTo
-        );
+        return playerDamagedHandler(payload, world, navigateTo);
 
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);

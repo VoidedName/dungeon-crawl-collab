@@ -13,8 +13,10 @@ import { withOrientation } from './entity/components/Orientation';
 import { withInteractIntent } from './entity/components/InteractIntent';
 import { positionComponent } from '@/entity/components/Position';
 import { withSize } from './entity/components/Size';
-import { scheduleAnimation } from './renderer/AnimationManager';
 import { renderableComponent } from './entity/components/Renderable';
+import { stateAwareComponent } from './entity/components/StateAware';
+import { registerStateMachine } from './stateMachines/stateMachineManager';
+import { createPlayerStateMachine } from './stateMachines/player';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -34,16 +36,17 @@ export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withOrientation(0))
     .with(renderableComponent)
+    .with(stateAwareComponent)
     .with(withAnimatable(options.spriteName))
     .with(withMovementIntent())
     .with(withInteractIntent())
     .build();
 
   registerRenderable(player.entity_id, sprite);
-  scheduleAnimation(player.entity_id, {
-    state: AnimationState.IDLE,
-    spriteName: options.spriteName
-  });
+  registerStateMachine(
+    player.entity_id,
+    createPlayerStateMachine(player, world)
+  );
 
   return player;
 };
