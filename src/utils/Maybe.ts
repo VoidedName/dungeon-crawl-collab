@@ -11,6 +11,8 @@ abstract class AMaybe<T> {
 
   abstract orElse(orElse: () => T): Some<T>;
 
+  abstract unwrap(): T;
+
   isSome(): this is Some<T> {
     return this instanceof Some;
   }
@@ -54,6 +56,10 @@ class Some<T> extends AMaybe<T> {
   get(): T {
     return this.value;
   }
+
+  unwrap(): T {
+    return this.value;
+  }
 }
 
 class None<T> extends AMaybe<T> {
@@ -77,6 +83,10 @@ class None<T> extends AMaybe<T> {
 
   orElse(orElse: () => T): Some<T> {
     return some(orElse());
+  }
+
+  unwrap(): never {
+    throw new Error('Tried unwrapping an empty Maybe<T>!');
   }
 }
 
