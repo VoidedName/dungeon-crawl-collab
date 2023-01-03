@@ -9,6 +9,7 @@ import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { PoisionBrand } from '@/entity/components/Poision';
 import type { Poision } from '@/entity/components/Poision';
 import { flashRed } from '@/createEffectManager';
+import { deleteComponent } from '@/entity/components/Delete';
 
 const DAMAGE_INTERVAL = 1000;
 
@@ -38,9 +39,7 @@ export const PoisionSystem: (
         flashRed(resolveSprite, entity.renderable.sprite);
 
         if (entity.stats.current.health <= 0) {
-          const sprite = resolveSprite(entity.renderable.sprite) as Sprite;
-          sprite.destroy();
-          ecs.deleteEntity(entity);
+          ecs.addComponent(entity, deleteComponent);
         }
       }
     });

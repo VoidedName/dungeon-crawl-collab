@@ -14,6 +14,7 @@ import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
+import { DeleteSystem } from './systems/DeleteSystem';
 import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
 
 import {
@@ -165,6 +166,7 @@ export function createGameLoop(
     InteractionSystem(resolveSprite, renderer.app)
   );
   world.addSystem('poision', PoisionSystem(resolveSprite, renderer.app));
+  world.addSystem('destroy', DeleteSystem(resolveSprite));
 
   function tick(delta: number) {
     queue.process();
