@@ -1,5 +1,5 @@
 import type { AnimatedSprite } from 'pixi.js';
-import { resolveSprite } from './renderableCache';
+import { resolveRenderable } from './renderableManager';
 import { updateTextures, type SpriteName } from './createAnimatedSprite';
 import type { AnimationState } from '../entity/components/Animatable';
 import type { Nullable } from 'vitest';
@@ -31,7 +31,7 @@ const getScheduler = (id: ECSEntityId) => {
   if (!schedulersCache.has(id)) {
     schedulersCache.set(
       id,
-      createScheduler(id, { resolveSprite, updateTextures })
+      createScheduler(id, { resolveRenderable, updateTextures })
     );
   }
 
@@ -39,7 +39,7 @@ const getScheduler = (id: ECSEntityId) => {
 };
 
 type CreateSchedulerOptions = {
-  resolveSprite: (id: ECSEntityId) => AnimatedSprite;
+  resolveRenderable: (id: ECSEntityId) => AnimatedSprite;
   updateTextures: (
     id: ECSEntityId,
     spriteName: SpriteName,
@@ -56,9 +56,9 @@ const defaultOptions: AnimationOptionals = {
 
 export const createScheduler = (
   id: ECSEntityId,
-  { resolveSprite, updateTextures }: CreateSchedulerOptions
+  { resolveRenderable, updateTextures }: CreateSchedulerOptions
 ): AnimationScheduler => {
-  const sprite = resolveSprite(id);
+  const sprite = resolveRenderable(id);
   const queue: AnimationOptions[] = [];
 
   let current: Nullable<AnimationOptions> = null;

@@ -21,7 +21,8 @@
     "pixi-viewport": "^4.38.0",
     "pixi.js": "^7.0.5",
     "vue": "^3.2.45",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "xstate": "^4.35.1"
   },
   "devDependencies": {
     "@iconify-json/mdi": "^1.1.41",

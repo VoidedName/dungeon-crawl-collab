@@ -7,7 +7,7 @@ import {
   type SpriteName
 } from './renderer/createAnimatedSprite';
 import { AnimationState, withAnimatable } from './entity/components/Animatable';
-import { register } from './renderer/renderableCache';
+import { registerRenderable } from './renderer/renderableManager';
 import { withStats } from './entity/components/Stats';
 import { withOrientation } from './entity/components/Orientation';
 import { withInteractIntent } from './entity/components/InteractIntent';
@@ -19,6 +19,8 @@ import { renderableComponent } from './entity/components/Renderable';
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
 };
+
+export type PlayerEntity = ReturnType<typeof createPlayer>;
 export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
   const sprite = createAnimatedSprite(options.spriteName, AnimationState.IDLE);
   sprite.zIndex = 1;
@@ -37,7 +39,7 @@ export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
     .with(withInteractIntent())
     .build();
 
-  register(player.entity_id, sprite);
+  registerRenderable(player.entity_id, sprite);
   scheduleAnimation(player.entity_id, {
     state: AnimationState.IDLE,
     spriteName: options.spriteName

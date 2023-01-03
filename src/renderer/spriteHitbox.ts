@@ -2,7 +2,7 @@ import type {
   Animatable,
   AnimationState
 } from '@/entity/components/Animatable';
-import { resolveSprite } from './renderableCache';
+import { resolveRenderable } from './renderableManager';
 import { sprites } from '@/assets/sprites';
 import type { AnimatedSprite } from 'pixi.js';
 import type { Rectangle, Values } from '@/utils/types';
@@ -36,7 +36,7 @@ export const getSpriteHitbox = ({
 }: GetHitboxOptions): Rectangle => {
   const { asepriteMeta } = sprites[entity.animatable.spriteName];
 
-  const sprite = resolveSprite<AnimatedSprite>(entity.entity_id);
+  const sprite = resolveRenderable<AnimatedSprite>(entity.entity_id);
   const animation = asepriteMeta.meta.frameTags.find(
     tag => tag.name === animationState
   );

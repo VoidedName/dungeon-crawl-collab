@@ -14,7 +14,7 @@ const FLASH_DURATION = 150;
 export const playerDamagedHandler = (
   damage: number,
   world: ECSWorld,
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
+  resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
   navigateTo: (path: string) => void
 ) => {
   const [player] = world.entitiesByComponent<[Player, Stats, Renderable]>([
@@ -33,7 +33,7 @@ export const playerDamagedHandler = (
     },
     () => console.warn('no audio manager set')
   );
-  const playerSprite = resolveSprite(player.entity_id) as Sprite;
+  const playerSprite = resolveRenderable(player.entity_id) as Sprite;
   playerSprite.tint = 0xff0000;
   setTimeout(() => {
     playerSprite.tint = 0xffffff;

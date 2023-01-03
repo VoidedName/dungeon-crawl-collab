@@ -14,10 +14,10 @@ import type { DisplayObject } from 'pixi.js';
 import { immoveableComponent } from '@/entity/components/Immoveable';
 
 export const InteractionSystem: (
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
+  resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
   app: Application // TODO: ecs shouldn't know about pixi
 ) => ECSSystem<[Position, Interactable, Renderable]> = (
-  resolveSprite,
+  resolveRenderable,
   app
 ) => ({
   target: ['position', 'interactable', 'renderable'],
@@ -29,7 +29,7 @@ export const InteractionSystem: (
       if (!player) return;
       if (!interactable.interactable.isEnabled) return;
       const distance = dist(interactable.position, player.position);
-      const text = resolveSprite(interactable.entity_id);
+      const text = resolveRenderable(interactable.entity_id);
       const isNear = distance < interactable.interactable.interactionRadius;
       text.visible = isNear;
 

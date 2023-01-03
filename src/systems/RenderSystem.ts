@@ -23,10 +23,10 @@ import { hasPlayer } from '@/entity/components/MovementIntent';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export const RenderSystem: (
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
+  resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
   app: Application
 ) => ECSSystem<[Position, Renderable, Orientation, Velocity]> = (
-  resolveSprite,
+  resolveRenderable,
   app
 ) => ({
   target: [PositionBrand, RenderableBrand, OrientationBrand, VelocityBrand],
@@ -48,7 +48,7 @@ export const RenderSystem: (
     };
 
     entities.forEach(e => {
-      const sprite = resolveSprite(e.entity_id);
+      const sprite = resolveRenderable(e.entity_id);
 
       if (!sprite.parent) {
         app.stage.addChild(sprite);
