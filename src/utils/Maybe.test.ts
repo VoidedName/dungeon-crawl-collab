@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { none, some } from '@/utils/Maybe';
+import { type Maybe, none, some } from '@/utils/Maybe';
 
 describe('maybe tests', () => {
   test('some is some', () => {
@@ -96,5 +96,16 @@ describe('maybe tests', () => {
 
   test('getOrElse on none uses else', () => {
     expect(none().getOrElse(() => 4)).toBe(4);
+  });
+
+  test('unwrap does not throw when some as Maybe<T>', () => {
+    const maybe = some('present') as Maybe<string>;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const value: string = maybe.unwrap(); // type check
+  });
+
+  test('unwrap does throw when none as Maybe<T>', () => {
+    const maybe = none() as Maybe<string>;
+    expect(maybe.unwrap).toThrow();
   });
 });
