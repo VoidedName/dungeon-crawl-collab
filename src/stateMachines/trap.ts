@@ -7,13 +7,16 @@ import { getAnimationDuration } from '@/renderer/renderableUtils';
 
 export const TrapState = {
   IDLE: 'idle',
-  FIRED: 'fired'
+  CLOSING: 'closing',
+  FIRED: 'fired',
+  CAN_HURT: 'canHurt',
+  USED: 'used'
 } as const;
 export type TrapState = Values<typeof TrapState>;
 
 export const TrapStateTransitions = {
-  RELOAD: 'reload',
-  ATTACK: 'attack'
+  ATTACK: 'attack',
+  INFLICTED: 'inflicted'
 } as const;
 export type TrapStateTransitions = Values<typeof TrapStateTransitions>;
 
@@ -28,7 +31,7 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
       states: {
         [TrapState.IDLE]: {
           on: {
-            [TrapStateTransitions.ATTACK]: TrapState.FIRED
+            [TrapStateTransitions.ATTACK]: TrapState.CLOSING
           },
           entry: () => {
             scheduleAnimation(entity.entity_id, {
@@ -37,10 +40,7 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             });
           }
         },
-        [TrapState.FIRED]: {
-          on: {
-            [TrapStateTransitions.RELOAD]: TrapState.IDLE
-          },
+        [TrapState.CLOSING]: {
           entry: () => {
             scheduleAnimation(entity.entity_id, {
               spriteName: entity.animatable.spriteName,
@@ -48,9 +48,27 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             });
           },
           after: {
-            ATTACK_DELAY: {
+            ATTACK_OFFSET: {
+              target: TrapState.CAN_HURT
+            }
+          }
+        },
+        [TrapState.CAN_HURT]: {
+          on: {
+            [TrapStateTransitions.INFLICTED]: TrapState.USED
+          },
+          after: {
+            ATTACK_OFFSET: {
               target: TrapState.IDLE
             }
+          }
+        },
+        [TrapState.USED]: {
+          entry: () => {
+            scheduleAnimation(entity.entity_id, {
+              spriteName: entity.animatable.spriteName,
+              state: AnimationState.FIRED
+            });
           }
         }
       }
@@ -61,7 +79,12 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
           getAnimationDuration(
             entity.animatable.spriteName,
             AnimationState.FIRED
-          )
+          ),
+        ATTACK_OFFSET: () =>
+          getAnimationDuration(
+            entity.animatable.spriteName,
+            AnimationState.FIRED
+          ) / 2
       }
     }
   );

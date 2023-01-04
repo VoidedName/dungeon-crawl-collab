@@ -1,5 +1,11 @@
+import type { ECSEntity } from '@/ecs/ECSEntity';
+import type { Animatable } from '@/entity/components/Animatable';
+import { getAnimationState } from '@/renderer/AnimationManager';
+import { getSpriteHitbox, HitBoxId } from '@/renderer/renderableUtils';
 import { dist } from './math';
 import type { Circle, Point, Rectangle } from './types';
+import type { Position } from '@/entity/components/Position';
+import type { Size } from '@/entity/components/Size';
 
 export const pointRectCollision = (point: Point, rect: Rectangle) =>
   point.x >= rect.x &&
@@ -32,6 +38,24 @@ export const circleRectCollision = (circle: Circle, rect: Rectangle) => {
   const dy = distY - rect.h / 2;
 
   return dx * dx + dy * dy <= circle.r * circle.r;
+};
+
+export const spriteCollision = (
+  source: Readonly<ECSEntity & Animatable & Position & Size>,
+  sink: Readonly<ECSEntity & Animatable & Position & Size>
+) => {
+  return rectRectCollision(
+    getSpriteHitbox({
+      entity: source,
+      hitboxId: HitBoxId.BODY_COLLISION,
+      animationState: getAnimationState(source.entity_id)!
+    }),
+    getSpriteHitbox({
+      entity: sink,
+      hitboxId: HitBoxId.BODY_COLLISION,
+      animationState: getAnimationState(sink.entity_id)!
+    })
+  );
 };
 
 export const rectRectCollision = (rect1: Rectangle, rect2: Rectangle) =>
