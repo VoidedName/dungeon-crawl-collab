@@ -20,3 +20,9 @@ export const registerRenderable = (
 ) => {
   spriteLookup.set(id, renderable);
 };
+
+export const cleanupRenderable = (id: ECSEntityId) => {
+  const sprite = resolveRenderable(id);
+  sprite.destroy();
+  spriteLookup.delete(id);
+};

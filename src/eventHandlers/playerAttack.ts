@@ -15,6 +15,7 @@ import { createProjectile } from '@/entity/factories/createProjectile';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import { subVector } from '@/utils/vectors';
 import { resolveRenderable } from '@/renderer/renderableManager';
+import { PlayerState, PlayerStateTransitions } from '@/stateMachines/player';
 
 export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   const [player] = world.entitiesByComponent<
@@ -25,9 +26,12 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   if (hasImmoveable(player)) return;
 
   const machine = resolveStateMachine(player.entity_id);
+  if (machine.getSnapshot().value === PlayerState.ATTACKING) return;
+
+  machine.send(PlayerStateTransitions.ATTACK);
   const sprite = resolveRenderable(player.entity_id);
 
-  const projectile = createProjectile(world, {
+  createProjectile(world, {
     spriteName: 'magicMissile',
     position: { ...player.position },
     target: subVector(mousePosition, sprite.toGlobal({ x: 0, y: 0 }))

@@ -8,9 +8,9 @@ import { AnimationState, withAnimatable } from '../components/Animatable';
 import { registerRenderable } from '../../renderer/renderableManager';
 import { withStats } from '../components/Stats';
 import { positionComponent } from '@/entity/components/Position';
-import { withVelocity } from '../components/Velocity';
 import { withOrientation } from '../components/Orientation';
 import { poisonComponent } from '../components/Poison';
+import { velocityComponent } from '../components/Velocity';
 
 export type CreateTrapOptions = {
   spriteName: SpriteName;
@@ -25,7 +25,7 @@ export const createTrap = (world: ECSWorld, options: CreateTrapOptions) => {
     .with(withStats({ speed: 5, health: 4 }))
     .with(renderableComponent)
     .with(withOrientation(0))
-    .with(withVelocity({ x: 0, y: 0 }))
+    .with(velocityComponent({ x: 0, y: 0 }))
     .with(withAnimatable(options.spriteName))
     .with(
       poisonComponent({

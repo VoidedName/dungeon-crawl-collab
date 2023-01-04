@@ -8,12 +8,12 @@ const stateMachineLookup = new Map<ECSEntityId, StateMachine>();
 export const resolveStateMachine = <T extends StateMachine>(
   id: ECSEntityId
 ): T => {
-  const sprite = stateMachineLookup.get(id);
-  if (!sprite) {
+  const machine = stateMachineLookup.get(id);
+  if (!machine) {
     throw new Error(`Entity State Machine not found for id ${id}`);
   }
 
-  return sprite as T;
+  return machine as T;
 };
 
 export const registerStateMachine = (
@@ -21,4 +21,11 @@ export const registerStateMachine = (
   stateMachine: StateMachine
 ) => {
   stateMachineLookup.set(id, stateMachine);
+};
+
+export const cleanupStateMachine = (id: ECSEntityId) => {
+  const machine = resolveStateMachine(id);
+  machine.stop();
+
+  stateMachineLookup.delete(id);
 };

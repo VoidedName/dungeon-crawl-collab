@@ -1,7 +1,6 @@
 import type { ECSWorld } from '../../ecs/ECSWorld';
-import { withMovementIntent } from '../components/MovementIntent';
 import { playerComponent } from '../components/Player';
-import { withVelocity } from '../components/Velocity';
+import { velocityComponent } from '../components/Velocity';
 import {
   createAnimatedSprite,
   type SpriteName
@@ -12,11 +11,11 @@ import { withStats } from '../components/Stats';
 import { withOrientation } from '../components/Orientation';
 import { withInteractIntent } from '../components/InteractIntent';
 import { positionComponent } from '@/entity/components/Position';
-import { withSize } from '../components/Size';
 import { renderableComponent } from '../components/Renderable';
 import { stateAwareComponent } from '../components/StateAware';
 import { registerStateMachine } from '../../stateMachines/stateMachineManager';
 import { createPlayerStateMachine } from '../../stateMachines/player';
+import { sizeComponent } from '../components/Size';
 
 export type CreatePlayerOptions = {
   spriteName: SpriteName;
@@ -30,15 +29,14 @@ export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
   const player = world
     .createEntity()
     .with(playerComponent)
-    .with(positionComponent({ x: 200, y: 100 }))
-    .with(withSize(64, 64))
-    .with(withStats({ speed: 5, health: 10 }))
-    .with(withVelocity({ x: 0, y: 0 }))
-    .with(withOrientation(0))
     .with(renderableComponent)
     .with(stateAwareComponent)
+    .with(positionComponent({ x: 200, y: 100 }))
+    .with(sizeComponent({ w: 64, h: 64 }))
+    .with(withStats({ speed: 5, health: 10 }))
+    .with(velocityComponent({ x: 0, y: 0 }))
+    .with(withOrientation(0))
     .with(withAnimatable(options.spriteName))
-    .with(withMovementIntent())
     .with(withInteractIntent())
     .build();
 

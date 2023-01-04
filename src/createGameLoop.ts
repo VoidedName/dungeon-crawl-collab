@@ -161,7 +161,7 @@ export function createGameLoop(
     InteractionSystem(resolveRenderable, renderer.app)
   );
   world.addSystem('poison', PoisonSystem(resolveRenderable));
-  world.addSystem('destroy', DeleteSystem(resolveRenderable));
+  world.addSystem('destroy', DeleteSystem());
 
   function tick(delta: number) {
     switch (state.type) {

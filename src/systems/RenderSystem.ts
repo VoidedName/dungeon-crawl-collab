@@ -12,10 +12,10 @@ import {
 } from '@/entity/components/Orientation';
 import { getAnimationState } from '@/renderer/AnimationManager';
 import { AnimationState } from '@/entity/components/Animatable';
-import { hasPlayer } from '@/entity/components/MovementIntent';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 import { hasProjectile } from '@/entity/components/Projectile';
 import { deg2Rad } from '@/utils/math';
+import { hasPlayer } from '@/entity/components/Player';
 
 export const RenderSystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,

@@ -55,3 +55,7 @@ export const normalizeVector = ({ x, y }: Point) => {
     };
   return { x: x / len, y: y / len };
 };
+
+export const setMagnitude = (vec: Point, speed: number) => {
+  return mulVector(normalizeVector(vec), speed);
+};

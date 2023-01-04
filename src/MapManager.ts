@@ -9,9 +9,10 @@ import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
 import { withMapObject } from './entity/components/MapObject';
 import type { MapObject } from './entity/components/MapObject';
-import { withCollidable } from './entity/components/Collidable';
+import { collidableComponent } from './entity/components/Collidable';
 import { createTileset } from './renderer/createTileset';
 import { renderableComponent } from './entity/components/Renderable';
+import { sizeComponent } from './entity/components/Size';
 
 export type TMap = {
   level: number;
@@ -188,13 +189,13 @@ export async function loadMap(
           .createEntity()
           .with(withMapObject())
           .with(
-            withCollidable({
-              x: globalPos.x,
-              y: globalPos.y,
-              w: TILE_SIZE,
-              h: TILE_SIZE
+            positionComponent({
+              x: globalPos.x + TILE_SIZE / 2,
+              y: globalPos.y + TILE_SIZE / 2
             })
           )
+          .with(sizeComponent({ w: TILE_SIZE, h: TILE_SIZE }))
+          .with(collidableComponent)
           .build();
       }
       mapGroup.addChild(tileContainer);

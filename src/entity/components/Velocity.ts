@@ -1,4 +1,4 @@
-import type { ECSComponent } from '@/ecs/ECSComponent';
+import { ecsComponent, type ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
 import type { Point } from '@/utils/types';
 
@@ -10,8 +10,4 @@ export function hasVelocity<E extends ECSEntity>(e: E): e is E & Velocity {
   return VelocityBrand in e;
 }
 
-export const withVelocity = (velocity: Point) => () => ({
-  [VelocityBrand]: {
-    velocity
-  }
-});
+export const velocityComponent = ecsComponent<Velocity>(VelocityBrand);
