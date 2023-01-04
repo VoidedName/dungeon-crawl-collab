@@ -1,4 +1,6 @@
+import type { Interpreter } from 'xstate';
 import type { AnyObject } from './types';
+import { isObject } from '@vue/shared';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export const throttle = (fn: Function, wait = 300) => {

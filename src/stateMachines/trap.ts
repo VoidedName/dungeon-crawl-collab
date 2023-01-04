@@ -7,16 +7,16 @@ import { getAnimationDuration } from '@/renderer/renderableUtils';
 
 export const TrapState = {
   IDLE: 'idle',
-  CLOSING: 'closing',
   FIRED: 'fired',
-  CAN_HURT: 'canHurt',
-  USED: 'used'
+  ACTIVATING: 'activating',
+  ACTIVATED: 'activated',
+  HAS_HURT: 'has_hurt'
 } as const;
 export type TrapState = Values<typeof TrapState>;
 
 export const TrapStateTransitions = {
-  ATTACK: 'attack',
-  INFLICTED: 'inflicted'
+  TRIGGER: 'attack',
+  HAS_HURT: 'has_hurt'
 } as const;
 export type TrapStateTransitions = Values<typeof TrapStateTransitions>;
 
@@ -31,7 +31,7 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
       states: {
         [TrapState.IDLE]: {
           on: {
-            [TrapStateTransitions.ATTACK]: TrapState.CLOSING
+            [TrapStateTransitions.TRIGGER]: TrapState.FIRED
           },
           entry: () => {
             scheduleAnimation(entity.entity_id, {
@@ -40,51 +40,49 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             });
           }
         },
-        [TrapState.CLOSING]: {
+        [TrapState.FIRED]: {
+          initial: TrapState.ACTIVATING,
+
           entry: () => {
             scheduleAnimation(entity.entity_id, {
               spriteName: entity.animatable.spriteName,
-              state: AnimationState.FIRED
+              state: AnimationState.FIRED,
+              loop: false
             });
           },
+
           after: {
-            ATTACK_OFFSET: {
-              target: TrapState.CAN_HURT
-            }
-          }
-        },
-        [TrapState.CAN_HURT]: {
-          on: {
-            [TrapStateTransitions.INFLICTED]: TrapState.USED
+            TRIGGER_DELAY: TrapState.IDLE
           },
-          after: {
-            ATTACK_OFFSET: {
-              target: TrapState.IDLE
-            }
-          }
-        },
-        [TrapState.USED]: {
-          entry: () => {
-            scheduleAnimation(entity.entity_id, {
-              spriteName: entity.animatable.spriteName,
-              state: AnimationState.FIRED
-            });
+
+          states: {
+            [TrapState.ACTIVATING]: {
+              after: {
+                ACTIVATION_DELAY: TrapState.ACTIVATED
+              }
+            },
+
+            [TrapState.ACTIVATED]: {},
+            [TrapState.HAS_HURT]: {}
           }
         }
+      },
+      on: {
+        [TrapStateTransitions.HAS_HURT]: { target: 'fired.has_hurt' }
       }
     },
     {
       delays: {
-        ATTACK_DELAY: () =>
+        TRIGGER_DELAY: () =>
           getAnimationDuration(
             entity.animatable.spriteName,
             AnimationState.FIRED
           ),
-        ATTACK_OFFSET: () =>
+        ACTIVATION_DELAY: () =>
           getAnimationDuration(
             entity.animatable.spriteName,
-            AnimationState.FIRED
-          ) / 2
+            AnimationState.ACTIVATING
+          )
       }
     }
   );

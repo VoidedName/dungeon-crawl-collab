@@ -17,6 +17,8 @@ import {
 } from '@/entity/components/Animatable';
 import { EventNames, type GameLoopQueue } from '@/createGameLoop';
 import { getPlayer } from '@/utils/getPlayer';
+import { PlayerState } from '@/stateMachines/player';
+import { isObject } from '@vue/shared';
 
 export const EnemySystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
@@ -38,16 +40,18 @@ export const EnemySystem: (
     entities.forEach(entity => {
       if (entity.enemy.type === 'trap') {
         const machine = resolveStateMachine(entity.entity_id);
+        const state = machine.getSnapshot().value;
         if (
-          machine.getSnapshot().value === TrapState.IDLE &&
+          state === TrapState.IDLE &&
           spriteCollision(player as any, entity)
         ) {
-          machine.send(TrapStateTransitions.ATTACK);
+          machine.send(TrapStateTransitions.TRIGGER);
         } else if (
-          machine.getSnapshot().value === TrapState.CAN_HURT &&
+          isObject(state) &&
+          state[TrapState.FIRED] === TrapState.ACTIVATED &&
           spriteCollision(player as any, entity)
         ) {
-          machine.send(TrapStateTransitions.INFLICTED);
+          machine.send(TrapStateTransitions.HAS_HURT);
           queue.dispatch({
             type: EventNames.PLAYER_DAMAGED,
             payload: 1

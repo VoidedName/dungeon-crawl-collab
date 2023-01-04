@@ -36,7 +36,7 @@
     "duration": 100
    },
    {
-    "filename": "trap:fired.0",
+    "filename": "trap:activating.0",
     "frame": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -45,7 +45,7 @@
     "duration": 100
    },
    {
-    "filename": "trap:fired.1",
+    "filename": "trap:activating.1",
     "frame": { "x": 192, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -54,7 +54,43 @@
     "duration": 100
    },
    {
-    "filename": "trap:fired.2",
+    "filename": "trap:activating.2",
+    "frame": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 100
+   },
+   {
+    "filename": "trap:activating.3",
+    "frame": { "x": 192, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 100
+   },
+   {
+    "filename": "trap:activating.4",
+    "frame": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 100
+   },
+   {
+    "filename": "trap:activating.5",
+    "frame": { "x": 192, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 100
+   },
+   {
+    "filename": "trap:activating.6",
     "frame": { "x": 0, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -63,7 +99,7 @@
     "duration": 100
    },
    {
-    "filename": "trap:fired.3",
+    "filename": "trap:fired.7",
     "frame": { "x": 64, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -72,7 +108,7 @@
     "duration": 50
    },
    {
-    "filename": "trap:fired.4",
+    "filename": "trap:fired.8",
     "frame": { "x": 128, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -81,7 +117,7 @@
     "duration": 50
    },
    {
-    "filename": "trap:fired.5",
+    "filename": "trap:fired.9",
     "frame": { "x": 192, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -90,7 +126,7 @@
     "duration": 50
    },
    {
-    "filename": "trap:fired.6",
+    "filename": "trap:fired.10",
     "frame": { "x": 0, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -99,7 +135,7 @@
     "duration": 50
    },
    {
-    "filename": "trap:fired.7",
+    "filename": "trap:fired.11",
     "frame": { "x": 64, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -117,7 +153,8 @@
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "fired", "from": 4, "to": 11, "direction": "forward" }
+   { "name": "fired", "from": 4, "to": 15, "direction": "forward" },
+   { "name": "activating", "from": 4, "to": 10, "direction": "forward" }
   ],
   "layers": [
    { "name": "Body", "opacity": 255, "blendMode": "normal" },
@@ -125,7 +162,7 @@
    { "name": "FX 1", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
-   { "name": "body", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 16, "y": 18, "w": 32, "h": 30 } }, { "frame": 1, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 2, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 3, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 4, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 5, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 6, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 7, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 8, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 9, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 10, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 11, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }] }
+   { "name": "body", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 16, "y": 18, "w": 32, "h": 30 } }, { "frame": 1, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 2, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 3, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 4, "bounds": {"x": 15, "y": 20, "w": 33, "h": 27 } }, { "frame": 5, "bounds": {"x": 15, "y": 18, "w": 35, "h": 30 } }, { "frame": 6, "bounds": {"x": 16, "y": 20, "w": 33, "h": 26 } }, { "frame": 7, "bounds": {"x": 14, "y": 21, "w": 36, "h": 25 } }, { "frame": 8, "bounds": {"x": 15, "y": 20, "w": 34, "h": 26 } }, { "frame": 9, "bounds": {"x": 13, "y": 21, "w": 37, "h": 25 } }, { "frame": 10, "bounds": {"x": 14, "y": 20, "w": 35, "h": 28 } }, { "frame": 11, "bounds": {"x": 14, "y": 14, "w": 37, "h": 33 } }, { "frame": 13, "bounds": {"x": 14, "y": 13, "w": 37, "h": 34 } }, { "frame": 14, "bounds": {"x": 22, "y": 13, "w": 20, "h": 33 } }, { "frame": 15, "bounds": {"x": 41, "y": 13, "w": 1, "h": 1 } }] }
   ]
  }
 }
