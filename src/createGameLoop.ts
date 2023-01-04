@@ -139,10 +139,13 @@ const setup = async (app: Application, world: ECSWorld) => {
   createTrap(world, { spriteName: 'trap' });
 };
 
+type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
+
 export function createGameLoop(
   renderer: GameRenderer,
   navigateTo: (path: string) => void
 ): ECSApi {
+  let state: GameState = { type: 'SETUP' };
   const world = createWorld();
   const queue = createEventQueue<QueueEvent>(
     eventQueueReducer(world, navigateTo)
@@ -161,13 +164,24 @@ export function createGameLoop(
   world.addSystem('destroy', DeleteSystem(resolveSprite));
 
   function tick(delta: number) {
-    queue.process();
-    world.runSystems({ delta });
+    switch (state.type) {
+      case 'SETUP':
+        setup(renderer.app, world).then(() => (state = { type: 'RUNNING' }));
+        state = { type: 'LOADING' };
+        break;
+      case 'RUNNING':
+        queue.process();
+        world.runSystems({ delta });
+        break;
+      case 'LOADING':
+        // update loading ui
+        break;
+      default:
+      // should never happen, maybe panic here
+    }
   }
 
-  setup(renderer.app, world).then(() => {
-    renderer.app.ticker.add(tick);
-  });
+  renderer.app.ticker.add(tick);
 
   return {
     cleanup() {
