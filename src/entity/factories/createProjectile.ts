@@ -44,6 +44,6 @@ export const createProjectile = (
     .build();
 
   registerRenderable(projectile.entity_id, sprite);
-  console.log(projectile.orientation.angle);
+  console.log(options.target, projectile.orientation.angle);
   return projectile;
 };

@@ -61,11 +61,10 @@ export function getControls() {
 
 export const createControls = (app: Application, queue: GameLoopQueue) => {
   const canvas = app.view as HTMLCanvasElement;
-
   app.stage.on('pointerdown', e => {
     queue.dispatch({
       type: EventNames.PLAYER_ATTACK,
-      payload: (app.renderer.events as any).rootPointerEvent.global as Point
+      payload: e.global
     });
   });
 

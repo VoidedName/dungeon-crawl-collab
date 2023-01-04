@@ -51,7 +51,7 @@ export const RenderSystem: (
       }
 
       if (hasProjectile(e)) {
-        sprite.rotation = deg2Rad(e.orientation.angle - 90);
+        sprite.rotation = deg2Rad(e.orientation.angle);
       }
     });
   }
