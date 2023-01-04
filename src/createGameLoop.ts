@@ -136,7 +136,6 @@ const setup = async (app: Application, world: ECSWorld) => {
 
   const camera = createCamera(world, player.entity_id);
   camera.camera.following = player.entity_id;
-  createTrap(world, { spriteName: 'trap' });
 };
 
 type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
