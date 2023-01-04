@@ -4,6 +4,8 @@ import { createMachine, interpret } from 'xstate';
 import { scheduleAnimation } from '@/renderer/AnimationManager';
 import { AnimationState } from '@/entity/components/Animatable';
 import { getAnimationDuration } from '@/renderer/renderableUtils';
+import { resolveRenderable } from '@/renderer/renderableManager';
+import type { Sprite } from 'pixi.js';
 
 export const TrapState = {
   IDLE: 'idle',
@@ -34,6 +36,8 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             [TrapStateTransitions.ATTACK]: TrapState.FIRED
           },
           entry: () => {
+            const sprite = resolveRenderable(entity.entity_id) as Sprite;
+            sprite.tint = 0xffffff;
             scheduleAnimation(entity.entity_id, {
               spriteName: entity.animatable.spriteName,
               state: AnimationState.IDLE
@@ -73,6 +77,8 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             }
           },
           entry: () => {
+            const sprite = resolveRenderable(entity.entity_id) as Sprite;
+            sprite.tint = 0x555555;
             scheduleAnimation(entity.entity_id, {
               spriteName: entity.animatable.spriteName,
               state: AnimationState.IDLE
