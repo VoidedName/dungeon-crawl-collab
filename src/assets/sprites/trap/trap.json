@@ -125,6 +125,7 @@
    { "name": "FX 1", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
+   { "name": "body", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 16, "y": 18, "w": 32, "h": 30 } }, { "frame": 1, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 2, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 3, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 4, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 5, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 6, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 7, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 8, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 9, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 10, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 11, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }] }
   ]
  }
 }
