@@ -121,7 +121,7 @@ export const createControls = (app: Application, queue: GameLoopQueue) => {
   const onKeyDown = keyboardHandler(true);
   const onKeyUp = keyboardHandler(false);
 
-  useKeydownOnce(onKeyDown, window);
+  window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
   canvas.addEventListener('mousemove', onMousemove);
 

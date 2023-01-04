@@ -1,43 +1,39 @@
 import type { TAudioManager } from '@/createAudioManager';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 import type { ECSWorld } from '@/ecs/ECSWorld';
+import {
+  AnimatableBrand,
+  type Animatable,
+  AnimationState
+} from '@/entity/components/Animatable';
 import { PlayerBrand, type Player } from '@/entity/components/Player';
 import {
   RenderableBrand,
   type Renderable
 } from '@/entity/components/Renderable';
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
-import type { DisplayObject, Sprite } from 'pixi.js';
-
-const FLASH_DURATION = 150;
+import { PlayerStateTransitions } from '@/stateMachines/player';
+import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
+import { clamp } from '@/utils/math';
 
 export const playerDamagedHandler = (
   damage: number,
   world: ECSWorld,
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
   navigateTo: (path: string) => void
 ) => {
-  const [player] = world.entitiesByComponent<[Player, Stats, Renderable]>([
-    PlayerBrand,
-    StatsBrand,
-    RenderableBrand
-  ]);
+  const [player] = world.entitiesByComponent<
+    [Player, Stats, Renderable, Animatable]
+  >([PlayerBrand, StatsBrand, RenderableBrand, AnimatableBrand]);
   if (!player) return;
-  player.stats.current.health = Math.max(
+
+  player.stats.current.health = clamp(
+    player.stats.current.health - damage,
     0,
-    player.stats.current.health - damage
+    player.stats.base.health
   );
-  world.get<TAudioManager>('audio').match(
-    audioManager => {
-      audioManager.play('ouch');
-    },
-    () => console.warn('no audio manager set')
-  );
-  const playerSprite = resolveSprite(player.entity_id) as Sprite;
-  playerSprite.tint = 0xff0000;
-  setTimeout(() => {
-    playerSprite.tint = 0xffffff;
-  }, FLASH_DURATION);
+
+  const machine = resolveStateMachine(player.entity_id);
+  machine.send(PlayerStateTransitions.TAKE_DAMAGE);
 
   if (player.stats.current.health <= 0) {
     alert('you dead');

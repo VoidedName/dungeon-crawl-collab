@@ -12,6 +12,8 @@ import {
   RenderableBrand,
   type Renderable
 } from '@/entity/components/Renderable';
+import { PlayerStateTransitions } from '@/stateMachines/player';
+import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 
 export type Directions = {
   up: boolean;
@@ -35,4 +37,11 @@ export const keyboardMovementHandler = (
   player.movement_intent.down = directions.down;
   player.movement_intent.left = directions.left;
   player.movement_intent.right = directions.right;
+
+  const machine = resolveStateMachine(player.entity_id);
+  const isRunning = Object.values(player.movement_intent).some(val => val);
+
+  machine.send(
+    isRunning ? PlayerStateTransitions.RUN : PlayerStateTransitions.STOP_RUN
+  );
 };

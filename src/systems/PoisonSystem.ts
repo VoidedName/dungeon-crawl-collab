@@ -16,8 +16,8 @@ const DAMAGE_INTERVAL = 1000;
 let lastTick = Date.now();
 
 export const PoisonSystem: (
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject
-) => ECSSystem<[Poison, Renderable, Stats]> = resolveSprite => ({
+  resolveRenderable: (sprite: ECSEntityId) => DisplayObject
+) => ECSSystem<[Poison, Renderable, Stats]> = resolveRenderable => ({
   target: [PoisonBrand, RenderableBrand, StatsBrand],
   run: (ecs, props, entities) => {
     const now = Date.now();
@@ -35,7 +35,7 @@ export const PoisonSystem: (
       if (entity.poison.nextDamageIn <= 0) {
         entity.poison.nextDamageIn = DAMAGE_INTERVAL;
         entity.stats.current.health -= entity.poison.damage;
-        flashRed(resolveSprite, entity.entity_id);
+        flashRed(resolveRenderable, entity.entity_id);
 
         if (entity.stats.current.health <= 0) {
           ecs.addComponent(entity, deleteComponent);

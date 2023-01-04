@@ -4,7 +4,7 @@ import { isNever } from './utils/assertions';
 import type { Point, Values } from './utils/types';
 
 import { loadMap } from './MapManager';
-import { resolveSprite } from './renderer/renderableCache';
+import { resolveRenderable } from './renderer/renderableManager';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
 import { createTrap } from './createTrap';
@@ -106,7 +106,7 @@ const eventQueueReducer =
         return playerInteractHandler(payload, world);
 
       case EventNames.PLAYER_DAMAGED:
-        return playerDamagedHandler(payload, world, resolveSprite, navigateTo);
+        return playerDamagedHandler(payload, world, navigateTo);
 
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);
@@ -153,15 +153,15 @@ export function createGameLoop(
   const controls = createControls(renderer.app, queue);
 
   world.addSystem('movement', MovementSystem());
-  world.addSystem('render', RenderSystem(resolveSprite, renderer.app));
+  world.addSystem('render', RenderSystem(resolveRenderable, renderer.app));
   world.addSystem('debug_renderer', DebugRenderer(renderer.app));
   world.addSystem('camera', CameraSystem(renderer.app));
   world.addSystem(
     'interactions',
-    InteractionSystem(resolveSprite, renderer.app)
+    InteractionSystem(resolveRenderable, renderer.app)
   );
-  world.addSystem('poison', PoisonSystem(resolveSprite));
-  world.addSystem('destroy', DeleteSystem(resolveSprite));
+  world.addSystem('poison', PoisonSystem(resolveRenderable));
+  world.addSystem('destroy', DeleteSystem(resolveRenderable));
 
   function tick(delta: number) {
     switch (state.type) {

@@ -10,56 +10,28 @@ import {
   OrientationBrand,
   type Orientation
 } from '@/entity/components/Orientation';
-import {
-  getAnimationState,
-  scheduleAnimation
-} from '@/renderer/AnimationManager';
-import {
-  AnimationState,
-  hasAnimatable,
-  type Animatable
-} from '@/entity/components/Animatable';
+import { getAnimationState } from '@/renderer/AnimationManager';
+import { AnimationState } from '@/entity/components/Animatable';
 import { hasPlayer } from '@/entity/components/MovementIntent';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export const RenderSystem: (
-  resolveSprite: (sprite: ECSEntityId) => DisplayObject,
+  resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
   app: Application
 ) => ECSSystem<[Position, Renderable, Orientation, Velocity]> = (
-  resolveSprite,
+  resolveRenderable,
   app
 ) => ({
   target: [PositionBrand, RenderableBrand, OrientationBrand, VelocityBrand],
   run: (ecs, props, entities) => {
-    const triggerMovementAnimation = (
-      e: typeof entities[number] & Animatable
-    ) => {
-      const isMoving = (e.velocity.x ?? 0) !== 0 || (e.velocity.y ?? 0) !== 0;
-
-      const newState = isMoving ? AnimationState.RUNNING : AnimationState.IDLE;
-      const currentState = getAnimationState(e.entity_id);
-
-      if (newState !== currentState) {
-        scheduleAnimation(e.entity_id, {
-          state: isMoving ? AnimationState.RUNNING : AnimationState.IDLE,
-          spriteName: e.animatable.spriteName
-        });
-      }
-    };
-
     entities.forEach(e => {
-      const sprite = resolveSprite(e.entity_id);
+      const sprite = resolveRenderable(e.entity_id);
 
       if (!sprite.parent) {
         app.stage.addChild(sprite);
       }
 
       sprite.position.set(e.position.x, e.position.y);
-
-      // temporary - scheduling animation should be tied to an entity state machine
-      if (hasAnimatable(e)) {
-        triggerMovementAnimation(e);
-      }
 
       const shouldSetOrientation =
         getAnimationState(e.entity_id) !== AnimationState.ATTACKING;

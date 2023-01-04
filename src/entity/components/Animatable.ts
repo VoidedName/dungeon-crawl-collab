@@ -1,14 +1,11 @@
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
 import type { SpriteName } from '@/renderer/createAnimatedSprite';
+import { PlayerState } from '@/stateMachines/player';
 import type { Values } from '@/utils/types';
 
-export const AnimationState = {
-  IDLE: 'idle',
-  RUNNING: 'running',
-  ATTACKING: 'attacking'
-} as const;
-export type AnimationState = Values<typeof AnimationState>;
+export const AnimationState = PlayerState;
+export type AnimationState = Values<typeof PlayerState>;
 
 export const AnimatableBrand = 'animatable';
 type AnimatableBrand = typeof AnimatableBrand;

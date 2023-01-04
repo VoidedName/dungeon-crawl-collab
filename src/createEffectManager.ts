@@ -3,11 +3,11 @@ import { DisplayObject, Graphics, Sprite, type Application } from 'pixi.js';
 import type { ECSEntityId } from './ecs/ECSEntity';
 
 export function flashRed(
-  resolveSprite: (entityId: ECSEntityId) => DisplayObject,
+  resolveRenderable: (entityId: ECSEntityId) => DisplayObject,
   entityId: ECSEntityId
 ) {
   const FLASH_DURATION = 150;
-  const playerSprite = resolveSprite(entityId) as Sprite;
+  const playerSprite = resolveRenderable(entityId) as Sprite;
   playerSprite.tint = 0xff0000;
   setTimeout(() => {
     playerSprite.tint = 0xffffff;

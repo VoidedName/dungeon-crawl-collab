@@ -4,7 +4,7 @@ import type { ECSWorld } from './ecs/ECSWorld';
 import { withInteractable } from './entity/components/Interactable';
 import type { Position } from './entity/components/Position';
 import { Text } from 'pixi.js';
-import { register } from './renderer/renderableCache';
+import { registerRenderable } from './renderer/renderableManager';
 import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
 import { withMapObject } from './entity/components/MapObject';
@@ -137,7 +137,7 @@ export async function loadMap(
           .with(renderableComponent)
           .build();
 
-        register(entity.entity_id, text);
+        registerRenderable(entity.entity_id, text);
       } else if (tileId === STAIRS_UP_ID) {
         const text = new Text('Ascend', {
           fontFamily: 'Arial',
@@ -180,7 +180,7 @@ export async function loadMap(
           )
           .with(renderableComponent)
           .build();
-        register(entity.entity_id, text);
+        registerRenderable(entity.entity_id, text);
       } else if (collidableTypes.includes(tileId)) {
         const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
 

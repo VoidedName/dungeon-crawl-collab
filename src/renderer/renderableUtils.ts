@@ -2,13 +2,15 @@ import type {
   Animatable,
   AnimationState
 } from '@/entity/components/Animatable';
-import { resolveSprite } from './renderableCache';
+import { resolveRenderable } from './renderableManager';
 import { sprites } from '@/assets/sprites';
 import type { AnimatedSprite } from 'pixi.js';
 import type { Rectangle, Values } from '@/utils/types';
 import type { Position } from '@/entity/components/Position';
 import type { Size } from '@/entity/components/Size';
 import type { ECSEntity } from '@/ecs/ECSEntity';
+import type { SpriteName } from './createAnimatedSprite';
+
 export const HitBoxId = {
   BODY_COLLISION: 'body'
 };
@@ -36,7 +38,7 @@ export const getSpriteHitbox = ({
 }: GetHitboxOptions): Rectangle => {
   const { asepriteMeta } = sprites[entity.animatable.spriteName];
 
-  const sprite = resolveSprite<AnimatedSprite>(entity.entity_id);
+  const sprite = resolveRenderable<AnimatedSprite>(entity.entity_id);
   const animation = asepriteMeta.meta.frameTags.find(
     tag => tag.name === animationState
   );
@@ -67,4 +69,21 @@ export const getSpriteHitbox = ({
     w: frame.bounds.w,
     h: frame.bounds.h
   };
+};
+
+export const getAnimationDuration = (
+  spriteName: SpriteName,
+  name: AnimationState
+) => {
+  const { asepriteMeta } = sprites[spriteName];
+
+  const animation = asepriteMeta.meta.frameTags.find(tag => tag.name === name);
+  if (!animation) {
+    console.warn(`Animation not found on ${spriteName}:  ${name}`);
+    return 0;
+  }
+
+  return asepriteMeta.frames
+    .slice(animation.from, animation.to + 1)
+    .reduce((total, frame) => total + frame.duration, 0);
 };

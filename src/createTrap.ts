@@ -5,7 +5,7 @@ import {
   type SpriteName
 } from './renderer/createAnimatedSprite';
 import { AnimationState, withAnimatable } from './entity/components/Animatable';
-import { register } from './renderer/renderableCache';
+import { registerRenderable } from './renderer/renderableManager';
 import { withStats } from './entity/components/Stats';
 import { positionComponent } from '@/entity/components/Position';
 import { withVelocity } from './entity/components/Velocity';
@@ -36,5 +36,5 @@ export const createTrap = (world: ECSWorld, options: CreateTrapOptions) => {
     )
     .build();
 
-  register(trap.entity_id, sprite);
+  registerRenderable(trap.entity_id, sprite);
 };

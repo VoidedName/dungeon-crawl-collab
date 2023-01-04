@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 import { createSpritesheetFrameObject } from '@/utils/aseprite';
 import type { AnimationState } from '@/entity/components/Animatable';
 import { Assets, type AnimatedSprite, type Texture } from 'pixi.js';
-import { resolveSprite } from './renderableCache';
+import { resolveRenderable } from './renderableManager';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export type SpriteName = keyof typeof sprites;
@@ -35,7 +35,7 @@ export const updateTextures = (
 ) => {
   const { meta } = sprites[spriteName];
 
-  const sprite = resolveSprite<AnimatedSprite>(id);
+  const sprite = resolveRenderable<AnimatedSprite>(id);
 
   sprite.textures = createSpritesheetFrameObject(
     animation,
