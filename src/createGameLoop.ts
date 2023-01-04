@@ -6,8 +6,8 @@ import type { Point, Values } from './utils/types';
 import { loadMap } from './MapManager';
 import { resolveRenderable } from './renderer/renderableManager';
 import { createEventQueue, type EventQueue } from './createEventQueue';
-import { createPlayer } from './createPlayer';
-import { createTrap } from './createTrap';
+import { createPlayer } from './entity/factories/createPlayer';
+import { createTrap } from './entity/factories/createTrap';
 import { createControls } from './createControls';
 
 import { MovementSystem } from '@/systems/MovementSystem';

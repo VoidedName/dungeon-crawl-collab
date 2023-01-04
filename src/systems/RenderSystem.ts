@@ -14,6 +14,8 @@ import { getAnimationState } from '@/renderer/AnimationManager';
 import { AnimationState } from '@/entity/components/Animatable';
 import { hasPlayer } from '@/entity/components/MovementIntent';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
+import { hasProjectile } from '@/entity/components/Projectile';
+import { deg2Rad } from '@/utils/math';
 
 export const RenderSystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
@@ -35,6 +37,7 @@ export const RenderSystem: (
 
       const shouldSetOrientation =
         getAnimationState(e.entity_id) !== AnimationState.ATTACKING;
+
       if (hasPlayer(e) && shouldSetOrientation) {
         // not sure why it's marked at private, this information is pretty useful
         // this might be a pixi 7 oversight, as they replaced InteractionManager with EventSystem
@@ -45,6 +48,10 @@ export const RenderSystem: (
         const scaleX =
           mousePosition.x < sprite.toGlobal({ x: 0, y: 0 }).x ? -1 : 1;
         sprite.scale.set(scaleX, 1);
+      }
+
+      if (hasProjectile(e)) {
+        sprite.rotation = deg2Rad(e.orientation.angle - 90);
       }
     });
   }

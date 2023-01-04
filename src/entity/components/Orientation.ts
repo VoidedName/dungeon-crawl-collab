@@ -14,8 +14,8 @@ export function hasVelocity<E extends ECSEntity>(e: E): e is E & Orientation {
   return OrientationBrand in e;
 }
 
-export const withOrientation = (orientation: AngleInDegrees) => () => ({
+export const withOrientation = (angle: AngleInDegrees) => () => ({
   [OrientationBrand]: {
-    orientation
+    angle
   }
 });

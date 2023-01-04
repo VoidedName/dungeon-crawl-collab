@@ -1,4 +1,4 @@
-import type { Application } from 'pixi.js';
+import type { Application, Point } from 'pixi.js';
 import { useKeydownOnce } from './composables/useKeydownOnce';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
 import { mulVector, subVector } from './utils/vectors';
@@ -62,10 +62,10 @@ export function getControls() {
 export const createControls = (app: Application, queue: GameLoopQueue) => {
   const canvas = app.view as HTMLCanvasElement;
 
-  app.stage.on('pointerdown', () => {
+  app.stage.on('pointerdown', e => {
     queue.dispatch({
       type: EventNames.PLAYER_ATTACK,
-      payload: { x: 0, y: 0 }
+      payload: (app.renderer.events as any).rootPointerEvent.global as Point
     });
   });
 

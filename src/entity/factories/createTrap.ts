@@ -1,16 +1,16 @@
-import type { ECSWorld } from './ecs/ECSWorld';
-import { renderableComponent } from './entity/components/Renderable';
+import type { ECSWorld } from '../../ecs/ECSWorld';
+import { renderableComponent } from '../components/Renderable';
 import {
   createAnimatedSprite,
   type SpriteName
-} from './renderer/createAnimatedSprite';
-import { AnimationState, withAnimatable } from './entity/components/Animatable';
-import { registerRenderable } from './renderer/renderableManager';
-import { withStats } from './entity/components/Stats';
+} from '../../renderer/createAnimatedSprite';
+import { AnimationState, withAnimatable } from '../components/Animatable';
+import { registerRenderable } from '../../renderer/renderableManager';
+import { withStats } from '../components/Stats';
 import { positionComponent } from '@/entity/components/Position';
-import { withVelocity } from './entity/components/Velocity';
-import { withOrientation } from './entity/components/Orientation';
-import { poisonComponent } from './entity/components/Poison';
+import { withVelocity } from '../components/Velocity';
+import { withOrientation } from '../components/Orientation';
+import { poisonComponent } from '../components/Poison';
 
 export type CreateTrapOptions = {
   spriteName: SpriteName;
