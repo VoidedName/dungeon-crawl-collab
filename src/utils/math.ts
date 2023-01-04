@@ -9,3 +9,5 @@ export const dist = (p1: Point, p2: Point) => {
 
 export const clamp = (num: number, min: number, max: number) =>
   Math.min(Math.max(num, min), max);
+
+export const lerp = (a: number, b: number, w: number) => a + (b - a) * w;
