@@ -5,10 +5,9 @@ import {
   RenderableBrand
 } from '@/entity/components/Renderable';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
+import { getPlayer } from '@/utils/getPlayer';
 import { EnemyBrand, type Enemy } from '@/entity/components/Enemy';
-import { PlayerBrand, type Player } from '@/entity/components/Player';
-import { getSpriteHitbox, HitBoxId } from '@/renderer/renderableUtils';
-import { rectRectCollision } from '@/utils/collisions';
+import { spriteCollision } from '@/utils/collisions';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import { SizeBrand, type Size } from '@/entity/components/Size';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
@@ -17,8 +16,8 @@ import {
   AnimatableBrand,
   type Animatable
 } from '@/entity/components/Animatable';
-import { getAnimationState } from '@/renderer/AnimationManager';
 import { EventNames, type GameLoopQueue } from '@/createGameLoop';
+import { isObject } from '@/utils/assertions';
 
 export const EnemySystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
@@ -35,31 +34,20 @@ export const EnemySystem: (
     SizeBrand
   ],
   run: (ecs, props, entities) => {
-    const [player] = ecs.entitiesByComponent<
-      [Player, Animatable, Position, Size]
-    >([PlayerBrand, AnimatableBrand, PositionBrand, SizeBrand]);
-
-    if (!player) return;
+    const player = getPlayer(ecs);
 
     entities.forEach(entity => {
       if (entity.enemy.type === 'trap') {
         const machine = resolveStateMachine(entity.entity_id);
-        if (
-          machine.getSnapshot().value === TrapState.IDLE &&
-          rectRectCollision(
-            getSpriteHitbox({
-              entity: player,
-              hitboxId: HitBoxId.BODY_COLLISION,
-              animationState: getAnimationState(player.entity_id)!
-            }),
-            getSpriteHitbox({
-              entity,
-              hitboxId: HitBoxId.BODY_COLLISION,
-              animationState: getAnimationState(entity.entity_id)!
-            })
-          )
-        ) {
+        if (!spriteCollision(player as any, entity)) return;
+        if (machine.getSnapshot().value === TrapState.IDLE) {
           machine.send(TrapStateTransitions.ATTACK);
+        } else if (
+          isObject(machine.getSnapshot().value) &&
+          (machine.getSnapshot().value as any)[TrapState.DAMAGEABLE] !==
+            TrapState.USED
+        ) {
+          machine.send(TrapStateTransitions.USED);
           queue.dispatch({
             type: EventNames.PLAYER_DAMAGED,
             payload: 1
