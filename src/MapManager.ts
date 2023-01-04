@@ -14,13 +14,11 @@ import { createTileset } from './renderer/createTileset';
 import { renderableComponent } from './entity/components/Renderable';
 import { createTrap } from './createTrap';
 import type { ECSEntity } from './ecs/ECSEntity';
+import { enemies, type Enemies } from './entity/components/Enemy';
 
 export type TMap = {
   level: number;
 };
-
-const enemies = ['trap'] as const;
-type Enemies = typeof enemies[number];
 
 const enemiesOnLevel: Record<Enemies, number>[] = [{ trap: 1 }, { trap: 2 }];
 

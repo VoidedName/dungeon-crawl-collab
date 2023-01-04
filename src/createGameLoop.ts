@@ -7,7 +7,6 @@ import { loadMap } from './MapManager';
 import { resolveRenderable } from './renderer/renderableManager';
 import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './createPlayer';
-import { createTrap } from './createTrap';
 import { createControls } from './createControls';
 
 import { MovementSystem } from '@/systems/MovementSystem';
@@ -32,6 +31,7 @@ import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
 import { loadSpriteTextures } from './renderer/createAnimatedSprite';
+import { EnemySystem } from './systems/EnemySystem';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -160,6 +160,7 @@ export function createGameLoop(
     InteractionSystem(resolveRenderable, renderer.app)
   );
   world.addSystem('poison', PoisonSystem(resolveRenderable));
+  world.addSystem('enemies', EnemySystem(resolveRenderable, queue));
   world.addSystem('destroy', DeleteSystem(resolveRenderable));
 
   function tick(delta: number) {
