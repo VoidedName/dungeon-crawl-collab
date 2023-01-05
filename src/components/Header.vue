@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import Gear from '~icons/mdi/gear';
 import Container from './ui/Container.vue';
+
+import { store } from '@/store';
 </script>
 
 <template>
@@ -11,10 +13,10 @@ import Container from './ui/Container.vue';
       <nav>
         <router-link to="/">Home</router-link>
         <router-link to="/achievements">Achievements</router-link>
-        <router-link to="/settings">
+        <button @click="store.showSettingsMenu = true">
           <Gear />
           Settings
-        </router-link>
+        </button>
         <router-link to="/about">About</router-link>
       </nav>
     </Container>

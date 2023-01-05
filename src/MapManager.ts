@@ -1,20 +1,24 @@
 import { Application, Container, Sprite } from 'pixi.js';
-import tilesheetImage from './assets/tilesets/base.png';
-import type { ECSWorld } from './ecs/ECSWorld';
-import { withInteractable } from './entity/components/Interactable';
-import { hasPosition, type Position } from './entity/components/Position';
+import tilesheetImage from '@/assets/tilesets/base.png';
+import type { ECSWorld } from '@/ecs/ECSWorld';
+import { withInteractable } from '@/entity/components/Interactable';
+import { hasPosition, type Position } from '@/entity/components/Position';
 import { Text } from 'pixi.js';
-import { registerRenderable } from './renderer/renderableManager';
+import {
+  registerRenderable,
+  resolveRenderable
+} from './renderer/renderableManager';
 import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
-import { withMapObject } from './entity/components/MapObject';
-import type { MapObject } from './entity/components/MapObject';
-import { withCollidable } from './entity/components/Collidable';
-import { createTileset } from './renderer/createTileset';
-import { renderableComponent } from './entity/components/Renderable';
-import { createTrap } from './createTrap';
-import type { ECSEntity } from './ecs/ECSEntity';
-import { enemies, type Enemies } from './entity/components/Enemy';
+import { withMapObject } from '@/entity/components/MapObject';
+import { hasAnimatable } from '@/entity/components/Animatable';
+import type { MapObject } from '@/entity/components/MapObject';
+import { withCollidable } from '@/entity/components/Collidable';
+import { createTileset } from '@/renderer/createTileset';
+import { renderableComponent } from '@/entity/components/Renderable';
+import { createTrap } from '@/createTrap';
+import type { ECSEntity } from '@/ecs/ECSEntity';
+import { enemies, type Enemies } from '@/entity/components/Enemy';
 
 export type TMap = {
   level: number;
@@ -82,6 +86,9 @@ export async function loadMap(
     mapGroup.destroy();
     world.entitiesByComponent<[MapObject]>(['mapObject']).forEach(mapObject => {
       world.deleteEntity(mapObject.entity_id);
+      if (hasAnimatable(mapObject)) {
+        resolveRenderable(mapObject.entity_id).destroy();
+      }
     });
   }
   mapGroup = new Container();
