@@ -10,9 +10,13 @@ export type Random = {
    */
   nextF(): number;
   /**
-   * next Double between [min, max[
+   * next Int between [min, max]
    */
   nextRange(min: number, max: number): number;
+  /**
+   * next Double between [min, max[
+   */
+  nextRangeF(min: number, max: number): number;
   /**
    * set seed
    */
@@ -39,7 +43,7 @@ export function lehmerRandom(seed?: number): Random {
   function nextF(): number {
     return next() / 0x7fffffff;
   }
-  function nextRange(min: number, max: number): number {
+  function nextRangeF(min: number, max: number): number {
     return nextF() * (max - min) + min;
   }
   return {
@@ -48,9 +52,12 @@ export function lehmerRandom(seed?: number): Random {
       state = seed;
     },
     nextF,
-    nextRange,
+    nextRange(min: number, max: number): number {
+      return Math.round(nextRangeF(min, max));
+    },
+    nextRangeF,
     die(sides: number): number {
-      return Math.round(nextRange(1, sides));
+      return Math.round(nextRangeF(1, sides));
     }
   };
 }
