@@ -36,61 +36,52 @@
     "duration": 100
    },
    {
-    "filename": "trap:fired.0",
-    "frame": { "x": 0, "y": 0, "w": 64, "h": 64 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
-    "sourceSize": { "w": 64, "h": 64 },
-    "duration": 100
-   },
-   {
-    "filename": "trap:fired.1",
+    "filename": "trap:activating.0",
     "frame": { "x": 192, "y": 0, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 100
+    "duration": 75
    },
    {
-    "filename": "trap:fired.2",
+    "filename": "trap:activating.1",
     "frame": { "x": 0, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 100
+    "duration": 75
    },
    {
-    "filename": "trap:fired.3",
+    "filename": "trap:activating.2",
     "frame": { "x": 64, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 50
+    "duration": 75
    },
    {
-    "filename": "trap:fired.4",
+    "filename": "trap:activating.3",
     "frame": { "x": 128, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 50
+    "duration": 75
    },
    {
-    "filename": "trap:fired.5",
+    "filename": "trap:activating.4",
     "frame": { "x": 192, "y": 64, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 50
+    "duration": 100
    },
    {
-    "filename": "trap:fired.6",
+    "filename": "trap:ready.0",
     "frame": { "x": 0, "y": 128, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
@@ -99,8 +90,35 @@
     "duration": 50
    },
    {
-    "filename": "trap:fired.7",
+    "filename": "trap:ready.1",
     "frame": { "x": 64, "y": 128, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 50
+   },
+   {
+    "filename": "trap:ready.2",
+    "frame": { "x": 128, "y": 128, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 50
+   },
+   {
+    "filename": "trap:ready.3",
+    "frame": { "x": 192, "y": 128, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 50
+   },
+   {
+    "filename": "trap:triggered.9",
+    "frame": { "x": 0, "y": 192, "w": 64, "h": 64 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
@@ -113,11 +131,13 @@
   "version": "1.2.40-x64",
   "image": "trap.png",
   "format": "RGBA8888",
-  "size": { "w": 256, "h": 192 },
+  "size": { "w": 256, "h": 256 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "fired", "from": 4, "to": 11, "direction": "forward" }
+   { "name": "triggered", "from": 4, "to": 13, "direction": "forward" },
+   { "name": "activating", "from": 4, "to": 8, "direction": "forward" },
+   { "name": "ready", "from": 9, "to": 12, "direction": "forward" }
   ],
   "layers": [
    { "name": "Body", "opacity": 255, "blendMode": "normal" },
@@ -125,7 +145,7 @@
    { "name": "FX 1", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
-   { "name": "body", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 16, "y": 18, "w": 32, "h": 30 } }, { "frame": 1, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 2, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 3, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 4, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 5, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 6, "bounds": {"x": 16, "y": 18, "w": 33, "h": 30 } }, { "frame": 7, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 8, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 9, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 10, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 11, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }] }
+   { "name": "body", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 16, "y": 16, "w": 33, "h": 30 } }, { "frame": 1, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 2, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 3, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 4, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 5, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 6, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 7, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 8, "bounds": {"x": 16, "y": 17, "w": 33, "h": 30 } }, { "frame": 9, "bounds": {"x": 12, "y": 11, "w": 40, "h": 36 } }, { "frame": 10, "bounds": {"x": 13, "y": 11, "w": 39, "h": 36 } }, { "frame": 11, "bounds": {"x": 22, "y": 11, "w": 23, "h": 36 } }, { "frame": 12, "bounds": {"x": 22, "y": 11, "w": 23, "h": 36 } }, { "frame": 13, "bounds": {"x": 15, "y": 19, "w": 36, "h": 28 } }] }
   ]
  }
 }

@@ -11,3 +11,11 @@ export const clamp = (num: number, min: number, max: number) =>
   Math.min(Math.max(num, min), max);
 
 export const lerp = (a: number, b: number, w: number) => a + (b - a) * w;
+
+export const deg2Rad = (degrees: number) => {
+  return degrees * (Math.PI / 180);
+};
+
+export const rad2Deg = (radians: number) => {
+  return (180 * radians) / Math.PI;
+};

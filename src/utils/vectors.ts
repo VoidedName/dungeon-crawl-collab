@@ -1,5 +1,6 @@
 import type { AngleInDegrees } from '@/entity/components/Orientation';
 import type { Point } from './types';
+import { rad2Deg } from './math';
 
 export const addVector = (vec1: Point, vec2: Point) => ({
   x: vec1.x + vec2.x,
@@ -42,9 +43,7 @@ export const divVector = (vec: Point, val: Point | number) => {
 export const toAngle = (vec: Point): AngleInDegrees => {
   const radians = Math.atan2(vec.y, vec.x);
 
-  const degrees = (180 * radians) / Math.PI;
-
-  return (360 + Math.round(degrees)) % 360;
+  return (360 + Math.round(rad2Deg(radians))) % 360;
 };
 
 export const normalizeVector = ({ x, y }: Point) => {
@@ -55,4 +54,8 @@ export const normalizeVector = ({ x, y }: Point) => {
       y: 0
     };
   return { x: x / len, y: y / len };
+};
+
+export const setMagnitude = (vec: Point, speed: number) => {
+  return mulVector(normalizeVector(vec), speed);
 };

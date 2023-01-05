@@ -1,24 +1,25 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import { hasAnimatable } from '@/entity/components/Animatable';
-import type { Collidable } from '@/entity/components/Collidable';
-import { hasImmoveable } from '@/entity/components/Immoveable';
 import {
-  MovementIntentBrand,
-  type MovementIntent
-} from '@/entity/components/MovementIntent';
+  AnimatableBrand,
+  AnimationState,
+  type Animatable
+} from '@/entity/components/Animatable';
+import {
+  CollidableBrand,
+  type Collidable
+} from '@/entity/components/Collidable';
+import { hasImmoveable } from '@/entity/components/Immoveable';
 import {
   OrientationBrand,
   type Orientation
 } from '@/entity/components/Orientation';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import { SizeBrand, type Size } from '@/entity/components/Size';
-import { hasStateAware } from '@/entity/components/StateAware';
-import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
-import type { Directions } from '@/eventHandlers/keyboardMovement';
 import { getAnimationState } from '@/renderer/AnimationManager';
 import {
   entityToRect,
+  getAnimationDuration,
   getSpriteHitbox,
   HitBoxId
 } from '@/renderer/renderableUtils';
@@ -26,70 +27,51 @@ import {
   directionAwareRectRectCollision,
   rectRectCollision
 } from '@/utils/collisions';
-import type { Point } from '@/utils/types';
-import { addVector, mulVector, subVector } from '@/utils/vectors';
+import { addVector, subVector } from '@/utils/vectors';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 import { PlayerState } from '@/stateMachines/player';
-
-function normalize({ x, y }: { x: number; y: number }) {
-  const len = Math.hypot(x, y);
-  if (len === 0)
-    return {
-      x: 0,
-      y: 0
-    };
-  return { x: x / len, y: y / len };
-}
-
-export function computeVelocity(directions: Directions, speed: number): Point {
-  let dx = 0;
-  let dy = 0;
-  if (directions.right) {
-    dx += 1;
-  }
-  if (directions.left) {
-    dx -= 1;
-  }
-  if (directions.up) {
-    dy -= 1;
-  }
-  if (directions.down) {
-    dy += 1;
-  }
-  return mulVector(normalize({ x: dx, y: dy }), speed);
-}
+import { hasPlayer } from '@/entity/components/Player';
+import { hasProjectile } from '@/entity/components/Projectile';
+import { deleteComponent } from '@/entity/components/Delete';
+import {
+  StateAwareBrand,
+  type StateAware
+} from '@/entity/components/StateAware';
+import { ProjectileStateTransitions } from '@/stateMachines/projectile';
 
 export const MovementSystem: () => ECSSystem<
-  [Position, MovementIntent, Velocity, Stats, Orientation, Size]
+  [Position, Velocity, Orientation, Size, StateAware, Animatable]
 > = () => ({
   target: [
     PositionBrand,
-    MovementIntentBrand,
     VelocityBrand,
-    StatsBrand,
     OrientationBrand,
-    SizeBrand
+    SizeBrand,
+    StateAwareBrand,
+    AnimatableBrand
   ],
   run: (world, props, entities) => {
-    const collidables = world.entitiesByComponent<[Collidable]>(['collidable']);
+    const collidables = world.entitiesByComponent<[Collidable, Size, Position]>(
+      [CollidableBrand, SizeBrand, PositionBrand]
+    );
 
     entities.forEach(e => {
       if (hasImmoveable(e)) {
         return;
       }
-      if (hasStateAware(e)) {
-        const machine = resolveStateMachine(e.entity_id);
-        if (machine.getSnapshot().value !== PlayerState.RUNNING) return;
-      }
+      const machine = resolveStateMachine(e.entity_id);
+
+      if (hasPlayer(e) && machine.getSnapshot().value !== PlayerState.RUNNING)
+        return;
+      if (hasProjectile(e) && machine.getSnapshot().value !== PlayerState.IDLE)
+        return;
 
       const getHitbox = () =>
-        hasAnimatable(e)
-          ? getSpriteHitbox({
-              entity: e,
-              hitboxId: HitBoxId.BODY_COLLISION,
-              animationState: getAnimationState(e.entity_id)!
-            })
-          : entityToRect(e);
+        getSpriteHitbox({
+          entity: e,
+          hitboxId: HitBoxId.BODY_COLLISION,
+          animationState: getAnimationState(e.entity_id)!
+        });
 
       // snap back position to closest safe spot, to avoid getting stuck in a wall
       // this involves getting the potential overlaps with a collidable, in all 4 directions
@@ -100,7 +82,7 @@ export const MovementSystem: () => ECSSystem<
       for (const collidable of collidables) {
         const { left, right, up, down } = directionAwareRectRectCollision(
           getHitbox(),
-          collidable.collidable.hitbox
+          entityToRect(collidable)
         );
         const horizontalCorrection = left > right ? -left : right;
         const verticalCorrection = up > down ? -up : down;
@@ -113,21 +95,24 @@ export const MovementSystem: () => ECSSystem<
         }
       }
 
-      e.velocity = computeVelocity(e.movement_intent, e.stats.current.speed);
-      e.position = addVector(e.position, { x: e.velocity.x, y: 0 });
-
+      e.position = addVector(e.position, { x: e.velocity.x, y: e.velocity.y });
       for (const collidable of collidables) {
-        if (rectRectCollision(collidable.collidable.hitbox, getHitbox())) {
-          e.position = subVector(e.position, { x: e.velocity.x, y: 0 });
-          break;
-        }
-      }
-
-      e.position = addVector(e.position, { x: 0, y: e.velocity.y });
-      for (const collidable of collidables) {
-        if (rectRectCollision(collidable.collidable.hitbox, getHitbox())) {
-          e.position = subVector(e.position, { x: 0, y: e.velocity.y });
-          break;
+        if (rectRectCollision(getHitbox(), entityToRect(collidable))) {
+          if (hasPlayer(e)) {
+            Object.assign(
+              e.position,
+              subVector(e.position, {
+                x: e.velocity.x,
+                y: e.velocity.y
+              })
+            );
+          }
+          if (hasProjectile(e)) {
+            machine.send(ProjectileStateTransitions.DIE);
+            setTimeout(() => {
+              world.addComponent(e.entity_id, deleteComponent);
+            }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+          }
         }
       }
     });

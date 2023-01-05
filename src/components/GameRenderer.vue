@@ -3,6 +3,8 @@ import { useEcsApiProvider } from '@/composables/useEcsApi';
 import { createGameLoop, type ECSApi } from '@/createGameLoop';
 import { createGameRenderer } from '@/renderer/createGameRenderer.js';
 import PauseMenu from './PauseMenu.vue';
+import SettingsMenu from './SettingsMenu.vue';
+import { store } from '@/store';
 
 const canvasEl = ref<HTMLCanvasElement>();
 const ecsApi = useEcsApiProvider();
@@ -27,6 +29,7 @@ onUnmounted(() => {
 
 <template>
   <div class="game-renderer">
+    <SettingsMenu v-if="store.showSettingsMenu" />
     <PauseMenu v-if="ecsApi" />
     <canvas ref="canvasEl" />
   </div>

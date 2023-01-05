@@ -1,6 +1,6 @@
 import { createMachine, interpret } from 'xstate';
 import type { Values } from '@/utils/types';
-import type { PlayerEntity } from '@/createPlayer';
+import type { PlayerEntity } from '@/entity/factories/createPlayer';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import { AnimationState } from '@/entity/components/Animatable';
 import { scheduleAnimation } from '@/renderer/AnimationManager';

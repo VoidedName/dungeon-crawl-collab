@@ -6,8 +6,7 @@ import type { Point, Values } from './utils/types';
 import { loadMap } from './MapManager';
 import { resolveRenderable } from './renderer/renderableManager';
 import { createEventQueue, type EventQueue } from './createEventQueue';
-import { createPlayer } from './createPlayer';
-import { createTrap } from './createTrap';
+import { createPlayer } from './entity/factories/createPlayer';
 import { createControls } from './createControls';
 
 import { MovementSystem } from '@/systems/MovementSystem';
@@ -32,6 +31,10 @@ import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
 import { loadSpriteTextures } from './renderer/createAnimatedSprite';
+import { EnemySystem } from './systems/EnemySystem';
+import type { ECSEntityId } from './ecs/ECSEntity';
+import { damageHandler } from './eventHandlers/damageHandler';
+import { playerClasses } from './assets/codex/classes';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -40,7 +43,8 @@ export const EventNames = {
   PLAYER_INTERACT: 'PLAYER_INTERACT',
   PLAYER_DAMAGED: 'PLAYER_DAMAGED',
   TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
-  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET'
+  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
+  DAMAGE: 'DAMAGE'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -74,13 +78,22 @@ type SetCameraOffsetEvent = {
   payload: Point;
 };
 
+type DamageEvent = {
+  type: typeof EventNames.DAMAGE;
+  payload: {
+    damage: number;
+    entityId: ECSEntityId;
+  };
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
   | PlayerInteractEvent
   | PlayerDamagedEvent
   | ToggleDebugOverlayEvent
-  | SetCameraOffsetEvent;
+  | SetCameraOffsetEvent
+  | DamageEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -114,6 +127,9 @@ const eventQueueReducer =
       case EventNames.SET_CAMERA_OFFSET:
         return setCameraOffsetHandler(payload, world);
 
+      case EventNames.DAMAGE:
+        return damageHandler(payload, world);
+
       default:
         isNever(type);
     }
@@ -131,12 +147,11 @@ const setup = async (app: Application, world: ECSWorld) => {
   // another possible fix would be to place the player on the map spawn point somewhere else, removing the dependency to the player
   // The whole map loading process will probably be completely revamped fairly soon, so no need to overthink it for now, just to parallel load some things
   await loadSpriteTextures();
-  const player = createPlayer(world, { spriteName: 'wizard' });
+  const player = createPlayer(world, { playerClass: playerClasses.wizard });
   await loadMap(0, true, app, world);
 
   const camera = createCamera(world, player.entity_id);
   camera.camera.following = player.entity_id;
-  createTrap(world, { spriteName: 'trap' });
 };
 
 type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
@@ -160,8 +175,9 @@ export function createGameLoop(
     'interactions',
     InteractionSystem(resolveRenderable, renderer.app)
   );
-  world.addSystem('poison', PoisonSystem(resolveRenderable));
-  world.addSystem('destroy', DeleteSystem(resolveRenderable));
+  world.addSystem('poison', PoisonSystem(queue));
+  world.addSystem('enemies', EnemySystem(resolveRenderable, queue));
+  world.addSystem('destroy', DeleteSystem());
 
   function tick(delta: number) {
     switch (state.type) {

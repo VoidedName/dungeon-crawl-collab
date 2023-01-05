@@ -3,17 +3,34 @@ import {
   AnimatableBrand,
   type Animatable
 } from '@/entity/components/Animatable';
-import {
-  MovementIntentBrand,
-  type MovementIntent
-} from '@/entity/components/MovementIntent';
+
 import { PlayerBrand, type Player } from '@/entity/components/Player';
 import {
   RenderableBrand,
   type Renderable
 } from '@/entity/components/Renderable';
+import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import { PlayerStateTransitions } from '@/stateMachines/player';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
+import type { Point } from '@/utils/types';
+import { setMagnitude } from '@/utils/vectors';
+
+export function computeVelocity(directions: Directions, speed: number): Point {
+  const vel = { x: 0, y: 0 };
+  if (directions.right) {
+    vel.x += 1;
+  }
+  if (directions.left) {
+    vel.x -= 1;
+  }
+  if (directions.up) {
+    vel.y -= 1;
+  }
+  if (directions.down) {
+    vel.y += 1;
+  }
+  return setMagnitude(vel, speed);
+}
 
 export type Directions = {
   up: boolean;
@@ -29,17 +46,17 @@ export const keyboardMovementHandler = (
   world: ECSWorld
 ) => {
   const [player] = world.entitiesByComponent<
-    [Player, MovementIntent, Animatable, Renderable]
-  >([PlayerBrand, MovementIntentBrand, AnimatableBrand, RenderableBrand]);
+    [Player, Velocity, Animatable, Renderable]
+  >([PlayerBrand, VelocityBrand, AnimatableBrand, RenderableBrand]);
 
   if (!player) return;
-  player.movement_intent.up = directions.up;
-  player.movement_intent.down = directions.down;
-  player.movement_intent.left = directions.left;
-  player.movement_intent.right = directions.right;
+  player.velocity = computeVelocity(
+    directions,
+    player.player.stats.current.speed
+  );
 
   const machine = resolveStateMachine(player.entity_id);
-  const isRunning = Object.values(player.movement_intent).some(val => val);
+  const isRunning = player.velocity.x !== 0 || player.velocity.y !== 0;
 
   machine.send(
     isRunning ? PlayerStateTransitions.RUN : PlayerStateTransitions.STOP_RUN

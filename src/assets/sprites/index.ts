@@ -1,10 +1,12 @@
+import type { SpriteResource } from '../types';
 import { wizard } from './wizard';
 import { trap } from './trap';
-import type { SpriteResource } from '../types';
+import { magicMissile } from './magic-missile';
 
 export const sprites = {
   wizard,
-  trap
+  trap,
+  magicMissile
 } satisfies Record<string, SpriteResource>;
 
 export const texturesBundle = Object.fromEntries(
