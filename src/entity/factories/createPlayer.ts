@@ -16,14 +16,21 @@ import { stateAwareComponent } from '../components/StateAware';
 import { registerStateMachine } from '../../stateMachines/stateMachineManager';
 import { createPlayerStateMachine } from '../../stateMachines/player';
 import { sizeComponent } from '../components/Size';
+import type { PlayerClass } from '@/assets/types';
 
 export type CreatePlayerOptions = {
-  spriteName: SpriteName;
+  playerClass: PlayerClass;
 };
 
 export type PlayerEntity = ReturnType<typeof createPlayer>;
-export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
-  const sprite = createAnimatedSprite(options.spriteName, AnimationState.IDLE);
+export const createPlayer = (
+  world: ECSWorld,
+  { playerClass }: CreatePlayerOptions
+) => {
+  const sprite = createAnimatedSprite(
+    playerClass.spriteName,
+    AnimationState.IDLE
+  );
   sprite.zIndex = 1;
 
   const player = world
@@ -33,10 +40,10 @@ export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
     .with(stateAwareComponent)
     .with(positionComponent({ x: 200, y: 100 }))
     .with(sizeComponent({ w: 64, h: 64 }))
-    .with(withStats({ speed: 5, health: 10 }))
+    .with(withStats(playerClass.baseStats))
     .with(velocityComponent({ x: 0, y: 0 }))
     .with(withOrientation(0))
-    .with(withAnimatable(options.spriteName))
+    .with(withAnimatable(playerClass.spriteName))
     .with(withInteractIntent())
     .build();
 

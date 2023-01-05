@@ -17,8 +17,10 @@ import { registerStateMachine } from '@/stateMachines/stateMachineManager';
 import { createProjectileStateMachine } from '@/stateMachines/projectile';
 import { stateAwareComponent } from '../components/StateAware';
 import { velocityComponent } from '../components/Velocity';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export type CreateProjectileOptions = {
+  firedBy: ECSEntityId;
   spriteName: SpriteName;
   position: Point;
   target: Point;
@@ -36,7 +38,7 @@ export const createProjectile = (
 
   const projectile = world
     .createEntity()
-    .with(projectileComponent)
+    .with(projectileComponent({ firedBy: options.firedBy }))
     .with(positionComponent(options.position))
     .with(sizeComponent({ w: 64, h: 64 }))
     .with(withStats({ speed, health: 1 }))
