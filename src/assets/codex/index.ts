@@ -1,5 +1,9 @@
-import * as classes from './classes';
+import { playerClasses } from './classes';
+import { enemies } from './enemies';
+import { projectiles } from './projectiles';
 
 export const codex = {
-  classes
+  playerClasses,
+  projectiles,
+  enemies
 };

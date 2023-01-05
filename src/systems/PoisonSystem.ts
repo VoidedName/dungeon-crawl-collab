@@ -3,7 +3,7 @@ import {
   type Renderable,
   RenderableBrand
 } from '@/entity/components/Renderable';
-import { StatsBrand, type Stats } from '@/entity/components/Stats';
+
 import { PoisonBrand } from '@/entity/components/Poison';
 import type { Poison } from '@/entity/components/Poison';
 import { EventNames, type GameLoopQueue } from '@/createGameLoop';
@@ -14,8 +14,8 @@ let lastTick = Date.now();
 
 export const PoisonSystem: (
   queue: GameLoopQueue
-) => ECSSystem<[Poison, Renderable, Stats]> = queue => ({
-  target: [PoisonBrand, RenderableBrand, StatsBrand],
+) => ECSSystem<[Poison, Renderable]> = queue => ({
+  target: [PoisonBrand, RenderableBrand],
   run: (ecs, props, entities) => {
     const now = Date.now();
     const delta = now - lastTick;

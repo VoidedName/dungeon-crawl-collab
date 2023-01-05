@@ -1,6 +1,6 @@
-import type { PlayerClass } from '@/assets/types';
+import type { CodexPlayerClass } from '@/assets/types';
 
-export const wizard: PlayerClass = {
+export const wizard: CodexPlayerClass = {
   spriteName: 'wizard',
   baseStats: {
     speed: 3,

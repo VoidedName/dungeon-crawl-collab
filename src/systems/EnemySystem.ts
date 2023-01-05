@@ -11,7 +11,11 @@ import { spriteCollision } from '@/utils/collisions';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import { SizeBrand, type Size } from '@/entity/components/Size';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
-import { TrapState, TrapStateTransitions } from '@/stateMachines/trap';
+import {
+  TrapReadyState,
+  TrapState,
+  TrapStateTransitions
+} from '@/stateMachines/trap';
 import {
   AnimatableBrand,
   type Animatable
@@ -40,14 +44,17 @@ export const EnemySystem: (
       if (entity.enemy.type === 'trap') {
         const machine = resolveStateMachine(entity.entity_id);
         if (!spriteCollision(player as any, entity)) return;
-        if (machine.getSnapshot().value === TrapState.IDLE) {
-          machine.send(TrapStateTransitions.ATTACK);
+
+        const state = machine.getSnapshot().value;
+
+        if (state === TrapState.IDLE) {
+          machine.send(TrapStateTransitions.TRIGGER);
         } else if (
-          isObject(machine.getSnapshot().value) &&
-          (machine.getSnapshot().value as any)[TrapState.DAMAGEABLE] !==
-            TrapState.USED
+          isObject(state) &&
+          state[TrapState.READY] === TrapReadyState.CAN_REACH_PLAYER
         ) {
-          machine.send(TrapStateTransitions.USED);
+          machine.send(TrapStateTransitions.REACHED_PLAYER);
+
           queue.dispatch({
             type: EventNames.PLAYER_DAMAGED,
             payload: 1

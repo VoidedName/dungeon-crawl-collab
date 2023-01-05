@@ -9,7 +9,6 @@ import {
   RenderableBrand,
   type Renderable
 } from '@/entity/components/Renderable';
-import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import { PlayerStateTransitions } from '@/stateMachines/player';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
@@ -47,11 +46,14 @@ export const keyboardMovementHandler = (
   world: ECSWorld
 ) => {
   const [player] = world.entitiesByComponent<
-    [Player, Velocity, Stats, Animatable, Renderable]
-  >([PlayerBrand, VelocityBrand, StatsBrand, AnimatableBrand, RenderableBrand]);
+    [Player, Velocity, Animatable, Renderable]
+  >([PlayerBrand, VelocityBrand, AnimatableBrand, RenderableBrand]);
 
   if (!player) return;
-  player.velocity = computeVelocity(directions, player.stats.current.speed);
+  player.velocity = computeVelocity(
+    directions,
+    player.player.stats.current.speed
+  );
 
   const machine = resolveStateMachine(player.entity_id);
   const isRunning = player.velocity.x !== 0 || player.velocity.y !== 0;

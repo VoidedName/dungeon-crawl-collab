@@ -9,16 +9,22 @@ import type { Sprite } from 'pixi.js';
 
 export const TrapState = {
   IDLE: 'idle',
-  FIRED: 'fired',
-  DAMAGEABLE: 'damageable',
-  USED: 'used',
+  TRIGGERED: 'triggered',
+  ACTIVATING: 'activating',
+  READY: 'ready',
   COOL_DOWN: 'coolDown'
 } as const;
 export type TrapState = Values<typeof TrapState>;
 
+export const TrapReadyState = {
+  CAN_REACH_PLAYER: 'can_reach',
+  HAS_REACHED_PLAYER: 'has_reached_player'
+} as const;
+export type TrapReadyState = Values<typeof TrapReadyState>;
+
 export const TrapStateTransitions = {
-  ATTACK: 'attack',
-  USED: 'used'
+  TRIGGER: 'trigger',
+  REACHED_PLAYER: 'reached_player'
 } as const;
 export type TrapStateTransitions = Values<typeof TrapStateTransitions>;
 
@@ -33,7 +39,7 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
       states: {
         [TrapState.IDLE]: {
           on: {
-            [TrapStateTransitions.ATTACK]: TrapState.FIRED
+            [TrapStateTransitions.TRIGGER]: TrapState.TRIGGERED
           },
           entry: () => {
             const sprite = resolveRenderable(entity.entity_id) as Sprite;
@@ -44,30 +50,31 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             });
           }
         },
-        [TrapState.FIRED]: {
+        [TrapState.TRIGGERED]: {
           entry: () => {
             scheduleAnimation(entity.entity_id, {
               spriteName: entity.animatable.spriteName,
-              state: AnimationState.FIRED
+              state: AnimationState.TRIGGERED,
+              loop: false
             });
           },
           after: {
-            HALF_ATTACK_DURATION: {
-              target: TrapState.DAMAGEABLE
+            ACTIVATION_DELAY: {
+              target: TrapState.READY
             }
           }
         },
-        [TrapState.DAMAGEABLE]: {
-          on: {
-            [TrapStateTransitions.USED]: `${TrapState.DAMAGEABLE}.${TrapState.USED}`
+        [TrapState.READY]: {
+          initial: TrapReadyState.CAN_REACH_PLAYER,
+          states: {
+            [TrapReadyState.CAN_REACH_PLAYER]: {},
+            [TrapReadyState.HAS_REACHED_PLAYER]: {}
           },
+
           after: {
-            HALF_ATTACK_DURATION: {
+            READY_DELAY: {
               target: TrapState.COOL_DOWN
             }
-          },
-          states: {
-            [TrapState.USED]: {}
           }
         },
         [TrapState.COOL_DOWN]: {
@@ -85,15 +92,23 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             });
           }
         }
+      },
+      on: {
+        [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN
       }
     },
     {
       delays: {
-        HALF_ATTACK_DURATION: () =>
+        ACTIVATION_DELAY: () =>
           getAnimationDuration(
             entity.animatable.spriteName,
-            AnimationState.FIRED
-          ) / 2,
+            AnimationState.ACTIVATING
+          ),
+        READY_DELAY: () =>
+          getAnimationDuration(
+            entity.animatable.spriteName,
+            AnimationState.READY
+          ),
         ATTACK_COOLDOWN: () => 1000
       }
     }
