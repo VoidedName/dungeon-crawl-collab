@@ -32,7 +32,7 @@ export const createPlayer = (world: ECSWorld, options: CreatePlayerOptions) => {
     .with(playerComponent)
     .with(positionComponent({ x: 200, y: 100 }))
     .with(withSize(64, 64))
-    .with(withStats({ speed: 5, health: 10 }))
+    .with(withStats({ speed: 3, health: 10 }))
     .with(withVelocity({ x: 0, y: 0 }))
     .with(withOrientation(0))
     .with(renderableComponent)

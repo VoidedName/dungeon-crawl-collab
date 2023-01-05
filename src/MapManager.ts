@@ -1,20 +1,33 @@
 import { Application, Container, Sprite } from 'pixi.js';
-import tilesheetImage from './assets/tilesets/base.png';
-import type { ECSWorld } from './ecs/ECSWorld';
-import { withInteractable } from './entity/components/Interactable';
-import type { Position } from './entity/components/Position';
+import tilesheetImage from '@/assets/tilesets/base.png';
+import type { ECSWorld } from '@/ecs/ECSWorld';
+import { withInteractable } from '@/entity/components/Interactable';
+import { hasPosition, type Position } from '@/entity/components/Position';
 import { Text } from 'pixi.js';
-import { registerRenderable } from './renderer/renderableManager';
+import {
+  registerRenderable,
+  resolveRenderable
+} from './renderer/renderableManager';
 import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
-import { withMapObject } from './entity/components/MapObject';
-import type { MapObject } from './entity/components/MapObject';
-import { withCollidable } from './entity/components/Collidable';
-import { createTileset } from './renderer/createTileset';
-import { renderableComponent } from './entity/components/Renderable';
+import { withMapObject } from '@/entity/components/MapObject';
+import { hasAnimatable } from '@/entity/components/Animatable';
+import type { MapObject } from '@/entity/components/MapObject';
+import { withCollidable } from '@/entity/components/Collidable';
+import { createTileset } from '@/renderer/createTileset';
+import { renderableComponent } from '@/entity/components/Renderable';
+import { createTrap } from '@/createTrap';
+import type { ECSEntity } from '@/ecs/ECSEntity';
+import { enemies, type Enemies } from '@/entity/components/Enemy';
 
 export type TMap = {
   level: number;
+};
+
+const enemiesOnLevel: Record<Enemies, number>[] = [{ trap: 1 }, { trap: 2 }];
+
+const spawners: Record<Enemies, (world: ECSWorld) => ECSEntity> = {
+  trap: (world: ECSWorld) => createTrap(world)
 };
 
 export const maps = [
@@ -51,6 +64,7 @@ const TILESET_ROWS = 3;
 const TILESET_COLUMNS = 7;
 
 const collidableTypes = [1, 2, 3, 4, 8, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21];
+const floorTiles = [9, 10];
 
 let mapGroup: Container;
 let sheet: any;
@@ -72,6 +86,9 @@ export async function loadMap(
     mapGroup.destroy();
     world.entitiesByComponent<[MapObject]>(['mapObject']).forEach(mapObject => {
       world.deleteEntity(mapObject.entity_id);
+      if (hasAnimatable(mapObject)) {
+        resolveRenderable(mapObject.entity_id).destroy();
+      }
     });
   }
   mapGroup = new Container();
@@ -83,6 +100,8 @@ export async function loadMap(
   }
 
   const map = maps[level]!;
+
+  const enemySpawnLocations = [];
 
   for (let i = 0; i < map.length; i++) {
     const row = map[i]!;
@@ -196,6 +215,11 @@ export async function loadMap(
             })
           )
           .build();
+      } else if (floorTiles.includes(tileId)) {
+        enemySpawnLocations.push({
+          x: j * TILE_SIZE + HALF_TILE,
+          y: i * TILE_SIZE + HALF_TILE
+        });
       }
       mapGroup.addChild(tileContainer);
     }
@@ -218,6 +242,24 @@ export async function loadMap(
 
   player.position.x = spawnLocation?.x;
   player.position.y = spawnLocation?.y;
+
+  const enemiesToSpawn = enemiesOnLevel[level]!;
+
+  for (const enemyKey of enemies) {
+    const amount = enemiesToSpawn[enemyKey];
+    for (let i = 0; i < amount; i++) {
+      const randomIndex = Math.floor(
+        Math.random() * enemySpawnLocations.length
+      );
+      const location = enemySpawnLocations[randomIndex]!;
+      enemySpawnLocations.splice(randomIndex, 1);
+      const enemy = spawners[enemyKey](world);
+      if (hasPosition(enemy)) {
+        enemy.position.x = location.x;
+        enemy.position.y = location.y;
+      }
+    }
+  }
 
   return mapGroup;
 }
