@@ -15,7 +15,6 @@ import { createTrapStateMachine } from './stateMachines/trap';
 import { registerStateMachine } from './stateMachines/stateMachineManager';
 import { enemyComponent } from './entity/components/Enemy';
 import { withSize } from './entity/components/Size';
-import { poisonComponent } from './entity/components/Poison';
 
 export type CreateTrapOptions = {
   spriteName: SpriteName;
