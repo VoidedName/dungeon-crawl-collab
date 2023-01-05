@@ -23,22 +23,18 @@ export type Random = {
   die(sides: number): number;
 };
 
-function lcgParkmiller(state: number) {
-  const product = state * 48271;
-  let x = (product & 0x7fffffff) + (product >> 31);
-
-  x = (x & 0x7fffffff) + (x >> 31);
-  return x;
-}
-
 /**
  * seed should be > 0 and < 0x7fffffff
  */
 export function lehmerRandom(seed?: number): Random {
   let state = seed ?? Date.now();
+
   function next(): number {
-    state = lcgParkmiller(state);
-    return state;
+    state += 0xe120fc15;
+    let tmp = state * 0x4a39b70d;
+    const m1 = (tmp >> 16) ^ tmp;
+    tmp = m1 * 0x12fad5c9;
+    return (tmp >> 16) ^ tmp;
   }
   function nextF(): number {
     return next() / 0x7fffffff;
