@@ -7,7 +7,7 @@ export type StatsDescriptors = {
 };
 
 export type EntityStats = {
-  base: StatsDescriptors;
+  base: Readonly<StatsDescriptors>;
   current: StatsDescriptors;
 };
 

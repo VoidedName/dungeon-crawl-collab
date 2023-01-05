@@ -1,5 +1,5 @@
 import type { Values } from '@/utils/types';
-import type { TrapEntity } from '@/createTrap';
+import type { TrapEntity } from '@/entity/factories/createTrap';
 import { createMachine, interpret } from 'xstate';
 import { scheduleAnimation } from '@/renderer/AnimationManager';
 import { AnimationState } from '@/entity/components/Animatable';

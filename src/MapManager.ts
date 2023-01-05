@@ -10,15 +10,16 @@ import {
 } from './renderer/renderableManager';
 import { positionComponent } from '@/entity/components/Position';
 import type { Player } from './entity/components/Player';
-import { withMapObject } from '@/entity/components/MapObject';
-import { hasAnimatable } from '@/entity/components/Animatable';
-import type { MapObject } from '@/entity/components/MapObject';
-import { withCollidable } from '@/entity/components/Collidable';
-import { createTileset } from '@/renderer/createTileset';
-import { renderableComponent } from '@/entity/components/Renderable';
-import { createTrap } from '@/createTrap';
-import type { ECSEntity } from '@/ecs/ECSEntity';
-import { enemies, type Enemies } from '@/entity/components/Enemy';
+import { withMapObject } from './entity/components/MapObject';
+import type { MapObject } from './entity/components/MapObject';
+import { collidableComponent } from './entity/components/Collidable';
+import { createTileset } from './renderer/createTileset';
+import { renderableComponent } from './entity/components/Renderable';
+import { sizeComponent } from './entity/components/Size';
+import { enemies, type Enemies } from './entity/components/Enemy';
+import { createTrap } from './entity/factories/createTrap';
+import type { ECSEntity } from './ecs/ECSEntity';
+import { hasAnimatable } from './entity/components/Animatable';
 
 export type TMap = {
   level: number;
@@ -207,13 +208,13 @@ export async function loadMap(
           .createEntity()
           .with(withMapObject())
           .with(
-            withCollidable({
-              x: globalPos.x,
-              y: globalPos.y,
-              w: TILE_SIZE,
-              h: TILE_SIZE
+            positionComponent({
+              x: globalPos.x + TILE_SIZE / 2,
+              y: globalPos.y + TILE_SIZE / 2
             })
           )
+          .with(sizeComponent({ w: TILE_SIZE, h: TILE_SIZE }))
+          .with(collidableComponent)
           .build();
       } else if (floorTiles.includes(tileId)) {
         enemySpawnLocations.push({

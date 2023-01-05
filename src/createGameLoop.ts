@@ -6,7 +6,7 @@ import type { Point, Values } from './utils/types';
 import { loadMap } from './MapManager';
 import { resolveRenderable } from './renderer/renderableManager';
 import { createEventQueue, type EventQueue } from './createEventQueue';
-import { createPlayer } from './createPlayer';
+import { createPlayer } from './entity/factories/createPlayer';
 import { createControls } from './createControls';
 
 import { MovementSystem } from '@/systems/MovementSystem';
@@ -176,7 +176,7 @@ export function createGameLoop(
   );
   world.addSystem('poison', PoisonSystem(queue));
   world.addSystem('enemies', EnemySystem(resolveRenderable, queue));
-  world.addSystem('destroy', DeleteSystem(resolveRenderable));
+  world.addSystem('destroy', DeleteSystem());
 
   function tick(delta: number) {
     switch (state.type) {
