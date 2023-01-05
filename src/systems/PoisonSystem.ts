@@ -1,5 +1,4 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import type { DisplayObject } from 'pixi.js';
 import {
   type Renderable,
   RenderableBrand
@@ -9,15 +8,15 @@ import { PoisonBrand } from '@/entity/components/Poison';
 import type { Poison } from '@/entity/components/Poison';
 import { flashRed } from '@/createEffectManager';
 import { deleteComponent } from '@/entity/components/Delete';
-import type { ECSEntityId } from '@/ecs/ECSEntity';
+import { EventNames, type GameLoopQueue } from '@/createGameLoop';
 
 const DAMAGE_INTERVAL = 1000;
 
 let lastTick = Date.now();
 
 export const PoisonSystem: (
-  resolveRenderable: (sprite: ECSEntityId) => DisplayObject
-) => ECSSystem<[Poison, Renderable, Stats]> = resolveRenderable => ({
+  queue: GameLoopQueue
+) => ECSSystem<[Poison, Renderable, Stats]> = queue => ({
   target: [PoisonBrand, RenderableBrand, StatsBrand],
   run: (ecs, props, entities) => {
     const now = Date.now();
@@ -28,18 +27,26 @@ export const PoisonSystem: (
       if (entity.poison.duration !== Number.POSITIVE_INFINITY) {
         entity.poison.duration -= delta;
       }
-      if (entity.poison.duration <= 0) {
-        ecs.removeComponent(entity, PoisonBrand);
-      }
       entity.poison.nextDamageIn -= delta;
       if (entity.poison.nextDamageIn <= 0) {
         entity.poison.nextDamageIn = DAMAGE_INTERVAL;
+        queue.dispatch({
+          type: EventNames.DAMAGE,
+          payload: {
+            entityId: entity.entity_id,
+            damage: entity.poison.damage
+          }
+        });
         entity.stats.current.health -= entity.poison.damage;
-        flashRed(resolveRenderable, entity.entity_id);
+        flashRed(entity.entity_id);
 
         if (entity.stats.current.health <= 0) {
           ecs.addComponent(entity, deleteComponent);
         }
+      }
+
+      if (entity.poison.duration <= 0) {
+        ecs.removeComponent(entity, PoisonBrand);
       }
     });
   }

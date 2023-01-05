@@ -1,9 +1,11 @@
 import ouchSound from './assets/sounds/ouch.mp3';
 import stairsSound from './assets/sounds/stairs.mp3';
+import damageSound from './assets/sounds/damage.mp3';
 
 const sounds = {
   ouch: ouchSound,
-  stairs: stairsSound
+  stairs: stairsSound,
+  damage: damageSound
 } as const;
 const soundCache: any = {};
 const audioCtx = new AudioContext();

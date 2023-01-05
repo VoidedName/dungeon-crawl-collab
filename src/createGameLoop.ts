@@ -32,6 +32,8 @@ import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
 import { loadSpriteTextures } from './renderer/createAnimatedSprite';
 import { EnemySystem } from './systems/EnemySystem';
+import type { ECSEntityId } from './ecs/ECSEntity';
+import { damageHandler } from './eventHandlers/damageHandler';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -40,7 +42,8 @@ export const EventNames = {
   PLAYER_INTERACT: 'PLAYER_INTERACT',
   PLAYER_DAMAGED: 'PLAYER_DAMAGED',
   TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
-  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET'
+  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
+  DAMAGE: 'DAMAGE'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -74,13 +77,22 @@ type SetCameraOffsetEvent = {
   payload: Point;
 };
 
+type DamageEvent = {
+  type: typeof EventNames.DAMAGE;
+  payload: {
+    damage: number;
+    entityId: ECSEntityId;
+  };
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
   | PlayerInteractEvent
   | PlayerDamagedEvent
   | ToggleDebugOverlayEvent
-  | SetCameraOffsetEvent;
+  | SetCameraOffsetEvent
+  | DamageEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -113,6 +125,9 @@ const eventQueueReducer =
 
       case EventNames.SET_CAMERA_OFFSET:
         return setCameraOffsetHandler(payload, world);
+
+      case EventNames.DAMAGE:
+        return damageHandler(payload, world);
 
       default:
         isNever(type);
@@ -159,7 +174,7 @@ export function createGameLoop(
     'interactions',
     InteractionSystem(resolveRenderable, renderer.app)
   );
-  world.addSystem('poison', PoisonSystem(resolveRenderable));
+  world.addSystem('poison', PoisonSystem(queue));
   world.addSystem('enemies', EnemySystem(resolveRenderable, queue));
   world.addSystem('destroy', DeleteSystem(resolveRenderable));
 

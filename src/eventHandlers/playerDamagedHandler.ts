@@ -1,10 +1,7 @@
-import type { TAudioManager } from '@/createAudioManager';
-import type { ECSEntityId } from '@/ecs/ECSEntity';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import {
   AnimatableBrand,
-  type Animatable,
-  AnimationState
+  type Animatable
 } from '@/entity/components/Animatable';
 import { PlayerBrand, type Player } from '@/entity/components/Player';
 import {
