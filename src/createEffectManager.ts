@@ -1,11 +1,9 @@
 export type TEffectManager = ReturnType<typeof createEffectManager>;
-import { DisplayObject, Graphics, Sprite, type Application } from 'pixi.js';
+import { Graphics, Sprite, type Application } from 'pixi.js';
 import type { ECSEntityId } from './ecs/ECSEntity';
+import { resolveRenderable } from './renderer/renderableManager';
 
-export function flashRed(
-  resolveRenderable: (entityId: ECSEntityId) => DisplayObject,
-  entityId: ECSEntityId
-) {
+export function flashRed(entityId: ECSEntityId) {
   const FLASH_DURATION = 150;
   const playerSprite = resolveRenderable(entityId) as Sprite;
   playerSprite.tint = 0xff0000;

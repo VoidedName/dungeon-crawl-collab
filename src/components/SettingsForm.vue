@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { getConfiguration, Controls } from '@/createControls.js';
-import type { ComputedRef } from 'vue';
 import type { Control } from '@/createControls.js';
 
 const configuration = ref<any>(getConfiguration());
