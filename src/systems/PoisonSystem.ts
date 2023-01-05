@@ -6,8 +6,6 @@ import {
 import { StatsBrand, type Stats } from '@/entity/components/Stats';
 import { PoisonBrand } from '@/entity/components/Poison';
 import type { Poison } from '@/entity/components/Poison';
-import { flashRed } from '@/createEffectManager';
-import { deleteComponent } from '@/entity/components/Delete';
 import { EventNames, type GameLoopQueue } from '@/createGameLoop';
 
 const DAMAGE_INTERVAL = 1000;
@@ -37,12 +35,6 @@ export const PoisonSystem: (
             damage: entity.poison.damage
           }
         });
-        entity.stats.current.health -= entity.poison.damage;
-        flashRed(entity.entity_id);
-
-        if (entity.stats.current.health <= 0) {
-          ecs.addComponent(entity, deleteComponent);
-        }
       }
 
       if (entity.poison.duration <= 0) {
