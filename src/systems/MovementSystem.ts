@@ -15,12 +15,7 @@ import {
 } from '@/entity/components/Orientation';
 import { PositionBrand, type Position } from '@/entity/components/Position';
 import { SizeBrand, type Size } from '@/entity/components/Size';
-import { StatsBrand, type Stats } from '@/entity/components/Stats';
-import {
-  VelocityBrand,
-  type Velocity,
-  velocityComponent
-} from '@/entity/components/Velocity';
+import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import { getAnimationState } from '@/renderer/AnimationManager';
 import {
   entityToRect,
@@ -45,12 +40,11 @@ import {
 import { ProjectileStateTransitions } from '@/stateMachines/projectile';
 
 export const MovementSystem: () => ECSSystem<
-  [Position, Velocity, Stats, Orientation, Size, StateAware, Animatable]
+  [Position, Velocity, Orientation, Size, StateAware, Animatable]
 > = () => ({
   target: [
     PositionBrand,
     VelocityBrand,
-    StatsBrand,
     OrientationBrand,
     SizeBrand,
     StateAwareBrand,

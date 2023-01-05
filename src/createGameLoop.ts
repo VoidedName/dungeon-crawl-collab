@@ -34,6 +34,7 @@ import { loadSpriteTextures } from './renderer/createAnimatedSprite';
 import { EnemySystem } from './systems/EnemySystem';
 import type { ECSEntityId } from './ecs/ECSEntity';
 import { damageHandler } from './eventHandlers/damageHandler';
+import { playerClasses } from './assets/codex/classes';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -146,7 +147,7 @@ const setup = async (app: Application, world: ECSWorld) => {
   // another possible fix would be to place the player on the map spawn point somewhere else, removing the dependency to the player
   // The whole map loading process will probably be completely revamped fairly soon, so no need to overthink it for now, just to parallel load some things
   await loadSpriteTextures();
-  const player = createPlayer(world, { spriteName: 'wizard' });
+  const player = createPlayer(world, { playerClass: playerClasses.wizard });
   await loadMap(0, true, app, world);
 
   const camera = createCamera(world, player.entity_id);

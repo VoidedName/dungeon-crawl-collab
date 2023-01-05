@@ -20,6 +20,7 @@ import { enemies, type Enemies } from './entity/components/Enemy';
 import { createTrap } from './entity/factories/createTrap';
 import type { ECSEntity } from './ecs/ECSEntity';
 import { hasAnimatable } from './entity/components/Animatable';
+import { codex } from './assets/codex';
 
 export type TMap = {
   level: number;
@@ -28,7 +29,7 @@ export type TMap = {
 const enemiesOnLevel: Record<Enemies, number>[] = [{ trap: 1 }, { trap: 2 }];
 
 const spawners: Record<Enemies, (world: ECSWorld) => ECSEntity> = {
-  trap: (world: ECSWorld) => createTrap(world)
+  trap: (world: ECSWorld) => createTrap(world, { enemy: codex.enemies.trap })
 };
 
 export const maps = [

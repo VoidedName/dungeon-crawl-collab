@@ -16,6 +16,7 @@ import { PositionBrand, type Position } from '@/entity/components/Position';
 import { subVector } from '@/utils/vectors';
 import { resolveRenderable } from '@/renderer/renderableManager';
 import { PlayerState, PlayerStateTransitions } from '@/stateMachines/player';
+import { codex } from '@/assets/codex';
 
 export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   const [player] = world.entitiesByComponent<
@@ -32,7 +33,8 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   const sprite = resolveRenderable(player.entity_id);
 
   createProjectile(world, {
-    spriteName: 'magicMissile',
+    firedBy: player.entity_id,
+    projectile: codex.projectiles.magicMissile,
     position: { ...player.position },
     target: subVector(mousePosition, sprite.toGlobal({ x: 0, y: 0 }))
   });
