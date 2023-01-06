@@ -150,6 +150,10 @@ export async function loadMap(
 
       let tileId = tileOptions[rng.die(tileOptions.length) - 1]!;
 
+      if (x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1) {
+        tileId = WALL_TOP[rng.die(WALL_TOP.length) - 1]!;
+      }
+
       if (x === stairsUp[0] && y === stairsUp[1]) {
         tileId = STAIRS_UP_ID;
       }
@@ -294,7 +298,7 @@ export async function loadMap(
   player.position.y = spawnLocation?.y;
 
   for (const enemyKey of enemies) {
-    const amount = rng.nextRange(3, 5);
+    const amount = rng.nextRange(3, 5) + map.level * 2;
     for (let i = 0; i < amount; i++) {
       const randomIndex = Math.floor(rng.nextF() * enemySpawnLocations.length);
       const location = enemySpawnLocations[randomIndex]!;

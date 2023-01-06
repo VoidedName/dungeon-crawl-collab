@@ -77,10 +77,10 @@ export const InteractionSystem: (
                   }
                   if (worldMap[nextMap] === undefined) {
                     worldMap[nextMap] = simpleMapGen(
-                      20,
-                      20,
+                      20 + Math.round(Math.sqrt(5 * nextMap + 1)),
+                      20 + Math.round(Math.sqrt(5 * nextMap + 1)),
                       nextMap,
-                      3,
+                      3 + nextMap,
                       world.get<Random>('rng').unwrap()
                     );
                   }
