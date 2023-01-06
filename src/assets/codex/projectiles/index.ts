@@ -3,4 +3,4 @@ import { magicMissile } from './magic-missile';
 
 export const projectiles = {
   magicMissile
-} satisfies Record<string, CodexProjectile>;
+} satisfies Record<string, () => CodexProjectile>;

@@ -27,7 +27,7 @@ export const createProjectileStateMachine = (
   world: ECSWorld
 ) => {
   const machine = createMachine({
-    id: `trap-${entity.entity_id}`,
+    id: `projectile-${entity.entity_id}`,
     initial: 'idle',
     predictableActionArguments: true,
     states: {

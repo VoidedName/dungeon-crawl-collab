@@ -3,4 +3,4 @@ import { wizard } from './wizard';
 
 export const playerClasses = {
   wizard
-} satisfies Record<string, CodexPlayerClass>;
+} satisfies Record<string, () => CodexPlayerClass>;
