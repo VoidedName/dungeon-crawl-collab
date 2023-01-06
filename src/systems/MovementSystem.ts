@@ -37,7 +37,10 @@ import {
   StateAwareBrand,
   type StateAware
 } from '@/entity/components/StateAware';
-import { ProjectileStateTransitions } from '@/stateMachines/projectile';
+import {
+  ProjectileState,
+  ProjectileStateTransitions
+} from '@/stateMachines/projectile';
 
 export const MovementSystem: () => ECSSystem<
   [Position, Velocity, Orientation, Size, StateAware, Animatable]
@@ -73,6 +76,14 @@ export const MovementSystem: () => ECSSystem<
           animationState: getAnimationState(e.entity_id)!
         });
 
+      const onProjectileCollision = () => {
+        if (machine.getSnapshot().value === ProjectileState.DEAD) return;
+        machine.send(ProjectileStateTransitions.DIE);
+        setTimeout(() => {
+          world.addComponent(e.entity_id, deleteComponent);
+        }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+      };
+
       // snap back position to closest safe spot, to avoid getting stuck in a wall
       // this involves getting the potential overlaps with a collidable, in all 4 directions
       // then applying the minimal corrections possible to fix potential issues
@@ -95,24 +106,29 @@ export const MovementSystem: () => ECSSystem<
         }
       }
 
-      e.position = addVector(e.position, { x: e.velocity.x, y: e.velocity.y });
+      e.position = addVector(e.position, { x: e.velocity.x, y: 0 });
       for (const collidable of collidables) {
-        if (rectRectCollision(getHitbox(), entityToRect(collidable))) {
+        if (rectRectCollision(entityToRect(collidable), getHitbox())) {
           if (hasPlayer(e)) {
-            Object.assign(
-              e.position,
-              subVector(e.position, {
-                x: e.velocity.x,
-                y: e.velocity.y
-              })
-            );
+            e.position = subVector(e.position, { x: e.velocity.x, y: 0 });
           }
           if (hasProjectile(e)) {
-            machine.send(ProjectileStateTransitions.DIE);
-            setTimeout(() => {
-              world.addComponent(e.entity_id, deleteComponent);
-            }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+            onProjectileCollision();
           }
+          break;
+        }
+      }
+
+      e.position = addVector(e.position, { x: 0, y: e.velocity.y });
+      for (const collidable of collidables) {
+        if (rectRectCollision(entityToRect(collidable), getHitbox())) {
+          if (hasPlayer(e)) {
+            e.position = subVector(e.position, { x: 0, y: e.velocity.y });
+          }
+          if (hasProjectile(e)) {
+            onProjectileCollision();
+          }
+          break;
         }
       }
     });
