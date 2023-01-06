@@ -8,7 +8,7 @@ import { rectRectCollision } from '@/utils/collisions';
 // it could carry the rooms geometry information
 // might be useful to spawn enemies things
 export type TileType = 'WALL' | 'FLOOR' | 'STAIRS_DOWN' | 'ENTRY';
-export type Map = BaseMap & {
+export type GameMap = BaseMap & {
   readonly width: number;
   readonly height: number;
   readonly level: number;
@@ -33,6 +33,8 @@ export type Map = BaseMap & {
 
 const MIN_ROOM_SIZE = 3;
 
+const MAX_ROOM_SIZE = 7;
+
 const MAX_ROOM_ATTEMPTS = 10;
 
 // prettier-ignore
@@ -42,13 +44,13 @@ const NEIGHBORS = [
   [ 1, -1], [ 1, 0], [ 1, 1],
 ] as [number, number][];
 
-function simpleMapGen(
+export function simpleMapGen(
   width: number,
   height: number,
   level: number,
   rooms: number,
   rng: Random
-): Map {
+): GameMap {
   // setup internal states
   const tiles: TileType[] = new Array(width * height).fill('WALL');
   const revealedTiles: boolean[] = new Array(width * height).fill(false);
@@ -64,18 +66,26 @@ function simpleMapGen(
   ];
 
   // generate room layouts
-  const roomsList = new Array<Rectangle>(rooms);
+  const roomsList = new Array<Rectangle>();
   for (let room = 0; room < rooms; room++) {
     for (let attempt = 0; attempt < MAX_ROOM_ATTEMPTS; attempt++) {
-      const x = rng.nextRange(0, width - MIN_ROOM_SIZE - 1);
-      const y = rng.nextRange(0, height - MIN_ROOM_SIZE - 1);
-      const w = rng.nextRange(MIN_ROOM_SIZE, width - x);
-      const h = rng.nextRange(MIN_ROOM_SIZE, height - x);
+      const x = rng.nextRange(1, width - MIN_ROOM_SIZE - 2);
+      const y = rng.nextRange(1, height - MIN_ROOM_SIZE - 2);
+      const w = rng.nextRange(
+        MIN_ROOM_SIZE,
+        Math.min(width - x, MAX_ROOM_SIZE)
+      );
+      const h = rng.nextRange(
+        MIN_ROOM_SIZE,
+        Math.min(height - x, MAX_ROOM_SIZE)
+      );
       const nextRoom = { x, y, w, h };
 
       let isValid = true;
       for (const other of roomsList) {
-        if (rectRectCollision(nextRoom, other)) {
+        if (
+          rectRectCollision({ x: x - 1, y: y - 1, w: w + 1, h: h + 1 }, other) // prevent room merging (ish)
+        ) {
           isValid = false;
         }
       }
@@ -108,20 +118,20 @@ function simpleMapGen(
 
     if (rng.nextF() < 0.5) {
       // from x1 to x2 on y1
-      for (let x = Math.min(x1, x2); x < Math.max(x1, x2); x++) {
+      for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
         tiles[xyIndex(x, y1)] = 'FLOOR';
       }
       // from y1 to y2 on x2
-      for (let y = Math.min(y1, y2); y < Math.max(y1, y2); y++) {
+      for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
         tiles[xyIndex(x2, y)] = 'FLOOR';
       }
     } else {
       // from x1 to x2 on y2
-      for (let x = Math.min(x1, x2); x < Math.max(x1, x2); x++) {
+      for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
         tiles[xyIndex(x, y2)] = 'FLOOR';
       }
       // from y1 to y2 on x1
-      for (let y = Math.min(y1, y2); y < Math.max(y1, y2); y++) {
+      for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
         tiles[xyIndex(x1, y)] = 'FLOOR';
       }
     }
@@ -194,7 +204,8 @@ function simpleMapGen(
       }
     },
     isBlocked(x: number, y: number): boolean {
-      return blockedTiles[xyIndex(x, y)]!;
+      const idx = xyIndex(x, y);
+      return tiles[idx] === 'WALL' || blockedTiles[idx]!;
     },
     getEntities(x: number, y: number): ECSEntityId[] {
       return tileContent[xyIndex(x, y)]!;

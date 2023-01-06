@@ -35,6 +35,8 @@ import { EnemySystem } from './systems/EnemySystem';
 import type { ECSEntityId } from './ecs/ECSEntity';
 import { damageHandler } from './eventHandlers/damageHandler';
 import { playerClasses } from './assets/codex/classes';
+import { simpleMapGen } from '@/map/Map';
+import { lehmerRandom } from '@/utils/rand/random';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -136,7 +138,12 @@ const eventQueueReducer =
   };
 
 const setup = async (app: Application, world: ECSWorld) => {
-  world.set('map', { level: 0 });
+  const rng = lehmerRandom(2023);
+  const map = simpleMapGen(20, 20, 0, 3, rng);
+
+  world.set('map', map);
+  world.set('rng', rng);
+  world.set('world map', [map]);
   world.set(DebugFlags.map, false);
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
@@ -148,7 +155,7 @@ const setup = async (app: Application, world: ECSWorld) => {
   // The whole map loading process will probably be completely revamped fairly soon, so no need to overthink it for now, just to parallel load some things
   await loadSpriteTextures();
   const player = createPlayer(world, { playerClass: playerClasses.wizard });
-  await loadMap(0, true, app, world);
+  await loadMap(map, true, app, world);
 
   const camera = createCamera(world, player.entity_id);
   camera.camera.following = player.entity_id;
