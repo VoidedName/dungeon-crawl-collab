@@ -221,7 +221,7 @@ export function simpleMapGen(
     distance(idx1: number, idx2: number): number {
       const [x1, y1] = indexXy(idx1);
       const [x2, y2] = indexXy(idx2);
-      return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+      return Math.hypot(x2 - x1, y2 - y1);
     },
     exits(idx: number): number[] {
       const [x, y] = indexXy(idx);
