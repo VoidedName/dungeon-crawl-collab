@@ -34,7 +34,7 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
 
   createProjectile(world, {
     firedBy: player.entity_id,
-    projectile: codex.projectiles.magicMissile,
+    projectile: codex.projectiles.magicMissile(),
     position: { ...player.position },
     target: subVector(mousePosition, sprite.toGlobal({ x: 0, y: 0 }))
   });

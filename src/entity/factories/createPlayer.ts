@@ -33,7 +33,10 @@ export const createPlayer = (
     .createEntity()
     .with(
       playerComponent({
-        stats: { base: playerClass.baseStats, current: playerClass.baseStats }
+        stats: {
+          base: playerClass.baseStats,
+          current: { ...playerClass.baseStats }
+        }
       })
     )
     .with(renderableComponent)

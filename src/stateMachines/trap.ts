@@ -6,12 +6,14 @@ import { AnimationState } from '@/entity/components/Animatable';
 import { getAnimationDuration } from '@/renderer/renderableUtils';
 import { resolveRenderable } from '@/renderer/renderableManager';
 import type { Sprite } from 'pixi.js';
+import { trapHitEndFX, trapHitFX } from '@/fx/trap';
 
 export const TrapState = {
   IDLE: 'idle',
   TRIGGERED: 'triggered',
   ACTIVATING: 'activating',
   READY: 'ready',
+  HIT: 'hit',
   COOL_DOWN: 'coolDown'
 } as const;
 export type TrapState = Values<typeof TrapState>;
@@ -24,6 +26,7 @@ export type TrapReadyState = Values<typeof TrapReadyState>;
 
 export const TrapStateTransitions = {
   TRIGGER: 'trigger',
+  TAKE_DAMAGE: 'take damage',
   REACHED_PLAYER: 'reached_player'
 } as const;
 export type TrapStateTransitions = Values<typeof TrapStateTransitions>;
@@ -91,10 +94,26 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
               state: AnimationState.IDLE
             });
           }
+        },
+        [TrapState.HIT]: {
+          entry() {
+            trapHitFX(entity);
+          },
+
+          exit() {
+            trapHitEndFX(entity);
+          },
+
+          after: {
+            HIT_DELAY: {
+              target: TrapState.IDLE
+            }
+          }
         }
       },
       on: {
-        [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN
+        [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN,
+        [TrapStateTransitions.TAKE_DAMAGE]: TrapState.HIT
       }
     },
     {
@@ -109,7 +128,8 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             entity.animatable.spriteName,
             AnimationState.READY
           ),
-        ATTACK_COOLDOWN: () => 1000
+        ATTACK_COOLDOWN: () => 1000,
+        HIT_DELAY: () => 250
       }
     }
   );

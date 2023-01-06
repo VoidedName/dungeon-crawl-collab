@@ -24,9 +24,8 @@ ecsApi.value.on((event: any) => {
 });
 
 const health = computed(() => {
-  console.log('baseHealth.value', baseHealth.value);
   return new Array(baseHealth.value).fill(false).map((value, index) => {
-    return index <= currentHealth.value;
+    return index + 1 <= currentHealth.value;
   });
 });
 </script>
@@ -50,6 +49,7 @@ const health = computed(() => {
   bottom: 20px;
   left: 20px;
   display: flex;
+  gap: 5px;
 }
 .health > .heart {
   height: 25px;

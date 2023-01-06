@@ -1,6 +1,5 @@
 import { createMachine, interpret } from 'xstate';
 import type { Values } from '@/utils/types';
-import type { ECSWorld } from '@/ecs/ECSWorld';
 import { AnimationState } from '@/entity/components/Animatable';
 import { scheduleAnimation } from '@/renderer/AnimationManager';
 import type { ProjectileEntity } from '@/entity/factories/createProjectile';
@@ -22,12 +21,9 @@ export type ProjectileStateMachine = ReturnType<
   typeof createProjectileStateMachine
 >;
 
-export const createProjectileStateMachine = (
-  entity: ProjectileEntity,
-  world: ECSWorld
-) => {
+export const createProjectileStateMachine = (entity: ProjectileEntity) => {
   const machine = createMachine({
-    id: `trap-${entity.entity_id}`,
+    id: `projectile-${entity.entity_id}`,
     initial: 'idle',
     predictableActionArguments: true,
     states: {

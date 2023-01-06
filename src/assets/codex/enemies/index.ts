@@ -3,4 +3,4 @@ import { trap } from './trap';
 
 export const enemies = {
   trap
-} satisfies Record<string, CodexEnemy>;
+} satisfies Record<string, () => CodexEnemy>;

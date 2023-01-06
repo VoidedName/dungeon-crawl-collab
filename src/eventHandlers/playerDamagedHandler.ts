@@ -9,9 +9,7 @@ import {
   RenderableBrand,
   type Renderable
 } from '@/entity/components/Renderable';
-import { PlayerStateTransitions } from '@/stateMachines/player';
-import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
-import { clamp } from '@/utils/math';
+import { dealDamage } from '@/utils/ecsUtils';
 
 export const playerDamagedHandler = (
   damage: number,
@@ -26,21 +24,16 @@ export const playerDamagedHandler = (
   ]);
   if (!player) return;
 
-  console.log('base', player.player.stats.base.health);
-  player.player.stats.current.health = clamp(
-    player.player.stats.current.health - damage,
-    0,
-    player.player.stats.base.health
-  );
-  console.log('base', player.player.stats.base.health);
+  dealDamage({
+    to: player,
+    amount: damage,
+    ecs: world
+  });
 
   emit('playerHealthChanged');
 
-  const machine = resolveStateMachine(player.entity_id);
-  machine.send(PlayerStateTransitions.TAKE_DAMAGE);
-
   if (player.player.stats.current.health <= 0) {
-    // alert('you dead');
-    // navigateTo('/');
+    alert('you dead');
+    navigateTo('/');
   }
 };

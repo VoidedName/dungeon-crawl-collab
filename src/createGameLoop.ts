@@ -35,11 +35,12 @@ import { EnemySystem } from './systems/EnemySystem';
 import type { TItem } from './createInventoryManager';
 import type { ECSEntityId } from './ecs/ECSEntity';
 import { damageHandler } from './eventHandlers/damageHandler';
-import { playerClasses } from './assets/codex/classes';
 import { simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { createInventoryManager } from './createInventoryManager';
 import { itemHandler } from './eventHandlers/itemHandler';
+import { ProjectileSystem } from './systems/ProjectileSystem';
+import { codex } from './assets/codex';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -146,7 +147,7 @@ const eventQueueReducer =
         return damageHandler(payload, world);
 
       case EventNames.USE_ITEM:
-        return itemHandler(payload, world);
+        return itemHandler(payload, world, emit);
 
       default:
         isNever(type);
@@ -175,7 +176,9 @@ const setup = async (
   // another possible fix would be to place the player on the map spawn point somewhere else, removing the dependency to the player
   // The whole map loading process will probably be completely revamped fairly soon, so no need to overthink it for now, just to parallel load some things
   await loadSpriteTextures();
-  const player = createPlayer(world, { playerClass: playerClasses.wizard });
+  const player = createPlayer(world, {
+    playerClass: codex.playerClasses.wizard()
+  });
   await loadMap(map, true, app, world);
 
   const camera = createCamera(world, player.entity_id);
@@ -205,6 +208,7 @@ export function createGameLoop(
   );
   const controls = createControls(renderer.app, queue);
 
+  world.addSystem('projectile', ProjectileSystem());
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveRenderable, renderer.app));
   world.addSystem('debug_renderer', DebugRenderer(renderer.app));
