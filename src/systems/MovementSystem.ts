@@ -41,6 +41,7 @@ import {
   ProjectileState,
   ProjectileStateTransitions
 } from '@/stateMachines/projectile';
+import { removeProjectile } from '@/utils/ecsUtils';
 
 export const MovementSystem: () => ECSSystem<
   [Position, Velocity, Orientation, Size, StateAware, Animatable]
@@ -77,11 +78,10 @@ export const MovementSystem: () => ECSSystem<
         });
 
       const onProjectileCollision = () => {
+        if (!hasProjectile(e)) return;
         if (machine.getSnapshot().value === ProjectileState.DEAD) return;
         machine.send(ProjectileStateTransitions.DIE);
-        setTimeout(() => {
-          world.addComponent(e.entity_id, deleteComponent);
-        }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+        removeProjectile(e, world);
       };
 
       // snap back position to closest safe spot, to avoid getting stuck in a wall

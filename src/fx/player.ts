@@ -3,6 +3,7 @@ import type { PlayerEntity } from '@/entity/factories/createPlayer';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import { resolveRenderable } from '@/renderer/renderableManager';
 import type { AnimatedSprite } from 'pixi.js';
+import type { TrapEntity } from '@/entity/factories/createTrap';
 
 export const playerHitFX = (entity: PlayerEntity, world: ECSWorld) => {
   world.get<TAudioManager>('audio').match(
