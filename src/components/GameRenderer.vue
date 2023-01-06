@@ -4,6 +4,8 @@ import { createGameLoop, type ECSApi } from '@/createGameLoop';
 import { createGameRenderer } from '@/renderer/createGameRenderer.js';
 import PauseMenu from './PauseMenu.vue';
 import SettingsMenu from './SettingsMenu.vue';
+import ItemBelt from './ItemBelt.vue';
+import HealthHud from './HealthHud.vue';
 import { store } from '@/store';
 
 const canvasEl = ref<HTMLCanvasElement>();
@@ -31,6 +33,8 @@ onUnmounted(() => {
   <div class="game-renderer">
     <SettingsMenu v-if="store.showSettingsMenu" />
     <PauseMenu v-if="ecsApi" />
+    <ItemBelt v-if="ecsApi" />
+    <HealthHud v-if="ecsApi" />
     <canvas ref="canvasEl" />
   </div>
 </template>

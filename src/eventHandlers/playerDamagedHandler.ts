@@ -1,3 +1,4 @@
+import type { ECSEmitter } from '@/createGameLoop';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import {
   AnimatableBrand,
@@ -15,7 +16,8 @@ import { clamp } from '@/utils/math';
 export const playerDamagedHandler = (
   damage: number,
   world: ECSWorld,
-  navigateTo: (path: string) => void
+  navigateTo: (path: string) => void,
+  emit: ECSEmitter
 ) => {
   const [player] = world.entitiesByComponent<[Player, Renderable, Animatable]>([
     PlayerBrand,
@@ -24,11 +26,15 @@ export const playerDamagedHandler = (
   ]);
   if (!player) return;
 
+  console.log('base', player.player.stats.base.health);
   player.player.stats.current.health = clamp(
     player.player.stats.current.health - damage,
     0,
     player.player.stats.base.health
   );
+  console.log('base', player.player.stats.base.health);
+
+  emit('playerHealthChanged');
 
   const machine = resolveStateMachine(player.entity_id);
   machine.send(PlayerStateTransitions.TAKE_DAMAGE);

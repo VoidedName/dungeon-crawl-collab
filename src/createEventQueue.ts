@@ -1,3 +1,4 @@
+import type { ECSEvent } from './createGameLoop';
 import type { AnyObject } from './utils/types';
 
 export type EventQueueMap = Record<string, AnyObject>;
