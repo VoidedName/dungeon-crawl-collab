@@ -1,7 +1,6 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import {
   AnimatableBrand,
-  AnimationState,
   type Animatable
 } from '@/entity/components/Animatable';
 import {
@@ -19,7 +18,6 @@ import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
 import { getAnimationState } from '@/renderer/AnimationManager';
 import {
   entityToRect,
-  getAnimationDuration,
   getSpriteHitbox,
   HitBoxId
 } from '@/renderer/renderableUtils';
@@ -32,7 +30,6 @@ import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 import { PlayerState } from '@/stateMachines/player';
 import { hasPlayer } from '@/entity/components/Player';
 import { hasProjectile } from '@/entity/components/Projectile';
-import { deleteComponent } from '@/entity/components/Delete';
 import {
   StateAwareBrand,
   type StateAware
@@ -80,7 +77,6 @@ export const MovementSystem: () => ECSSystem<
       const onProjectileCollision = () => {
         if (!hasProjectile(e)) return;
         if (machine.getSnapshot().value === ProjectileState.DEAD) return;
-        machine.send(ProjectileStateTransitions.DIE);
         removeProjectile(e, world);
       };
 
@@ -113,7 +109,7 @@ export const MovementSystem: () => ECSSystem<
             e.position = subVector(e.position, { x: e.velocity.x, y: 0 });
           }
           if (hasProjectile(e)) {
-            onProjectileCollision();
+            return onProjectileCollision();
           }
           break;
         }
@@ -126,7 +122,7 @@ export const MovementSystem: () => ECSSystem<
             e.position = subVector(e.position, { x: 0, y: e.velocity.y });
           }
           if (hasProjectile(e)) {
-            onProjectileCollision();
+            return onProjectileCollision();
           }
           break;
         }
