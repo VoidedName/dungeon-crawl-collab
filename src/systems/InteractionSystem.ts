@@ -7,11 +7,14 @@ import type { InteractIntent } from '@/entity/components/InteractIntent';
 import type { Player } from '@/entity/components/Player';
 import type { Position } from '@/entity/components/Position';
 import type { Renderable } from '@/entity/components/Renderable';
-import { loadMap, type TMap } from '@/MapManager';
+import { loadMap } from '@/MapManager';
 import { dist } from '@/utils/math';
 import type { Application } from 'pixi.js';
 import type { DisplayObject } from 'pixi.js';
 import { immoveableComponent } from '@/entity/components/Immoveable';
+import type { GameMap } from '@/map/Map';
+import { simpleMapGen } from '@/map/Map';
+import type { Random } from '@/utils/rand/random';
 
 export const InteractionSystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
@@ -45,9 +48,10 @@ export const InteractionSystem: (
           player.interact_intent.canInteract = true;
         }, player.interact_intent.cooldown);
 
-        const mapGlobalMaybe = world.get<TMap>('map');
+        const mapGlobalMaybe = world.get<GameMap>('map');
         if (mapGlobalMaybe.isSome()) {
           const mapGlobal = mapGlobalMaybe.get();
+          const worldMap = world.get<GameMap[]>('world map').unwrap();
 
           if (
             ['stairsUp', 'stairsDown'].includes(interactable.interactable.type)
@@ -63,13 +67,25 @@ export const InteractionSystem: (
               effectsManager => {
                 effectsManager.fadeScreenOut(() => {
                   world.removeComponent(player, 'immoveable');
+                  let nextMap = 0;
+                  let spawnAtStarisUp = false;
                   if (interactable.interactable.type === 'stairsUp') {
-                    mapGlobal.level--;
-                    loadMap(mapGlobal.level, false, app, world);
+                    nextMap = mapGlobal.level - 1;
                   } else if (interactable.interactable.type === 'stairsDown') {
-                    mapGlobal.level++;
-                    loadMap(mapGlobal.level, true, app, world);
+                    nextMap = mapGlobal.level + 1;
+                    spawnAtStarisUp = true;
                   }
+                  if (worldMap[nextMap] === undefined) {
+                    worldMap[nextMap] = simpleMapGen(
+                      20 + Math.round(Math.sqrt(5 * nextMap + 1)),
+                      20 + Math.round(Math.sqrt(5 * nextMap + 1)),
+                      nextMap,
+                      3 + nextMap,
+                      world.get<Random>('rng').unwrap()
+                    );
+                  }
+                  loadMap(worldMap[nextMap]!, spawnAtStarisUp, app, world);
+                  world.set('map', worldMap[nextMap]!);
                 });
               },
               () => console.warn('no audio manager set')

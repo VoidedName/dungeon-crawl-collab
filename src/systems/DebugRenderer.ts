@@ -1,6 +1,7 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import { maps, TILE_SIZE, type TMap } from '@/MapManager';
 import { Application, Container, Graphics, Text } from 'pixi.js';
+import type { GameMap } from '@/map/Map';
 
 export const DebugFlags = {
   map: 'debug:map' as const
@@ -25,7 +26,7 @@ export const DebugRenderer: (app: Application) => ECSSystem<[]> = app => {
         return;
       }
 
-      world.get<TMap>('map').match(
+      world.get<GameMap>('map').match(
         map => {
           if (map.level === currentStage) return;
           currentStage = map.level;

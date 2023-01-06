@@ -21,6 +21,8 @@ import { createTrap } from './entity/factories/createTrap';
 import type { ECSEntity } from './ecs/ECSEntity';
 import { hasAnimatable } from './entity/components/Animatable';
 import { codex } from './assets/codex';
+import type { GameMap } from '@/map/Map';
+import { lehmerRandom } from '@/utils/rand/random';
 
 export type TMap = {
   level: number;
@@ -71,12 +73,23 @@ const floorTiles = [9, 10];
 let mapGroup: Container;
 let sheet: any;
 
+const WALL_LEFT = [1, 8];
+const WALL_RIGHT = [4, 11];
+const WALL_TOP = [2, 3];
+const WALL_BOTTOM = [16];
+const FLOOR = [9, 10];
+const WALL_CORNER_BOTTOM_RIGHT = [12];
+const WALL_CORNER_BOTTOM_LEFT = [13];
+const TILE_NA = [-1];
+
 export async function loadMap(
-  level: number,
+  map: GameMap,
   spawnAtStairsUp: boolean,
   app: Application,
   world: ECSWorld
 ) {
+  const rng = lehmerRandom(map.level + map.width + map.height);
+
   sheet = await createTileset({
     id: TILESET_ID,
     tileSize: TILE_SIZE,
@@ -97,23 +110,62 @@ export async function loadMap(
 
   let spawnLocation;
 
-  if (!maps[level]) {
-    throw new Error(`no map of level ${level} found`);
-  }
-
-  const map = maps[level]!;
-
   const enemySpawnLocations = [];
 
-  for (let i = 0; i < map.length; i++) {
-    const row = map[i]!;
-    for (let j = 0; j < row.length; j++) {
-      const tileId = row[j]!;
+  const stairsUp = map.entry();
+  const stairsDown = map.stairs();
+
+  for (let y = 0; y < map.height; y++) {
+    for (let x = 0; x < map.width; x++) {
+      let tileOptions = map.isBlocked(x, y) ? TILE_NA : FLOOR;
+      if (map.isBlocked(x, y)) {
+        let neighborhood = +!map.isBlocked(x - 1, y);
+        neighborhood += 2 * +!map.isBlocked(x + 1, y);
+        neighborhood += 4 * +!map.isBlocked(x, y - 1);
+        neighborhood += 8 * +!map.isBlocked(x, y + 1);
+        // TODO: Tileset matching
+        switch (neighborhood) {
+          case 0: // surround by wall
+            tileOptions = TILE_NA;
+            break;
+          case 1: // floor to the left
+            tileOptions = WALL_RIGHT;
+            break;
+          case 2: // floor to the right
+            tileOptions = WALL_LEFT;
+            break;
+          case 4: // bottom
+            tileOptions = WALL_BOTTOM;
+            break;
+          case 8: // top
+            tileOptions = WALL_TOP;
+            break;
+          case 6:
+            tileOptions = WALL_CORNER_BOTTOM_LEFT;
+            break;
+          default:
+            tileOptions = WALL_TOP;
+        }
+      }
+
+      let tileId = tileOptions[rng.die(tileOptions.length) - 1]!;
+
+      if (x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1) {
+        tileId = WALL_TOP[rng.die(WALL_TOP.length) - 1]!;
+      }
+
+      if (x === stairsUp[0] && y === stairsUp[1]) {
+        tileId = STAIRS_UP_ID;
+      }
+      if (x === stairsDown[0] && y === stairsDown[1]) {
+        tileId = STAIRS_DOWN_ID;
+      }
+
       const textureName = `${TILESET_ID}-${tileId}`;
       const tileContainer = new Container();
       const tile = new Sprite(sheet.textures[textureName]);
       tileContainer.addChild(tile);
-      tileContainer.position.set(j * TILE_SIZE, i * TILE_SIZE);
+      tileContainer.position.set(x * TILE_SIZE, y * TILE_SIZE);
 
       if (tileId === STAIRS_DOWN_ID) {
         const text = new Text('Descend', {
@@ -188,7 +240,7 @@ export async function loadMap(
             withInteractable(
               'Ascend',
               'stairsUp',
-              level > 0,
+              map.level > 0,
               STAIRS_INTERACT_RADIUS
             )
           )
@@ -219,8 +271,8 @@ export async function loadMap(
           .build();
       } else if (floorTiles.includes(tileId)) {
         enemySpawnLocations.push({
-          x: j * TILE_SIZE + HALF_TILE,
-          y: i * TILE_SIZE + HALF_TILE
+          x: x * TILE_SIZE + HALF_TILE,
+          y: y * TILE_SIZE + HALF_TILE
         });
       }
       mapGroup.addChild(tileContainer);
@@ -245,14 +297,10 @@ export async function loadMap(
   player.position.x = spawnLocation?.x;
   player.position.y = spawnLocation?.y;
 
-  const enemiesToSpawn = enemiesOnLevel[level]!;
-
   for (const enemyKey of enemies) {
-    const amount = enemiesToSpawn[enemyKey];
+    const amount = rng.nextRange(3, 5) + map.level * 2;
     for (let i = 0; i < amount; i++) {
-      const randomIndex = Math.floor(
-        Math.random() * enemySpawnLocations.length
-      );
+      const randomIndex = Math.floor(rng.nextF() * enemySpawnLocations.length);
       const location = enemySpawnLocations[randomIndex]!;
       enemySpawnLocations.splice(randomIndex, 1);
       const enemy = spawners[enemyKey](world);
