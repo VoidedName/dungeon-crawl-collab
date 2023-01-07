@@ -3,7 +3,7 @@ import type { CodexPlayerClass } from '@/assets/types';
 export const wizard = (): CodexPlayerClass => ({
   spriteName: 'wizard',
   baseStats: {
-    speed: 3,
+    speed: 3.25,
     health: 10
   }
 });

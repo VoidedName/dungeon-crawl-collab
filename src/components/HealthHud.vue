@@ -54,16 +54,15 @@ const health = computed(() => {
 .health > .heart {
   height: 25px;
   width: 25px;
-  border: 1px solid red;
+  border: 2px solid var(--color-hp-dark);
   border-radius: 50%;
-  background: pink;
 }
 
 .health > .heart.full {
-  background: pink;
+  background: linear-gradient(130deg, var(--color-hp), var(--color-hp-dark));
 }
 
 .health > .heart.empty {
-  background: gray;
+  background-color: transparent;
 }
 </style>

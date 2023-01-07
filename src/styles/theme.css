@@ -3,6 +3,10 @@
   --cyan: 190,90%;
   --cold-grey: 230, 20%;
   --grey: 0, 0%;
+  --red: 0, 88%;
+
+  --color-hp: hsl(var(--red), 65%);
+  --color-hp-dark: hsl(var(--red), 30%);
 
   --color-background: hsl(var(--cold-grey), 10%);
   --color-on-background: var(--color-primary-light);
@@ -88,6 +92,10 @@
   --breakpoints-lg: 64rem;
   --breakpoints-xl: 80rem;
   --breakpoints-2xl: 96rem;
+
+  --transition-sm: 0.2s;
+  --transition-md: 0.3s;
+  --transition-lg: 0.6s;
 }
 
 body {

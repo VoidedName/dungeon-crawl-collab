@@ -195,7 +195,7 @@ export function createGameLoop(
   const queue = createEventQueue<QueueEvent>(
     eventQueueReducer(world, navigateTo, emit)
   );
-  const controls = createControls(renderer.app, queue);
+  const controls = createControls(renderer.app, queue, world);
 
   world.addSystem('projectile', ProjectileSystem());
   world.addSystem('movement', MovementSystem());
