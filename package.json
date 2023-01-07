@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.7",
+    "@types/lodash-es": "^4.17.6",
     "@vueuse/core": "^9.9.0",
+    "lodash-es": "^4.17.21",
     "pixi-viewport": "^4.38.0",
     "pixi.js": "^7.0.5",
     "vue": "^3.2.45",

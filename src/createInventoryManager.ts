@@ -1,22 +1,24 @@
+import { codex } from './assets/codex';
+import type { CodexItem } from './assets/types';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
+import type { Nullable } from './utils/types';
 
 export type TInventoryManager = ReturnType<typeof createInventoryManager>;
 
-export type items = 'potion';
-
 export type TItem = {
-  name: items;
+  item: CodexItem;
   isUseable: boolean;
 };
 
 export const BELT_SIZE = 8;
 
 export type InventoryEvent = 'updated';
+export type InventoryBelt = Nullable<TItem>[];
 
 export function createInventoryManager(queue: GameLoopQueue) {
-  const belt: (TItem | undefined)[] = new Array(BELT_SIZE).fill(undefined);
+  const belt: InventoryBelt = Array.from<TItem>({ length: BELT_SIZE });
   belt[2] = {
-    name: 'potion',
+    item: codex.items.healthPotion(),
     isUseable: true
   };
 
@@ -30,7 +32,7 @@ export function createInventoryManager(queue: GameLoopQueue) {
 
   return {
     getBelt() {
-      return belt.map(item => ({ ...item }));
+      return [...belt];
     },
     setBeltItem(index: number, item: TItem) {
       belt[index] = item;
