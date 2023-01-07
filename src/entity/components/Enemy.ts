@@ -1,21 +1,23 @@
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import { ecsComponent, has } from '@/ecs/ECSComponent';
-import type { Stats } from '@/utils/types';
+import type { Stats, Values } from '@/utils/types';
 
 export type EnemyStats = {
   speed: number;
   health: number;
 };
 
-export const enemies = ['trap'] as const;
-export type Enemies = typeof enemies[number];
+export const EnemyType = {
+  TRAP: 'trap'
+};
+export type EnemyType = Values<typeof EnemyType>;
 
 export const EnemyBrand = 'enemy';
 type EnemyBrand = typeof EnemyBrand;
 export type Enemy = ECSComponent<
   EnemyBrand,
   {
-    type: Enemies;
+    type: EnemyType;
     stats: Stats<EnemyStats>;
   }
 >;

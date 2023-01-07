@@ -13,6 +13,7 @@ import { registerStateMachine } from '../../stateMachines/stateMachineManager';
 import { createPlayerStateMachine } from '../../stateMachines/player';
 import { sizeComponent } from '../components/Size';
 import type { CodexPlayerClass } from '@/assets/types';
+import { collidableComponent } from '../components/Collidable';
 
 export type CreatePlayerOptions = {
   playerClass: CodexPlayerClass;

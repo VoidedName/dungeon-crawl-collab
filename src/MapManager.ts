@@ -16,7 +16,7 @@ import { collidableComponent } from './entity/components/Collidable';
 import { createTileset } from './renderer/createTileset';
 import { renderableComponent } from './entity/components/Renderable';
 import { sizeComponent } from './entity/components/Size';
-import { enemies, type Enemies } from './entity/components/Enemy';
+import { EnemyType } from './entity/components/Enemy';
 import { createTrap } from './entity/factories/createTrap';
 import type { ECSEntity } from './ecs/ECSEntity';
 import { hasAnimatable } from './entity/components/Animatable';
@@ -28,10 +28,8 @@ export type TMap = {
   level: number;
 };
 
-const enemiesOnLevel: Record<Enemies, number>[] = [{ trap: 1 }, { trap: 2 }];
-
-const spawners: Record<Enemies, (world: ECSWorld) => ECSEntity> = {
-  trap: (world: ECSWorld) => createTrap(world, { enemy: codex.enemies.trap })
+const spawners: Record<EnemyType, (world: ECSWorld) => ECSEntity> = {
+  trap: (world: ECSWorld) => createTrap(world, { enemy: codex.enemies.trap() })
 };
 
 export const maps = [
@@ -297,13 +295,14 @@ export async function loadMap(
   player.position.x = spawnLocation?.x;
   player.position.y = spawnLocation?.y;
 
-  for (const enemyKey of enemies) {
+  for (const enemyKey of Object.values(EnemyType)) {
     const amount = rng.nextRange(3, 5) + map.level * 2;
     for (let i = 0; i < amount; i++) {
       const randomIndex = Math.floor(rng.nextF() * enemySpawnLocations.length);
       const location = enemySpawnLocations[randomIndex]!;
       enemySpawnLocations.splice(randomIndex, 1);
-      const enemy = spawners[enemyKey](world);
+      const spawner = spawners[enemyKey]!;
+      const enemy = spawner(world);
       if (hasPosition(enemy)) {
         enemy.position.x = location.x;
         enemy.position.y = location.y;
