@@ -1,7 +1,8 @@
-import type { Application, Point } from 'pixi.js';
-import { useKeydownOnce } from './composables/useKeydownOnce';
+import type { Application } from 'pixi.js';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
 import { mulVector, subVector } from './utils/vectors';
+import type { ECSWorld } from './ecs/ECSWorld';
+import type { TInventoryManager } from './createInventoryManager';
 
 export const Controls = [
   'up',
@@ -9,18 +10,31 @@ export const Controls = [
   'left',
   'right',
   'use',
-  'seppuku',
-  'toggleDebug'
+  'toggleDebug',
+  'itemSlot1',
+  'itemSlot2',
+  'itemSlot3',
+  'itemSlot4',
+  'itemSlot5',
+  'itemSlot6',
+  'itemSlot7',
+  'itemSlot8'
 ] as const;
 
 export const movementControls = ['up', 'down', 'left', 'right'];
 const isMovementControl = (key: Control) => movementControls.includes(key);
 const isUseControl = (key: Control) => key === 'use';
-
-// TODO: this is a temp way to hurt the player, will be removed soon
-const isSeppukuControl = (key: Control) => key === 'seppuku';
 const isDebugControl = (key: Control) => key === 'toggleDebug';
-
+const isItemControl = (key: Control) => [
+  'itemSlot1',
+  'itemSlot2',
+  'itemSlot3',
+  'itemSlot4',
+  'itemSlot5',
+  'itemSlot6',
+  'itemSlot7',
+  'itemSlot8'
+];
 export type Control = typeof Controls[number];
 
 const configuration = {
@@ -29,8 +43,15 @@ const configuration = {
   KeyW: 'up',
   KeyS: 'down',
   KeyE: 'use',
-  KeyP: 'seppuku',
-  Backquote: 'toggleDebug'
+  Backquote: 'toggleDebug',
+  Digit1: 'itemSlot1',
+  Digit2: 'itemSlot2',
+  Digit3: 'itemSlot3',
+  Digit4: 'itemSlot4',
+  Digit5: 'itemSlot5',
+  Digit6: 'itemSlot6',
+  Digit7: 'itemSlot7',
+  Digit8: 'itemSlot8'
 } as Record<string, Control>;
 
 const controls = {
@@ -39,7 +60,14 @@ const controls = {
   left: false,
   right: false,
   use: false,
-  seppuku: false,
+  itemSlot1: false,
+  itemSlot2: false,
+  itemSlot3: false,
+  itemSlot4: false,
+  itemSlot5: false,
+  itemSlot6: false,
+  itemSlot7: false,
+  itemSlot8: false,
   toggleDebug: false
 };
 
@@ -59,7 +87,11 @@ export function getControls() {
   return controls;
 }
 
-export const createControls = (app: Application, queue: GameLoopQueue) => {
+export const createControls = (
+  app: Application,
+  queue: GameLoopQueue,
+  ecs: ECSWorld
+) => {
   const canvas = app.view as HTMLCanvasElement;
   app.stage.on('pointerdown', e => {
     queue.dispatch({
@@ -85,18 +117,17 @@ export const createControls = (app: Application, queue: GameLoopQueue) => {
         payload: isOn
       });
     }
-    if (isSeppukuControl(control) && isOn) {
-      queue.dispatch({
-        type: EventNames.PLAYER_DAMAGED,
-        payload: 1
-      });
-    }
-
     if (isDebugControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.TOGGLE_DEBUG_OVERLAY,
         payload: undefined
       });
+    }
+    if (isItemControl(control)) {
+      console.log(control);
+      const inventoryManager = ecs.get<TInventoryManager>('inventory').unwrap();
+      const itemIndex = Number(control.replace('itemSlot', ''));
+      inventoryManager?.useBeltItem(itemIndex - 1);
     }
   };
 

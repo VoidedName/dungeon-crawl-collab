@@ -1,8 +1,7 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import {
   AnimatableBrand,
-  type Animatable,
-  AnimationState
+  type Animatable
 } from '@/entity/components/Animatable';
 import { deleteComponent } from '@/entity/components/Delete';
 import { EnemyBrand, type Enemy } from '@/entity/components/Enemy';
@@ -17,20 +16,10 @@ import {
   StateAwareBrand,
   type StateAware
 } from '@/entity/components/StateAware';
-import { getAnimationState } from '@/renderer/AnimationManager';
-import {
-  HitBoxId,
-  getAnimationDuration,
-  getSpriteHitbox
-} from '@/renderer/renderableUtils';
-import {
-  ProjectileState,
-  ProjectileStateTransitions
-} from '@/stateMachines/projectile';
+import { ProjectileState } from '@/stateMachines/projectile';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 import { spriteCollision } from '@/utils/collisions';
 import { dealDamage, removeProjectile } from '@/utils/ecsUtils';
-import { clamp } from '@/utils/math';
 
 export const ProjectileSystem: () => ECSSystem<
   [Projectile, Position, Size, Animatable, StateAware]

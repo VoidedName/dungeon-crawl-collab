@@ -6,6 +6,7 @@ import { AnimationState } from '@/entity/components/Animatable';
 import { scheduleAnimation } from '@/renderer/AnimationManager';
 import { getAnimationDuration } from '@/renderer/renderableUtils';
 import { playerHitFX, playerHitEndFX } from '@/fx/player';
+import type { TAudioManager } from '@/createAudioManager';
 
 export const PlayerState = {
   IDLE: 'idle',
@@ -47,6 +48,7 @@ export const createPlayerStateMachine = (
               spriteName: entity.animatable.spriteName,
               state: AnimationState.IDLE
             });
+            world.get<TAudioManager>('audio').unwrap().stopLoop('steps');
           }
         },
 
@@ -62,6 +64,7 @@ export const createPlayerStateMachine = (
               spriteName: entity.animatable.spriteName,
               state: AnimationState.RUNNING
             });
+            world.get<TAudioManager>('audio').unwrap().loop('steps');
           }
         },
 

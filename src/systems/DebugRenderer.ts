@@ -1,5 +1,5 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
-import { maps, TILE_SIZE, type TMap } from '@/MapManager';
+import { maps, TILE_SIZE } from '@/MapManager';
 import { Application, Container, Graphics, Text } from 'pixi.js';
 import type { GameMap } from '@/map/Map';
 
