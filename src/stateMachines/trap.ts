@@ -73,7 +73,9 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             [TrapReadyState.CAN_REACH_PLAYER]: {},
             [TrapReadyState.HAS_REACHED_PLAYER]: {}
           },
-
+          on: {
+            [TrapStateTransitions.REACHED_PLAYER]: `${TrapState.READY}.${TrapReadyState.HAS_REACHED_PLAYER}`
+          },
           after: {
             READY_DELAY: {
               target: TrapState.COOL_DOWN
@@ -112,7 +114,7 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
         }
       },
       on: {
-        [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN,
+        // [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN,
         [TrapStateTransitions.TAKE_DAMAGE]: TrapState.HIT
       }
     },

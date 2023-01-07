@@ -24,7 +24,6 @@ import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
-import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
 import { createCamera } from './createCamera';
 import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
 import { createAudioManager } from './createAudioManager';
@@ -47,7 +46,6 @@ export const EventNames = {
   KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
   PLAYER_ATTACK: 'PLAYER_ATTACK',
   PLAYER_INTERACT: 'PLAYER_INTERACT',
-  PLAYER_DAMAGED: 'PLAYER_DAMAGED',
   TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
   SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
   DAMAGE: 'DAMAGE',
@@ -68,11 +66,6 @@ type PlayerAttackEvent = {
 type PlayerInteractEvent = {
   type: typeof EventNames.PLAYER_INTERACT;
   payload: any;
-};
-
-type PlayerDamagedEvent = {
-  type: typeof EventNames.PLAYER_DAMAGED;
-  payload: number;
 };
 
 type ToggleDebugOverlayEvent = {
@@ -102,7 +95,6 @@ type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
   | PlayerInteractEvent
-  | PlayerDamagedEvent
   | ToggleDebugOverlayEvent
   | SetCameraOffsetEvent
   | DamageEvent
@@ -134,9 +126,6 @@ const eventQueueReducer =
       case EventNames.PLAYER_INTERACT:
         return playerInteractHandler(payload, world);
 
-      case EventNames.PLAYER_DAMAGED:
-        return playerDamagedHandler(payload, world, navigateTo, emit);
-
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);
 
@@ -144,7 +133,7 @@ const eventQueueReducer =
         return setCameraOffsetHandler(payload, world);
 
       case EventNames.DAMAGE:
-        return damageHandler(payload, world);
+        return damageHandler(payload, world, navigateTo, emit);
 
       case EventNames.USE_ITEM:
         return itemHandler(payload, world, emit);

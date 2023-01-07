@@ -1,5 +1,4 @@
-import type { Application, Point } from 'pixi.js';
-import { useKeydownOnce } from './composables/useKeydownOnce';
+import type { Application } from 'pixi.js';
 import { EventNames, type GameLoopQueue } from './createGameLoop';
 import { mulVector, subVector } from './utils/vectors';
 
@@ -9,16 +8,12 @@ export const Controls = [
   'left',
   'right',
   'use',
-  'seppuku',
   'toggleDebug'
 ] as const;
 
 export const movementControls = ['up', 'down', 'left', 'right'];
 const isMovementControl = (key: Control) => movementControls.includes(key);
 const isUseControl = (key: Control) => key === 'use';
-
-// TODO: this is a temp way to hurt the player, will be removed soon
-const isSeppukuControl = (key: Control) => key === 'seppuku';
 const isDebugControl = (key: Control) => key === 'toggleDebug';
 
 export type Control = typeof Controls[number];
@@ -29,7 +24,6 @@ const configuration = {
   KeyW: 'up',
   KeyS: 'down',
   KeyE: 'use',
-  KeyP: 'seppuku',
   Backquote: 'toggleDebug'
 } as Record<string, Control>;
 
@@ -39,7 +33,6 @@ const controls = {
   left: false,
   right: false,
   use: false,
-  seppuku: false,
   toggleDebug: false
 };
 
@@ -85,13 +78,6 @@ export const createControls = (app: Application, queue: GameLoopQueue) => {
         payload: isOn
       });
     }
-    if (isSeppukuControl(control) && isOn) {
-      queue.dispatch({
-        type: EventNames.PLAYER_DAMAGED,
-        payload: 1
-      });
-    }
-
     if (isDebugControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.TOGGLE_DEBUG_OVERLAY,

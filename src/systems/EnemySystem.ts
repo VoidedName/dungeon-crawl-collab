@@ -56,8 +56,11 @@ export const EnemySystem: (
           machine.send(TrapStateTransitions.REACHED_PLAYER);
 
           queue.dispatch({
-            type: EventNames.PLAYER_DAMAGED,
-            payload: 1
+            type: EventNames.DAMAGE,
+            payload: {
+              damage: 1,
+              entityId: player.entity_id
+            }
           });
         }
       }
