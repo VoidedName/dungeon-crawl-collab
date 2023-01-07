@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useEcsApi } from '@/composables/useEcsApi';
+import type { ECSEvent } from '@/createGameLoop';
 import type { TInventoryManager } from '@/createInventoryManager';
 import { BELT_SIZE } from '@/createInventoryManager';
 
@@ -8,7 +9,7 @@ let inventoryManager: TInventoryManager;
 const ecsApi = useEcsApi();
 let belt = ref(new Array(BELT_SIZE).fill(undefined));
 
-ecsApi.value.on((event: any) => {
+ecsApi.value.on((event: ECSEvent) => {
   if (event === 'ready') {
     inventoryManager = ecsApi.value
       ?.getGlobal<TInventoryManager>('inventory')
