@@ -110,7 +110,6 @@ export const DebugRenderer: (app: Application) => ECSSystem<[]> = app => {
           drawHitbox(e.hitboxes.hurt, graphics, 0xff0000);
           drawHitbox(e.hitboxes.damage, graphics, 0x00ffff);
           graphics.endFill();
-          graphics.endFill();
           hitboxes.addChild(graphics);
         });
       }
