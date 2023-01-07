@@ -12,7 +12,6 @@ import { enemyComponent } from '../components/Enemy';
 import { registerStateMachine } from '@/stateMachines/stateMachineManager';
 import { createTrapStateMachine } from '@/stateMachines/trap';
 import type { CodexEnemy } from '@/assets/types';
-import { collidableComponent } from '../components/Collidable';
 
 export type CreateTrapOptions = {
   enemy: CodexEnemy;

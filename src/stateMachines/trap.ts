@@ -7,7 +7,6 @@ import { getAnimationDuration } from '@/renderer/renderableUtils';
 import { resolveRenderable } from '@/renderer/renderableManager';
 import type { Sprite } from 'pixi.js';
 import { trapHitEndFX, trapHitFX } from '@/fx/trap';
-import type { ECSWorld } from '@/ecs/ECSWorld';
 
 export const TrapState = {
   IDLE: 'idle',
@@ -74,7 +73,9 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
             [TrapReadyState.CAN_REACH_PLAYER]: {},
             [TrapReadyState.HAS_REACHED_PLAYER]: {}
           },
-
+          on: {
+            [TrapStateTransitions.REACHED_PLAYER]: `${TrapState.READY}.${TrapReadyState.HAS_REACHED_PLAYER}`
+          },
           after: {
             READY_DELAY: {
               target: TrapState.COOL_DOWN
@@ -113,7 +114,7 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
         }
       },
       on: {
-        [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN,
+        // [TrapStateTransitions.REACHED_PLAYER]: TrapState.COOL_DOWN,
         [TrapStateTransitions.TAKE_DAMAGE]: TrapState.HIT
       }
     },

@@ -59,7 +59,7 @@ export const createProjectile = (
   registerRenderable(projectile.entity_id, sprite);
   registerStateMachine(
     projectile.entity_id,
-    createProjectileStateMachine(projectile, world)
+    createProjectileStateMachine(projectile)
   );
   return projectile;
 };

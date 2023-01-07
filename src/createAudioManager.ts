@@ -1,11 +1,15 @@
 import ouchSound from './assets/sounds/ouch.mp3';
 import stairsSound from './assets/sounds/stairs.mp3';
 import damageSound from './assets/sounds/damage.mp3';
+import drinkSound from './assets/sounds/drink.mp3';
+import stepsSound from './assets/sounds/steps.mp3';
 
 const sounds = {
   ouch: ouchSound,
   stairs: stairsSound,
-  damage: damageSound
+  damage: damageSound,
+  drink: drinkSound,
+  steps: stepsSound
 } as const;
 const soundCache: any = {};
 const audioCtx = new AudioContext();
@@ -22,6 +26,8 @@ export function createAudioManager() {
     soundCache[key] = audioBuffer;
   };
 
+  const loopingSounds = new Map<TSound, AudioBufferSourceNode>();
+
   Object.keys(sounds).forEach(key => {
     window.requestIdleCallback(async () => {
       loadSound(key as keyof typeof sounds);
@@ -37,6 +43,20 @@ export function createAudioManager() {
       source.buffer = soundCache[sound];
       source.connect(audioCtx.destination);
       source.start();
+    },
+    async loop(sound: TSound) {
+      if (!soundCache[sound]) {
+        await loadSound(sound);
+      }
+      const source = audioCtx.createBufferSource();
+      source.buffer = soundCache[sound];
+      source.connect(audioCtx.destination);
+      source.loop = true;
+      source.start();
+      loopingSounds.set(sound, source);
+    },
+    async stopLoop(sound: TSound) {
+      loopingSounds.get(sound)?.stop();
     }
   };
 }

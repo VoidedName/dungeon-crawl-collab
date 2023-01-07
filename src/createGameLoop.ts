@@ -24,7 +24,6 @@ import { playerAttackHandler } from './eventHandlers/playerAttack';
 import { playerInteractHandler } from './eventHandlers/playerInteract';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
-import { playerDamagedHandler } from './eventHandlers/playerDamagedHandler';
 import { createCamera } from './createCamera';
 import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
 import { createAudioManager } from './createAudioManager';
@@ -32,10 +31,13 @@ import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
 import { loadSpriteTextures } from './renderer/createAnimatedSprite';
 import { EnemySystem } from './systems/EnemySystem';
+import type { TItem } from './createInventoryManager';
 import type { ECSEntityId } from './ecs/ECSEntity';
 import { damageHandler } from './eventHandlers/damageHandler';
 import { simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
+import { createInventoryManager } from './createInventoryManager';
+import { itemHandler } from './eventHandlers/itemHandler';
 import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
 
@@ -44,10 +46,10 @@ export const EventNames = {
   KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
   PLAYER_ATTACK: 'PLAYER_ATTACK',
   PLAYER_INTERACT: 'PLAYER_INTERACT',
-  PLAYER_DAMAGED: 'PLAYER_DAMAGED',
   TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
   SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
-  DAMAGE: 'DAMAGE'
+  DAMAGE: 'DAMAGE',
+  USE_ITEM: 'USE_ITEM'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -64,11 +66,6 @@ type PlayerAttackEvent = {
 type PlayerInteractEvent = {
   type: typeof EventNames.PLAYER_INTERACT;
   payload: any;
-};
-
-type PlayerDamagedEvent = {
-  type: typeof EventNames.PLAYER_DAMAGED;
-  payload: number;
 };
 
 type ToggleDebugOverlayEvent = {
@@ -89,27 +86,35 @@ type DamageEvent = {
   };
 };
 
+type UseItemEvent = {
+  type: typeof EventNames.USE_ITEM;
+  payload: TItem;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
   | PlayerInteractEvent
-  | PlayerDamagedEvent
   | ToggleDebugOverlayEvent
   | SetCameraOffsetEvent
-  | DamageEvent;
+  | DamageEvent
+  | UseItemEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
+
+export type ECSEvent = 'ready' | 'playerHealthChanged';
 
 export type ECSApi = {
   cleanup: () => void;
   getEntities: ECSWorld['entitiesByComponent'];
   getGlobal: ECSWorld['get'];
+  emit: (event: ECSEvent) => void;
   dispatch: GameLoopQueue['dispatch'];
-  on: () => void; // to be defined
+  on: (cb: (event: ECSEvent) => void) => void;
 };
 
 const eventQueueReducer =
-  (world: ECSWorld, navigateTo: (path: string) => void) =>
+  (world: ECSWorld, navigateTo: (path: string) => void, emit: ECSEmitter) =>
   ({ type, payload }: QueueEvent) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
@@ -121,9 +126,6 @@ const eventQueueReducer =
       case EventNames.PLAYER_INTERACT:
         return playerInteractHandler(payload, world);
 
-      case EventNames.PLAYER_DAMAGED:
-        return playerDamagedHandler(payload, world, navigateTo);
-
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(world);
 
@@ -131,14 +133,21 @@ const eventQueueReducer =
         return setCameraOffsetHandler(payload, world);
 
       case EventNames.DAMAGE:
-        return damageHandler(payload, world);
+        return damageHandler(payload, world, navigateTo, emit);
+
+      case EventNames.USE_ITEM:
+        return itemHandler(payload, world, emit);
 
       default:
         isNever(type);
     }
   };
 
-const setup = async (app: Application, world: ECSWorld) => {
+const setup = async (
+  app: Application,
+  world: ECSWorld,
+  queue: GameLoopQueue
+) => {
   const rng = lehmerRandom(2023);
   const map = simpleMapGen(20, 20, 0, 3, rng);
 
@@ -146,6 +155,7 @@ const setup = async (app: Application, world: ECSWorld) => {
   world.set('rng', rng);
   world.set('world map', [map]);
   world.set(DebugFlags.map, false);
+  world.set('inventory', createInventoryManager(queue));
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
 
@@ -166,14 +176,24 @@ const setup = async (app: Application, world: ECSWorld) => {
 
 type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
 
+export type ECSEmitter = typeof emit;
+
+const listeners: any[] = [];
+function emit(event: ECSEvent) {
+  for (const listener of listeners) {
+    listener(event);
+  }
+}
+
 export function createGameLoop(
   renderer: GameRenderer,
   navigateTo: (path: string) => void
 ): ECSApi {
   let state: GameState = { type: 'SETUP' };
+
   const world = createWorld();
   const queue = createEventQueue<QueueEvent>(
-    eventQueueReducer(world, navigateTo)
+    eventQueueReducer(world, navigateTo, emit)
   );
   const controls = createControls(renderer.app, queue);
 
@@ -193,7 +213,10 @@ export function createGameLoop(
   function tick(delta: number) {
     switch (state.type) {
       case 'SETUP':
-        setup(renderer.app, world).then(() => (state = { type: 'RUNNING' }));
+        setup(renderer.app, world, queue).then(() => {
+          state = { type: 'RUNNING' };
+          emit('ready');
+        });
         state = { type: 'LOADING' };
         break;
       case 'RUNNING':
@@ -215,11 +238,12 @@ export function createGameLoop(
       renderer.cleanup();
       controls.cleanup();
     },
+    emit,
     getEntities: world.entitiesByComponent,
     getGlobal: world.get,
     dispatch: queue.dispatch,
-    on: () => {
-      console.log('ecsApi.on not implemented yet');
+    on: (cb: (event: ECSEvent) => void) => {
+      listeners.push(cb);
     }
   };
 }

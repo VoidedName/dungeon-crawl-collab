@@ -13,7 +13,6 @@ import { registerStateMachine } from '../../stateMachines/stateMachineManager';
 import { createPlayerStateMachine } from '../../stateMachines/player';
 import { sizeComponent } from '../components/Size';
 import type { CodexPlayerClass } from '@/assets/types';
-import { collidableComponent } from '../components/Collidable';
 
 export type CreatePlayerOptions = {
   playerClass: CodexPlayerClass;
@@ -34,7 +33,10 @@ export const createPlayer = (
     .createEntity()
     .with(
       playerComponent({
-        stats: { base: playerClass.baseStats, current: playerClass.baseStats }
+        stats: {
+          base: playerClass.baseStats,
+          current: { ...playerClass.baseStats }
+        }
       })
     )
     .with(renderableComponent)
