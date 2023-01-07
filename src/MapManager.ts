@@ -113,168 +113,166 @@ export async function loadMap(
   const stairsUp = map.entry();
   const stairsDown = map.stairs();
 
-  for (let y = 0; y < map.height; y++) {
-    for (let x = 0; x < map.width; x++) {
-      let tileOptions = map.isBlocked(x, y) ? TILE_NA : FLOOR;
-      if (map.isBlocked(x, y)) {
-        let neighborhood = +!map.isBlocked(x - 1, y);
-        neighborhood += 2 * +!map.isBlocked(x + 1, y);
-        neighborhood += 4 * +!map.isBlocked(x, y - 1);
-        neighborhood += 8 * +!map.isBlocked(x, y + 1);
-        // TODO: Tileset matching
-        switch (neighborhood) {
-          case 0: // surround by wall
-            tileOptions = TILE_NA;
-            break;
-          case 1: // floor to the left
-            tileOptions = WALL_RIGHT;
-            break;
-          case 2: // floor to the right
-            tileOptions = WALL_LEFT;
-            break;
-          case 4: // bottom
-            tileOptions = WALL_BOTTOM;
-            break;
-          case 8: // top
-            tileOptions = WALL_TOP;
-            break;
-          case 6:
-            tileOptions = WALL_CORNER_BOTTOM_LEFT;
-            break;
-          default:
-            tileOptions = WALL_TOP;
-        }
+  for (const [x, y] of map) {
+    let tileOptions = map.isBlocked(x, y) ? TILE_NA : FLOOR;
+    if (map.isBlocked(x, y)) {
+      let neighborhood = +!map.isBlocked(x - 1, y);
+      neighborhood += 2 * +!map.isBlocked(x + 1, y);
+      neighborhood += 4 * +!map.isBlocked(x, y - 1);
+      neighborhood += 8 * +!map.isBlocked(x, y + 1);
+      // TODO: Tileset matching
+      switch (neighborhood) {
+        case 0: // surround by wall
+          tileOptions = TILE_NA;
+          break;
+        case 1: // floor to the left
+          tileOptions = WALL_RIGHT;
+          break;
+        case 2: // floor to the right
+          tileOptions = WALL_LEFT;
+          break;
+        case 4: // bottom
+          tileOptions = WALL_BOTTOM;
+          break;
+        case 8: // top
+          tileOptions = WALL_TOP;
+          break;
+        case 6:
+          tileOptions = WALL_CORNER_BOTTOM_LEFT;
+          break;
+        default:
+          tileOptions = WALL_TOP;
       }
-
-      let tileId = tileOptions[rng.die(tileOptions.length) - 1]!;
-
-      if (x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1) {
-        tileId = WALL_TOP[rng.die(WALL_TOP.length) - 1]!;
-      }
-
-      if (x === stairsUp[0] && y === stairsUp[1]) {
-        tileId = STAIRS_UP_ID;
-      }
-      if (x === stairsDown[0] && y === stairsDown[1]) {
-        tileId = STAIRS_DOWN_ID;
-      }
-
-      const textureName = `${TILESET_ID}-${tileId}`;
-      const tileContainer = new Container();
-      const tile = new Sprite(sheet.textures[textureName]);
-      tileContainer.addChild(tile);
-      tileContainer.position.set(x * TILE_SIZE, y * TILE_SIZE);
-
-      if (tileId === STAIRS_DOWN_ID) {
-        const text = new Text('Descend', {
-          fontFamily: 'Arial',
-          fontSize: 36,
-          fill: 0xff0000,
-          align: 'center'
-        });
-
-        text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
-        text.position.set(0, -30);
-        text.visible = false;
-
-        tileContainer.addChild(text);
-
-        const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
-
-        if (!spawnAtStairsUp) {
-          spawnLocation = tileContainer.toGlobal({
-            x: HALF_TILE,
-            y: HALF_TILE
-          });
-        }
-
-        const entity = world
-          .createEntity()
-          .with(
-            withInteractable(
-              'Descend',
-              'stairsDown',
-              true,
-              STAIRS_INTERACT_RADIUS
-            )
-          )
-          .with(withMapObject())
-          .with(
-            positionComponent({
-              x: globalPos.x + HALF_TILE,
-              y: globalPos.y + HALF_TILE
-            })
-          )
-          .with(renderableComponent)
-          .build();
-
-        registerRenderable(entity.entity_id, text);
-      } else if (tileId === STAIRS_UP_ID) {
-        const text = new Text('Ascend', {
-          fontFamily: 'Arial',
-          fontSize: 36,
-          fill: 0x00ffff,
-          align: 'center'
-        });
-
-        text.visible = false;
-        text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
-        text.position.set(0, -30);
-
-        tileContainer.addChild(text);
-
-        const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
-
-        if (spawnAtStairsUp) {
-          spawnLocation = tileContainer.toGlobal({
-            x: HALF_TILE,
-            y: HALF_TILE
-          });
-        }
-
-        const entity = world
-          .createEntity()
-          .with(
-            withInteractable(
-              'Ascend',
-              'stairsUp',
-              map.level > 0,
-              STAIRS_INTERACT_RADIUS
-            )
-          )
-          .with(withMapObject())
-          .with(
-            positionComponent({
-              x: globalPos.x + HALF_TILE,
-              y: globalPos.y + HALF_TILE
-            })
-          )
-          .with(renderableComponent)
-          .build();
-        registerRenderable(entity.entity_id, text);
-      } else if (collidableTypes.includes(tileId)) {
-        const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
-
-        world
-          .createEntity()
-          .with(withMapObject())
-          .with(
-            positionComponent({
-              x: globalPos.x + TILE_SIZE / 2,
-              y: globalPos.y + TILE_SIZE / 2
-            })
-          )
-          .with(sizeComponent({ w: TILE_SIZE, h: TILE_SIZE }))
-          .with(collidableComponent)
-          .build();
-      } else if (floorTiles.includes(tileId)) {
-        enemySpawnLocations.push({
-          x: x * TILE_SIZE + HALF_TILE,
-          y: y * TILE_SIZE + HALF_TILE
-        });
-      }
-      mapGroup.addChild(tileContainer);
     }
+
+    let tileId = tileOptions[rng.die(tileOptions.length) - 1]!;
+
+    if (x === 0 || y === 0 || x === map.width - 1 || y === map.height - 1) {
+      tileId = WALL_TOP[rng.die(WALL_TOP.length) - 1]!;
+    }
+
+    if (x === stairsUp[0] && y === stairsUp[1]) {
+      tileId = STAIRS_UP_ID;
+    }
+    if (x === stairsDown[0] && y === stairsDown[1]) {
+      tileId = STAIRS_DOWN_ID;
+    }
+
+    const textureName = `${TILESET_ID}-${tileId}`;
+    const tileContainer = new Container();
+    const tile = new Sprite(sheet.textures[textureName]);
+    tileContainer.addChild(tile);
+    tileContainer.position.set(x * TILE_SIZE, y * TILE_SIZE);
+
+    if (tileId === STAIRS_DOWN_ID) {
+      const text = new Text('Descend', {
+        fontFamily: 'Arial',
+        fontSize: 36,
+        fill: 0xff0000,
+        align: 'center'
+      });
+
+      text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
+      text.position.set(0, -30);
+      text.visible = false;
+
+      tileContainer.addChild(text);
+
+      const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
+
+      if (!spawnAtStairsUp) {
+        spawnLocation = tileContainer.toGlobal({
+          x: HALF_TILE,
+          y: HALF_TILE
+        });
+      }
+
+      const entity = world
+        .createEntity()
+        .with(
+          withInteractable(
+            'Descend',
+            'stairsDown',
+            true,
+            STAIRS_INTERACT_RADIUS
+          )
+        )
+        .with(withMapObject())
+        .with(
+          positionComponent({
+            x: globalPos.x + HALF_TILE,
+            y: globalPos.y + HALF_TILE
+          })
+        )
+        .with(renderableComponent)
+        .build();
+
+      registerRenderable(entity.entity_id, text);
+    } else if (tileId === STAIRS_UP_ID) {
+      const text = new Text('Ascend', {
+        fontFamily: 'Arial',
+        fontSize: 36,
+        fill: 0x00ffff,
+        align: 'center'
+      });
+
+      text.visible = false;
+      text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
+      text.position.set(0, -30);
+
+      tileContainer.addChild(text);
+
+      const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
+
+      if (spawnAtStairsUp) {
+        spawnLocation = tileContainer.toGlobal({
+          x: HALF_TILE,
+          y: HALF_TILE
+        });
+      }
+
+      const entity = world
+        .createEntity()
+        .with(
+          withInteractable(
+            'Ascend',
+            'stairsUp',
+            map.level > 0,
+            STAIRS_INTERACT_RADIUS
+          )
+        )
+        .with(withMapObject())
+        .with(
+          positionComponent({
+            x: globalPos.x + HALF_TILE,
+            y: globalPos.y + HALF_TILE
+          })
+        )
+        .with(renderableComponent)
+        .build();
+      registerRenderable(entity.entity_id, text);
+    } else if (collidableTypes.includes(tileId)) {
+      const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
+
+      world
+        .createEntity()
+        .with(withMapObject())
+        .with(
+          positionComponent({
+            x: globalPos.x + TILE_SIZE / 2,
+            y: globalPos.y + TILE_SIZE / 2
+          })
+        )
+        .with(sizeComponent({ w: TILE_SIZE, h: TILE_SIZE }))
+        .with(collidableComponent)
+        .build();
+    } else if (floorTiles.includes(tileId)) {
+      enemySpawnLocations.push({
+        x: x * TILE_SIZE + HALF_TILE,
+        y: y * TILE_SIZE + HALF_TILE
+      });
+    }
+    mapGroup.addChild(tileContainer);
   }
 
   app.stage.addChild(mapGroup);
