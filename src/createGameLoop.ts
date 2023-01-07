@@ -38,6 +38,7 @@ import { simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
+import { EntityLocationIndexSystem } from '@/systems/EntityLocationIndexSystem';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -177,6 +178,7 @@ export function createGameLoop(
   );
   const controls = createControls(renderer.app, queue);
 
+  world.addSystem('entity_location', EntityLocationIndexSystem);
   world.addSystem('projectile', ProjectileSystem());
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveRenderable, renderer.app));
