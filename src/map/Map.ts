@@ -8,28 +8,29 @@ import { rectRectCollision } from '@/utils/collisions';
 // it could carry the rooms geometry information
 // might be useful to spawn enemies things
 export type TileType = 'WALL' | 'FLOOR' | 'STAIRS_DOWN' | 'ENTRY';
-export type GameMap = BaseMap & {
-  readonly width: number;
-  readonly height: number;
-  readonly level: number;
+export type GameMap = BaseMap &
+  Iterable<[number, number, TileType]> & {
+    readonly width: number;
+    readonly height: number;
+    readonly level: number;
 
-  entry(): [number, number];
-  stairs(): [number, number];
+    entry(): [number, number];
+    stairs(): [number, number];
 
-  getEntities(x: number, y: number): ECSEntityId[];
-  setEntities(x: number, y: number, entities: ECSEntityId[]): void;
-  clearEntities(): void;
+    getEntities(x: number, y: number): ECSEntityId[];
+    setEntities(x: number, y: number, entities: ECSEntityId[]): void;
+    clearEntities(): void;
 
-  isRevealed(x: number, y: number): boolean;
-  setRevealed(x: number, y: number, isRevealed: boolean): void;
-  clearRevealed(): void;
+    isRevealed(x: number, y: number): boolean;
+    setRevealed(x: number, y: number, isRevealed: boolean): void;
+    clearRevealed(): void;
 
-  isVisible(x: number, y: number): boolean;
-  setVisible(x: number, y: number, isVisible: boolean): void;
-  clearVisible(): void;
+    isVisible(x: number, y: number): boolean;
+    setVisible(x: number, y: number, isVisible: boolean): void;
+    clearVisible(): void;
 
-  isBlocked(x: number, y: number): boolean;
-};
+    isBlocked(x: number, y: number): boolean;
+  };
 
 const MIN_ROOM_SIZE = 3;
 
@@ -231,6 +232,13 @@ export function simpleMapGen(
     },
     isOpaque(idx: number): boolean {
       return tiles[idx] === 'WALL';
+    },
+    *[Symbol.iterator]() {
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < width; y++) {
+          yield [x, y, tiles[xyIndex(x, y)]!];
+        }
+      }
     }
   };
 }

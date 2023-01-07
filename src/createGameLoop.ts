@@ -40,6 +40,8 @@ import { createInventoryManager } from './createInventoryManager';
 import { itemHandler } from './eventHandlers/itemHandler';
 import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
+import { EntityLocationIndexSystem } from '@/systems/EntityLocationIndexSystem';
+import { DynamicHitBoxSystem } from '@/systems/DynamicHitBoxSystem';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -70,7 +72,7 @@ type PlayerInteractEvent = {
 
 type ToggleDebugOverlayEvent = {
   type: typeof EventNames.TOGGLE_DEBUG_OVERLAY;
-  payload: any;
+  payload: keyof DebugFlags;
 };
 
 type SetCameraOffsetEvent = {
@@ -127,7 +129,7 @@ const eventQueueReducer =
         return playerInteractHandler(payload, world);
 
       case EventNames.TOGGLE_DEBUG_OVERLAY:
-        return debugOverlayHandler(world);
+        return debugOverlayHandler(payload, world);
 
       case EventNames.SET_CAMERA_OFFSET:
         return setCameraOffsetHandler(payload, world);
@@ -155,6 +157,7 @@ const setup = async (
   world.set('rng', rng);
   world.set('world map', [map]);
   world.set(DebugFlags.map, false);
+  world.set(DebugFlags.hitboxes, false);
   world.set('inventory', createInventoryManager(queue));
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
@@ -197,6 +200,8 @@ export function createGameLoop(
   );
   const controls = createControls(renderer.app, queue, world);
 
+  world.addSystem('dynamic_hitboxes', DynamicHitBoxSystem);
+  world.addSystem('entity_location', EntityLocationIndexSystem);
   world.addSystem('projectile', ProjectileSystem());
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveRenderable, renderer.app));

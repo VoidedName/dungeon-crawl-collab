@@ -3,6 +3,7 @@ import { EventNames, type GameLoopQueue } from './createGameLoop';
 import { mulVector, subVector } from './utils/vectors';
 import type { ECSWorld } from './ecs/ECSWorld';
 import type { TInventoryManager } from './createInventoryManager';
+import { DebugFlags } from '@/systems/DebugRenderer';
 
 export const Controls = [
   'up',
@@ -10,7 +11,8 @@ export const Controls = [
   'left',
   'right',
   'use',
-  'toggleDebug',
+  'toggleDebugMap',
+  'toggleDebugHitboxes',
   'itemSlot1',
   'itemSlot2',
   'itemSlot3',
@@ -24,7 +26,8 @@ export const Controls = [
 export const movementControls = ['up', 'down', 'left', 'right'];
 const isMovementControl = (key: Control) => movementControls.includes(key);
 const isUseControl = (key: Control) => key === 'use';
-const isDebugControl = (key: Control) => key === 'toggleDebug';
+const isDebugControl = (key: Control) =>
+  key === 'toggleDebugMap' || key === 'toggleDebugHitboxes';
 const isItemControl = (key: Control) => [
   'itemSlot1',
   'itemSlot2',
@@ -43,7 +46,8 @@ const configuration = {
   KeyW: 'up',
   KeyS: 'down',
   KeyE: 'use',
-  Backquote: 'toggleDebug',
+  Backquote: 'toggleDebugMap',
+  F1: 'toggleDebugHitboxes',
   Digit1: 'itemSlot1',
   Digit2: 'itemSlot2',
   Digit3: 'itemSlot3',
@@ -68,7 +72,8 @@ const controls = {
   itemSlot6: false,
   itemSlot7: false,
   itemSlot8: false,
-  toggleDebug: false
+  toggleDebugMap: false,
+  toggleDebugHitboxes: false
 };
 
 export function getConfiguration() {
@@ -120,7 +125,7 @@ export const createControls = (
     if (isDebugControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.TOGGLE_DEBUG_OVERLAY,
-        payload: undefined
+        payload: control === 'toggleDebugMap' ? 'map' : 'hitboxes'
       });
     }
     if (isItemControl(control)) {
