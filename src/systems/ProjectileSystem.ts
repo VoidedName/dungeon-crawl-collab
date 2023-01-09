@@ -60,8 +60,6 @@ export const ProjectileSystem: () => ECSSystem<
               .filter(hasAnimatable)
               .filter(hasSize);
 
-            console.log('Collision Candidates:', enemies);
-
             enemies.forEach(enemy => {
               if (!spriteCollision(e, enemy)) return;
               dealDamage({
