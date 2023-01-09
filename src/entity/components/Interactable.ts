@@ -1,7 +1,7 @@
 import type { ECSComponent } from '@/ecs/ECSComponent';
 import type { ECSEntity } from '@/ecs/ECSEntity';
 
-export type Interactables = 'stairsUp' | 'stairsDown';
+export type Interactables = 'stairsUp' | 'stairsDown' | 'item';
 const InteractableBrand = 'interactable';
 type InteractableBrand = typeof InteractableBrand;
 export type Interactable = ECSComponent<

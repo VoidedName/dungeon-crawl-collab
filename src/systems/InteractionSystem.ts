@@ -3,10 +3,8 @@ import type { TEffectManager } from '@/createEffectManager';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import type { Interactable } from '@/entity/components/Interactable';
-import type { InteractIntent } from '@/entity/components/InteractIntent';
-import type { Player } from '@/entity/components/Player';
-import type { Position } from '@/entity/components/Position';
-import type { Renderable } from '@/entity/components/Renderable';
+import { hasInteractIntent } from '@/entity/components/InteractIntent';
+import { hasPosition, type Position } from '@/entity/components/Position';
 import { loadMap } from '@/MapManager';
 import { dist } from '@/utils/math';
 import type { Application } from 'pixi.js';
@@ -15,6 +13,11 @@ import { immoveableComponent } from '@/entity/components/Immoveable';
 import type { GameMap } from '@/map/Map';
 import { simpleMapGen } from '@/map/Map';
 import type { Random } from '@/utils/rand/random';
+import { getPlayer } from '@/utils/getPlayer';
+import type { Renderable } from '@/entity/components/Renderable';
+import { hasParent } from '@/entity/components/Parent';
+import type { TInventoryManager } from '@/createInventoryManager';
+import { hasItem } from '@/entity/components/Item';
 
 export const InteractionSystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
@@ -26,10 +29,8 @@ export const InteractionSystem: (
   target: ['position', 'interactable', 'renderable'],
   run: (world, props, entities) => {
     entities.forEach(interactable => {
-      const player = world.entitiesByComponent<
-        [Player, Position, InteractIntent]
-      >(['player', 'position', 'interact_intent'])[0];
-      if (!player) return;
+      const player = getPlayer(world);
+      if (!hasPosition(player) || !hasInteractIntent(player)) return;
       if (!interactable.interactable.isEnabled) return;
       const distance = dist(interactable.position, player.position);
       const text = resolveRenderable(interactable.entity_id);
@@ -90,6 +91,32 @@ export const InteractionSystem: (
               },
               () => console.warn('no audio manager set')
             );
+          } else if (interactable.interactable.type === 'item') {
+            const inventoryManager = world
+              .get<TInventoryManager>('inventory')
+              .unwrap();
+
+            if (inventoryManager.isFull()) return;
+
+            interactable.interactable.isEnabled = false;
+            text.visible = false;
+            if (hasParent(interactable)) {
+              if (hasItem(interactable.parent.entity)) {
+                inventoryManager.addItemToBelt(
+                  interactable.parent.entity.item.type
+                );
+              }
+
+              world.removeComponent(
+                interactable.parent.entity.entity_id,
+                'position'
+              );
+
+              const item = resolveRenderable(
+                interactable.parent.entity.entity_id
+              );
+              item.visible = false;
+            }
           }
         }
       }

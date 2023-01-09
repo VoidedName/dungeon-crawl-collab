@@ -5,11 +5,7 @@ import {
   type Renderable,
   RenderableBrand
 } from '@/entity/components/Renderable';
-import { VelocityBrand, type Velocity } from '@/entity/components/Velocity';
-import {
-  OrientationBrand,
-  type Orientation
-} from '@/entity/components/Orientation';
+import { hasOrientation } from '@/entity/components/Orientation';
 import { getAnimationState } from '@/renderer/AnimationManager';
 import { AnimationState } from '@/entity/components/Animatable';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
@@ -20,11 +16,8 @@ import { hasPlayer } from '@/entity/components/Player';
 export const RenderSystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,
   app: Application
-) => ECSSystem<[Position, Renderable, Orientation, Velocity]> = (
-  resolveRenderable,
-  app
-) => ({
-  target: [PositionBrand, RenderableBrand, OrientationBrand, VelocityBrand],
+) => ECSSystem<[Position, Renderable]> = (resolveRenderable, app) => ({
+  target: [PositionBrand, RenderableBrand],
   run: (ecs, props, entities) => {
     entities.forEach(e => {
       const sprite = resolveRenderable(e.entity_id);
@@ -50,7 +43,7 @@ export const RenderSystem: (
         sprite.scale.set(scaleX, 1);
       }
 
-      if (hasProjectile(e)) {
+      if (hasProjectile(e) && hasOrientation(e)) {
         sprite.rotation = deg2Rad(e.orientation.angle);
       }
     });
