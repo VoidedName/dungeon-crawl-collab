@@ -1,32 +1,31 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import {
-  AnimatableBrand,
   type Animatable,
+  AnimatableBrand,
   hasAnimatable
 } from '@/entity/components/Animatable';
 import { deleteComponent } from '@/entity/components/Delete';
-import { EnemyBrand, type Enemy, hasEnemy } from '@/entity/components/Enemy';
+import { hasEnemy } from '@/entity/components/Enemy';
 import { hasPlayer } from '@/entity/components/Player';
 import {
-  PositionBrand,
+  hasPosition,
   type Position,
-  hasPosition
+  PositionBrand
 } from '@/entity/components/Position';
 import {
-  ProjectileBrand,
-  type Projectile
+  type Projectile,
+  ProjectileBrand
 } from '@/entity/components/Projectile';
-import { SizeBrand, type Size, hasSize } from '@/entity/components/Size';
+import { hasSize, type Size, SizeBrand } from '@/entity/components/Size';
 import {
-  StateAwareBrand,
-  type StateAware
+  type StateAware,
+  StateAwareBrand
 } from '@/entity/components/StateAware';
 import { ProjectileState } from '@/stateMachines/projectile';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 import { getIntersectingTiles, spriteCollision } from '@/utils/collisions';
 import { dealDamage, removeProjectile } from '@/utils/ecsUtils';
 import type { GameMap } from '@/map/Map';
-import { hasHitboxes } from '@/entity/components/HitBoxes';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export const ProjectileSystem: () => ECSSystem<
