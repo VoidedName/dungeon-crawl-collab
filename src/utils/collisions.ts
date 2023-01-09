@@ -6,6 +6,11 @@ import { getAnimationState } from '@/renderer/AnimationManager';
 import { getSpriteHitbox, HitBoxId } from '@/renderer/renderableUtils';
 import { dist } from './math';
 import type { Circle, Point, Rectangle } from './types';
+import type { Intersect } from './types';
+import { TILE_SIZE } from '@/MapManager';
+import { hasHitboxes } from '@/entity/components/HitBoxes';
+import type { Maybe } from '@/utils/Maybe';
+import type { GameMap } from '@/map/Map';
 
 export const pointRectCollision = (point: Point, rect: Rectangle) =>
   point.x >= rect.x &&
@@ -39,6 +44,62 @@ export const circleRectCollision = (circle: Circle, rect: Rectangle) => {
 
   return dx * dx + dy * dy <= circle.r * circle.r;
 };
+
+function getLimits(
+  box: Maybe<Rectangle>,
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number
+): [number, number, number, number] {
+  return box.match(
+    box => [
+      Math.min(xMin, Math.floor(box.x / TILE_SIZE)),
+      Math.max(xMax, Math.floor((box.x + box.w) / TILE_SIZE)),
+      Math.min(yMin, Math.floor(box.y / TILE_SIZE)),
+      Math.max(yMax, Math.floor((box.y + box.h) / TILE_SIZE))
+    ],
+    () => [xMin, xMax, yMin, yMax]
+  );
+}
+
+export function* getIntersectingTiles(
+  e: ECSEntity & Intersect<[Position]>,
+  map: GameMap
+): Generator<[number, number]> {
+  let xMin = Math.floor(e.position.x / TILE_SIZE);
+  let xMax = xMin;
+  let yMin = Math.floor(e.position.y / TILE_SIZE);
+  let yMax = yMin;
+  if (hasHitboxes(e)) {
+    [xMin, xMax, yMin, yMax] = getLimits(
+      e.hitboxes.movement,
+      xMin,
+      xMax,
+      yMin,
+      yMax
+    );
+    [xMin, xMax, yMin, yMax] = getLimits(
+      e.hitboxes.damage,
+      xMin,
+      xMax,
+      yMin,
+      yMax
+    );
+    [xMin, xMax, yMin, yMax] = getLimits(
+      e.hitboxes.hurt,
+      xMin,
+      xMax,
+      yMin,
+      yMax
+    );
+  }
+  for (let x = Math.max(0, xMin); x < Math.min(xMax + 1, map.width); x++) {
+    for (let y = Math.max(0, yMin); y < Math.min(yMax + 1, map.height); y++) {
+      yield [x, y];
+    }
+  }
+}
 
 export const spriteCollision = (
   source: Readonly<ECSEntity & Animatable & Position & Size>,
