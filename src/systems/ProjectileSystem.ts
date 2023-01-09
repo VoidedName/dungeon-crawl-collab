@@ -1,25 +1,33 @@
 import type { ECSSystem } from '@/ecs/ECSSystem';
 import {
   AnimatableBrand,
-  type Animatable
+  type Animatable,
+  hasAnimatable
 } from '@/entity/components/Animatable';
 import { deleteComponent } from '@/entity/components/Delete';
-import { EnemyBrand, type Enemy } from '@/entity/components/Enemy';
+import { EnemyBrand, type Enemy, hasEnemy } from '@/entity/components/Enemy';
 import { hasPlayer } from '@/entity/components/Player';
-import { PositionBrand, type Position } from '@/entity/components/Position';
+import {
+  PositionBrand,
+  type Position,
+  hasPosition
+} from '@/entity/components/Position';
 import {
   ProjectileBrand,
   type Projectile
 } from '@/entity/components/Projectile';
-import { SizeBrand, type Size } from '@/entity/components/Size';
+import { SizeBrand, type Size, hasSize } from '@/entity/components/Size';
 import {
   StateAwareBrand,
   type StateAware
 } from '@/entity/components/StateAware';
 import { ProjectileState } from '@/stateMachines/projectile';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
-import { spriteCollision } from '@/utils/collisions';
+import { getIntersectingTiles, spriteCollision } from '@/utils/collisions';
 import { dealDamage, removeProjectile } from '@/utils/ecsUtils';
+import type { GameMap } from '@/map/Map';
+import { hasHitboxes } from '@/entity/components/HitBoxes';
+import type { ECSEntityId } from '@/ecs/ECSEntity';
 
 export const ProjectileSystem: () => ECSSystem<
   [Projectile, Position, Size, Animatable, StateAware]
@@ -32,6 +40,7 @@ export const ProjectileSystem: () => ECSSystem<
     StateAwareBrand
   ],
   run: (ecs, props, entities) => {
+    const map = ecs.get<GameMap>('map').unwrap();
     entities.forEach(e => {
       const machine = resolveStateMachine(e.entity_id);
       if (machine.getSnapshot().value === ProjectileState.DEAD) return;
@@ -39,9 +48,19 @@ export const ProjectileSystem: () => ECSSystem<
       ecs.getEntity(e.projectile.firedBy).match(
         owner => {
           if (hasPlayer(owner)) {
-            const enemies = ecs.entitiesByComponent<
-              [Enemy, Position, Animatable, Size]
-            >([EnemyBrand, PositionBrand, AnimatableBrand, SizeBrand]);
+            const candidateIds = new Set<ECSEntityId>();
+            for (const [x, y] of getIntersectingTiles(e, map)) {
+              map.getEntities(x, y).forEach(e => candidateIds.add(e));
+            }
+
+            const enemies = [...candidateIds]
+              .map(e => ecs.getEntity(e).unwrap())
+              .filter(hasEnemy)
+              .filter(hasPosition)
+              .filter(hasAnimatable)
+              .filter(hasSize);
+
+            console.log('Collision Candidates:', enemies);
 
             enemies.forEach(enemy => {
               if (!spriteCollision(e, enemy)) return;
