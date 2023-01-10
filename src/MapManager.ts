@@ -23,6 +23,8 @@ import { hasAnimatable } from './entity/components/Animatable';
 import { codex } from './assets/codex';
 import type { GameMap } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
+import { hitboxes } from '@/entity/components/HitBoxes';
+import { none, some } from '@/utils/Maybe';
 
 export type TMap = {
   level: number;
@@ -265,6 +267,18 @@ export async function loadMap(
         )
         .with(sizeComponent({ w: TILE_SIZE, h: TILE_SIZE }))
         .with(collidableComponent)
+        .with(
+          hitboxes({
+            damage: none(),
+            hurt: none(),
+            movement: some({
+              x: globalPos.x,
+              y: globalPos.y,
+              w: TILE_SIZE,
+              h: TILE_SIZE
+            })
+          })
+        )
         .build();
     } else if (floorTiles.includes(tileId)) {
       enemySpawnLocations.push({
