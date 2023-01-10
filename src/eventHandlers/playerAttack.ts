@@ -17,6 +17,9 @@ import { subVector } from '@/utils/vectors';
 import { resolveRenderable } from '@/renderer/renderableManager';
 import { PlayerState, PlayerStateTransitions } from '@/stateMachines/player';
 import { codex } from '@/assets/codex';
+import { lehmerRandom } from '@/utils/rand/random';
+
+const random = lehmerRandom();
 
 export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   const [player] = world.entitiesByComponent<
@@ -32,10 +35,18 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
   machine.send(PlayerStateTransitions.ATTACK);
   const sprite = resolveRenderable(player.entity_id);
 
+  // for (let x = 0; x < 125; x++) {
   createProjectile(world, {
     firedBy: player.entity_id,
     projectile: codex.projectiles.magicMissile(),
     position: { ...player.position },
-    target: subVector(mousePosition, sprite.toGlobal({ x: 0, y: 0 }))
+    target: subVector(
+      {
+        x: mousePosition.x + random.nextRangeF(-50, 50),
+        y: mousePosition.y + random.nextRangeF(-50, 50)
+      },
+      sprite.toGlobal({ x: 0, y: 0 })
+    )
   });
+  // }
 };
