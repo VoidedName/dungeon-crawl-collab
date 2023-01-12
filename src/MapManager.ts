@@ -25,6 +25,7 @@ import type { GameMap } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { hitboxes } from '@/entity/components/HitBoxes';
 import { none, some } from '@/utils/Maybe';
+import { mapLayer, overlayLayer } from './renderer/createGameRenderer';
 
 export type TMap = {
   level: number;
@@ -177,6 +178,7 @@ export async function loadMap(
       text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
       text.position.set(3, -30);
       text.visible = false;
+      text.parentLayer = overlayLayer;
       tileContainer.addChild(text);
 
       const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
@@ -216,6 +218,7 @@ export async function loadMap(
         fill: 0xff0000,
         align: 'center'
       });
+      text.parentLayer = overlayLayer;
       text.name = 'text';
       text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
       text.position.set(3, -30);
@@ -285,6 +288,7 @@ export async function loadMap(
         y: y * TILE_SIZE + HALF_TILE
       });
     }
+    mapGroup.parentLayer = mapLayer;
     mapGroup.addChild(tileContainer);
   }
 

@@ -13,6 +13,7 @@ import { Text } from 'pixi.js';
 import { withMapObject } from '../components/MapObject';
 import { itemComponent } from '../components/Item';
 import { codex } from '@/assets/codex';
+import { itemLayer, overlayLayer } from '@/renderer/createGameRenderer';
 
 const lootableItems: (() => CodexItem)[] = [healthPotion];
 
@@ -34,6 +35,7 @@ export const createRandomItem = (
     codexItem.spriteName,
     AnimationState.IDLE
   );
+  sprite.parentLayer = itemLayer;
 
   const item = world
     .createEntity()
@@ -61,6 +63,7 @@ export const createRandomItem = (
     fill: 0xffffff,
     align: 'center'
   });
+  text.parentLayer = overlayLayer;
   text.name = 'text';
   text.scale.set(0.5, 0.5);
   text.visible = false;
