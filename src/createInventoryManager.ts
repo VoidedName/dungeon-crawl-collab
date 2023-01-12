@@ -40,6 +40,13 @@ export function createInventoryManager(queue: GameLoopQueue) {
     getBeltItem(index: number) {
       return belt[index];
     },
+    isFull() {
+      return belt.every(Boolean);
+    },
+    addItemToBelt(item: TItem) {
+      const openIndex = belt.findIndex(value => !value);
+      belt[openIndex] = item;
+    },
     useBeltItem(index: number) {
       const item = belt[index];
       if (item?.isUseable) {

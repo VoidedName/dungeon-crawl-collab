@@ -29,6 +29,8 @@ import { getAnimationDuration } from '@/renderer/renderableUtils';
 import { TrapStateTransitions } from '@/stateMachines/trap';
 import { PlayerStateTransitions } from '@/stateMachines/player';
 import type { TAudioManager } from '@/createAudioManager';
+import { hasPosition } from '@/entity/components/Position';
+import { createRandomItem } from '@/entity/factories/createRandomItem';
 
 export const getStats = <T extends PlayerStats | ProjectileStats | EnemyStats>(
   entity: ECSEntity & (Player | Enemy | Projectile)
@@ -61,6 +63,12 @@ export const dealDamage = ({
 
   if (stats.current.health <= 0) {
     ecs.addComponent(to, deleteComponent);
+
+    if (hasPosition(to)) {
+      createRandomItem(ecs, {
+        position: to.position
+      });
+    }
   } else {
     const machine = resolveStateMachine(to.entity_id);
     if (hasPlayer(to)) {
