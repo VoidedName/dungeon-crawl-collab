@@ -13,6 +13,7 @@ import { registerStateMachine } from '../../stateMachines/stateMachineManager';
 import { createPlayerStateMachine } from '../../stateMachines/player';
 import { sizeComponent } from '../components/Size';
 import type { CodexPlayerClass } from '@/assets/types';
+import { spriteLayer } from '@/renderer/createGameRenderer';
 
 export type CreatePlayerOptions = {
   playerClass: CodexPlayerClass;
@@ -27,7 +28,7 @@ export const createPlayer = (
     playerClass.spriteName,
     AnimationState.IDLE
   );
-  sprite.zIndex = 1;
+  sprite.parentLayer = spriteLayer;
 
   const player = world
     .createEntity()
