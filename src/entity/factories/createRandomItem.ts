@@ -11,7 +11,6 @@ import { healthPotion } from '@/assets/codex/items/health-potion';
 import { withInteractable } from '@/entity/components/Interactable';
 import { Text } from 'pixi.js';
 import { withMapObject } from '../components/MapObject';
-import { parentComponent } from '../components/Parent';
 import { itemComponent } from '../components/Item';
 import { codex } from '@/assets/codex';
 
@@ -43,11 +42,12 @@ export const createRandomItem = (
     .with(renderableComponent)
     .with(withAnimatable(codexItem.spriteName))
     .with(withMapObject())
+    .with(withInteractable('potion', 'item', true, 50))
     .with(
       itemComponent({
         type: {
           item: codex.items.healthPotion(),
-          isUseable: true // TODO: this seems weird living here instead of part of the health potion
+          isUseable: true
         }
       })
     )
@@ -61,24 +61,12 @@ export const createRandomItem = (
     fill: 0xffffff,
     align: 'center'
   });
-
+  text.name = 'text';
   text.scale.set(0.5, 0.5);
   text.visible = false;
+  text.position.x = -10;
+  text.position.y = -20;
+  sprite.addChild(text);
 
-  const textEntity = world
-    .createEntity()
-    .with(withInteractable('potion', 'item', true, 50))
-    .with(withMapObject())
-    .with(
-      positionComponent({
-        x: options.position.x - 16,
-        y: options.position.y - 20
-      })
-    )
-    .with(parentComponent({ entity: item }))
-    .with(renderableComponent)
-    .build();
-
-  registerRenderable(textEntity.entity_id, text);
   return item;
 };
