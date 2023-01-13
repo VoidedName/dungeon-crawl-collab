@@ -14,6 +14,9 @@ export type GameMap = BaseMap &
     readonly height: number;
     readonly level: number;
 
+    xyIndex(x: number, y: number): number;
+    indexXy(idx: number): [number, number];
+
     entry(): [number, number];
     stairs(): [number, number];
 
@@ -172,10 +175,17 @@ export function simpleMapGen(
 
   // todo: place monsters and other entities
 
+  function isBlocked(x: number, y: number): boolean {
+    const idx = xyIndex(x, y);
+    return tiles[idx] === 'WALL' || blockedTiles[idx]!;
+  }
+
   return {
     width,
     height,
     level,
+    xyIndex,
+    indexXy,
     entry(): [number, number] {
       return [...entryPos] as [number, number];
     },
@@ -204,10 +214,7 @@ export function simpleMapGen(
         revealedTiles[i] = false;
       }
     },
-    isBlocked(x: number, y: number): boolean {
-      const idx = xyIndex(x, y);
-      return tiles[idx] === 'WALL' || blockedTiles[idx]!;
-    },
+    isBlocked,
     getEntities(x: number, y: number): ECSEntityId[] {
       return tileContent[xyIndex(x, y)]!;
     },
@@ -227,7 +234,15 @@ export function simpleMapGen(
     exits(idx: number): number[] {
       const [x, y] = indexXy(idx);
       return NEIGHBORS.map(([dx, dy]) => [x + dx, y + dy] as [number, number])
-        .filter(([nx, ny]) => ny > 0 && nx > 0 && ny < height && nx < width)
+        .filter(
+          ([nx, ny]) =>
+            // prettier-ignore
+            ny > 0
+            && nx > 0
+            && ny < height
+            && nx < width
+            && !isBlocked(nx, ny)
+        )
         .map(([nx, ny]) => xyIndex(nx, ny));
     },
     isOpaque(idx: number): boolean {

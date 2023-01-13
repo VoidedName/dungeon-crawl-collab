@@ -34,7 +34,7 @@ import { EnemySystem } from './systems/EnemySystem';
 import type { TItem } from './createInventoryManager';
 import type { ECSEntityId } from './ecs/ECSEntity';
 import { damageHandler } from './eventHandlers/damageHandler';
-import { simpleMapGen } from '@/map/Map';
+import { type GameMap, simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { createInventoryManager } from './createInventoryManager';
 import { itemHandler } from './eventHandlers/itemHandler';
@@ -42,6 +42,10 @@ import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
 import { EntityLocationIndexSystem } from '@/systems/EntityLocationIndexSystem';
 import { DynamicHitBoxSystem } from '@/systems/DynamicHitBoxSystem';
+import type { PathingTo } from '@/entity/components/PathingTo';
+import { pathingTo } from '@/entity/components/PathingTo';
+import { PathingSystem } from '@/systems/PathingSystem';
+import type { Player } from '@/entity/components/Player';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -202,6 +206,7 @@ export function createGameLoop(
 
   world.addSystem('dynamic_hitboxes', DynamicHitBoxSystem);
   world.addSystem('entity_location', EntityLocationIndexSystem);
+  world.addSystem('pathing', PathingSystem(renderer.app));
   world.addSystem('projectile', ProjectileSystem());
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveRenderable, renderer.app));
@@ -226,6 +231,14 @@ export function createGameLoop(
         break;
       case 'RUNNING':
         queue.process();
+        // eslint-disable-next-line no-case-declarations
+        const map = world.get<GameMap>('map').unwrap();
+        // eslint-disable-next-line no-case-declarations
+        const player = world.entitiesByComponent<[Player]>(['player'])[0]!;
+        world.addComponent<PathingTo>(
+          player,
+          pathingTo({ target: map.getEntities(...map.stairs())[0]! })
+        );
         world.runSystems({ delta });
         break;
       case 'LOADING':

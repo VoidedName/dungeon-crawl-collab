@@ -79,7 +79,7 @@ export const DebugRenderer: (app: Application) => ECSSystem<[]> = app => {
                 TILE_SIZE - 1,
                 TILE_SIZE - 1
               );
-              const labelData = new Text(label, {
+              const labelData = new Text(`${map.xyIndex(x, y)}:${label}`, {
                 align: 'center',
                 fontSize: 8,
                 fill: tileColor

@@ -122,7 +122,7 @@ describe('adding and removing components', () => {
       [TestComponentOne, TestComponentTwo]
     >(['one', 'two'])[0]!;
 
-    world.removeComponent<typeof entity, TestComponentOne>(entity, 'one');
+    world.removeComponent<TestComponentOne>(entity, 'one');
 
     const after = world.entitiesByComponent<[TestComponentTwo]>(['two'])[0]!;
 

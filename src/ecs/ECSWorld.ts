@@ -89,7 +89,7 @@ export interface ECSWorld {
     e: ECSEntityId,
     component: () => C
   ): (ECSEntity & C) | undefined;
-  addComponent<E extends ECSEntity, C extends ECSComponent<string>>(
+  addComponent<C extends ECSComponent<string>, E extends ECSEntity = ECSEntity>(
     e: E,
     component: () => C
   ): E & C;
@@ -98,7 +98,10 @@ export interface ECSWorld {
     entity: ECSEntityId,
     component: C extends ECSComponent<infer S> ? S : never
   ): ECSEntity | undefined;
-  removeComponent<E extends ECSEntity, C extends ECSComponent<string>>(
+  removeComponent<
+    C extends ECSComponent<string>,
+    E extends ECSEntity = ECSEntity
+  >(
     entity: E,
     component: C extends ECSComponent<infer S> ? S : never
   ): Omit<E, keyof C>;
