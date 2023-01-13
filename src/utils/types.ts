@@ -1,3 +1,6 @@
+import type { ECSEntityId } from '@/ecs/ECSEntity';
+import type { DisplayObject } from 'pixi.js';
+
 export type Nullable<T> = T | null | undefined;
 export type NonNullable<T> = Exclude<T, undefined | null>;
 export type PartialBy<T, K extends keyof T = never> = Omit<T, K> &
@@ -26,3 +29,5 @@ export type Circle = Point & { r: number };
 export type Rectangle = Point & Size;
 
 export type Stats<T> = { base: T; current: T };
+
+export type ResolveRenderable = (sprite: ECSEntityId) => DisplayObject;
