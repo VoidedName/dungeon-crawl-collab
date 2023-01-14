@@ -21,6 +21,8 @@ import type { TInventoryManager } from '@/createInventoryManager';
 import { hasItem } from '@/entity/components/Item';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 
+export const TEXT_OBJECT_NAME = 'text';
+
 function handleItemInteraction(
   world: ECSWorld,
   itemEntity: ECSEntity,
@@ -116,7 +118,7 @@ export const InteractionSystem: (
         player.position
       );
       const isNear = distance < interactable.interactable.interactionRadius;
-      const text = parentSprite.getChildByName('text');
+      const text = parentSprite.getChildByName(TEXT_OBJECT_NAME);
 
       if (text) {
         text.visible = isNear;

@@ -45,15 +45,18 @@ export const createRandomItem = (
     .with(withAnimatable(codexItem.spriteName))
     .with(withMapObject())
     .with(withInteractable('potion', 'item', true, 50))
-    .with(
-      itemComponent({
-        type: {
-          item: codex.items.healthPotion(),
-          isUseable: true
-        }
-      })
-    )
     .build();
+
+  world.addComponent(
+    item.entity_id,
+    itemComponent({
+      type: {
+        item: codex.items.healthPotion(),
+        isUseable: true,
+        entityId: item.entity_id
+      }
+    })
+  );
 
   registerRenderable(item.entity_id, sprite);
 
