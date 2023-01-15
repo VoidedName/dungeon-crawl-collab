@@ -4,6 +4,7 @@ export const wizard = (): CodexPlayerClass => ({
   spriteName: 'wizard',
   baseStats: {
     speed: 3.25,
-    health: 10
+    health: 10,
+    attack: 1
   }
 });

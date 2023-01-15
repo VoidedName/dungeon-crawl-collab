@@ -5,6 +5,7 @@ import type { Stats, Values } from '@/utils/types';
 export type EnemyStats = {
   speed: number;
   health: number;
+  attack: number;
 };
 
 export const EnemyType = {
