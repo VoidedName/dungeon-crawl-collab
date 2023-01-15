@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useEcsApi } from '@/composables/useEcsApi';
-import type { ECSEvent } from '@/createGameLoop';
 import type { TItem } from '@/createInventoryManager';
 import { sprites } from '@/assets/sprites';
 import type { Nullable } from '@/utils/types';
@@ -10,16 +8,23 @@ const props = defineProps<{ item: Nullable<TItem>; slot: number }>();
 const bg = computed(() => {
   if (!props.item) return 'transparent';
   const { url } = sprites[props.item.item.spriteName];
-
   return `url(${url})`;
 });
+
+function startDrag(evt: DragEvent, index: number) {
+  if (!evt.dataTransfer) return;
+  evt.dataTransfer.setData('slot', index + '')
+}
 </script>
 
 <template>
   <li class="item-belt-slot">
     <span>{{ props.slot }}</span>
 
-    <button :title="item?.item.spriteName" />
+    <button 
+      draggable="true"
+      @dragstart="startDrag($event, props.slot - 1)"
+      :title="item?.item.spriteName" />
   </li>
 </template>
 

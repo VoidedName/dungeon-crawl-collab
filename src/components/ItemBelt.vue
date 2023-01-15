@@ -8,7 +8,6 @@ import type {
 } from '@/createInventoryManager';
 import { BELT_SIZE } from '@/createInventoryManager';
 import ItemBeltSlot from './ItemBeltSlot.vue';
-import { getConfiguration } from '@/createControls';
 
 let inventoryManager: TInventoryManager;
 
@@ -34,6 +33,8 @@ ecsApi.value.on((event: ECSEvent) => {
 function useItem(itemIndex: number) {
   inventoryManager?.useBeltItem(itemIndex);
 }
+
+
 </script>
 
 <template>
