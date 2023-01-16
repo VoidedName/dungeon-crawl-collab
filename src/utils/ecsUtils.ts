@@ -31,6 +31,8 @@ import { PlayerStateTransitions } from '@/stateMachines/player';
 import type { TAudioManager } from '@/createAudioManager';
 import { hasPosition } from '@/entity/components/Position';
 import { createRandomItem } from '@/entity/factories/createRandomItem';
+import { getPlayer } from './getPlayer';
+import { cp } from 'fs';
 
 export const getStats = <T extends PlayerStats | ProjectileStats | EnemyStats>(
   entity: ECSEntity & (Player | Enemy | Projectile)
@@ -69,6 +71,9 @@ export const dealDamage = ({
         position: to.position
       });
     }
+    if (hasEnemy(to)) {
+      addExperience(to, ecs);
+    }
   } else {
     const machine = resolveStateMachine(to.entity_id);
     if (hasPlayer(to)) {
@@ -89,4 +94,23 @@ export const removeProjectile = (
   setTimeout(() => {
     ecs.addComponent(e.entity_id, deleteComponent);
   }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+};
+
+export const addExperience = (to: ECSEntity & Enemy, ecs: ECSWorld) => {
+  const {
+    player: { stats }
+  } = getPlayer(ecs);
+  const experienceGain = 10; // temporary, needs to add heuristics too compute exp gain, from enemy type, level, player level, etc...
+  const newExperienceCap = stats.current.experienceToNextLevel * 1.2; //same thing
+
+  stats.current.experience += experienceGain;
+  const isLevelUp =
+    stats.current.experience < stats.current.experienceToNextLevel;
+
+  if (!isLevelUp) return;
+
+  stats.current.level++;
+  stats.current.experience =
+    stats.current.experience % stats.current.experienceToNextLevel;
+  stats.current.experienceToNextLevel = newExperienceCap;
 };

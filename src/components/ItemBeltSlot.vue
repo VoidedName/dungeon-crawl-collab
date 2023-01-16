@@ -13,7 +13,7 @@ const bg = computed(() => {
 
 function startDrag(evt: DragEvent, index: number) {
   if (!evt.dataTransfer) return;
-  evt.dataTransfer.setData('slot', index + '')
+  evt.dataTransfer.setData('slot', index + '');
 }
 </script>
 
@@ -21,10 +21,11 @@ function startDrag(evt: DragEvent, index: number) {
   <li class="item-belt-slot">
     <span>{{ props.slot }}</span>
 
-    <button 
+    <button
       draggable="true"
       @dragstart="startDrag($event, props.slot - 1)"
-      :title="item?.item.spriteName" />
+      :title="item?.item.spriteName"
+    />
   </li>
 </template>
 

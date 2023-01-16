@@ -33,8 +33,6 @@ ecsApi.value.on((event: ECSEvent) => {
 function useItem(itemIndex: number) {
   inventoryManager?.useBeltItem(itemIndex);
 }
-
-
 </script>
 
 <template>

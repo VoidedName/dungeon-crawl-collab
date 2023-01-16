@@ -32,7 +32,7 @@ import { PoisonSystem } from './systems/PoisonSystem';
 import { loadSpriteTextures } from './renderer/createAnimatedSprite';
 import { EnemySystem } from './systems/EnemySystem';
 import type { TItem } from './createInventoryManager';
-import type { ECSEntityId } from './ecs/ECSEntity';
+import type { ECSEntity, ECSEntityId } from './ecs/ECSEntity';
 import { damageHandler } from './eventHandlers/damageHandler';
 import { simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
@@ -43,6 +43,8 @@ import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
 import { EntityLocationIndexSystem } from '@/systems/EntityLocationIndexSystem';
 import { DynamicHitBoxSystem } from '@/systems/DynamicHitBoxSystem';
+import type { Enemy } from './entity/components/Enemy';
+import { enemyDiedHandler } from './eventHandlers/enemyDiedHandler';
 
 // @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
 export const EventNames = {
@@ -53,7 +55,8 @@ export const EventNames = {
   SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
   DAMAGE: 'DAMAGE',
   USE_ITEM: 'USE_ITEM',
-  DROP_ITEM: 'DROP_ITEM'
+  DROP_ITEM: 'DROP_ITEM',
+  ENEMY_DIED: 'ENEMY_DIED'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -100,6 +103,11 @@ type DropItemEvent = {
   payload: TItem;
 };
 
+type EnemyDiedEvent = {
+  type: typeof EventNames.ENEMY_DIED;
+  payload: ECSEntity & Enemy;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
@@ -108,7 +116,8 @@ type QueueEvent =
   | SetCameraOffsetEvent
   | DamageEvent
   | UseItemEvent
-  | DropItemEvent;
+  | DropItemEvent
+  | EnemyDiedEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -150,6 +159,9 @@ const eventQueueReducer =
 
       case EventNames.DROP_ITEM:
         return dropItemHandler(payload, world, resolveRenderable);
+
+      case EventNames.ENEMY_DIED:
+        return enemyDiedHandler(payload, world, emit);
 
       default:
         isNever(type);

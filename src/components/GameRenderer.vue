@@ -30,10 +30,9 @@ onMounted(async () => {
       inventoryManager = ecsApi.value
         ?.getGlobal<TInventoryManager>('inventory')
         .unwrap();
-
     }
-  })
-})
+  });
+});
 
 onUnmounted(() => {
   ecsApi.value?.cleanup();
@@ -41,7 +40,7 @@ onUnmounted(() => {
 
 function handleDrop(evt: DragEvent) {
   if (!evt.dataTransfer) return;
-  const slot = evt.dataTransfer.getData('slot')
+  const slot = evt.dataTransfer.getData('slot');
   inventoryManager?.dropBeltItem(Number(slot));
 }
 </script>
@@ -52,12 +51,13 @@ function handleDrop(evt: DragEvent) {
     <PauseMenu v-if="ecsApi" />
     <ItemBelt v-if="ecsApi" />
     <HealthHud v-if="ecsApi" />
-    <canvas 
-      ref="canvasEl" 
-      droppable="true" 
-      @drop="handleDrop($event)" 
-      @dragenter.prevent 
-      @dragover.prevent />
+    <canvas
+      ref="canvasEl"
+      droppable="true"
+      @drop="handleDrop($event)"
+      @dragenter.prevent
+      @dragover.prevent
+    />
   </div>
 </template>
 

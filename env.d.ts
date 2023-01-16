@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="@pixi/layers/global" />
 
 declare module '*.vue' {
   import type { DefineComponent } from 'vue';
