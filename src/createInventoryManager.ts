@@ -51,6 +51,7 @@ export function createInventoryManager(queue: GameLoopQueue) {
     addItemToBelt(item: TItem) {
       const openIndex = belt.findIndex(value => !value);
       belt[openIndex] = item;
+      emit('updated');
     },
     useBeltItem(index: number) {
       const item = belt[index];

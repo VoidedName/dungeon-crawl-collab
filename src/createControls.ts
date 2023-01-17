@@ -30,16 +30,17 @@ const isHighlightInteractablesControl = (key: Control) =>
   key === 'highlightInteractables';
 const isDebugControl = (key: Control) =>
   key === 'toggleDebugMap' || key === 'toggleDebugHitboxes';
-const isItemControl = (key: Control) => [
-  'itemSlot1',
-  'itemSlot2',
-  'itemSlot3',
-  'itemSlot4',
-  'itemSlot5',
-  'itemSlot6',
-  'itemSlot7',
-  'itemSlot8'
-];
+const isItemControl = (key: Control) =>
+  [
+    'itemSlot1',
+    'itemSlot2',
+    'itemSlot3',
+    'itemSlot4',
+    'itemSlot5',
+    'itemSlot6',
+    'itemSlot7',
+    'itemSlot8'
+  ].includes(key);
 export type Control = typeof Controls[number];
 
 const configuration = {

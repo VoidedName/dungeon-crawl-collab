@@ -20,13 +20,13 @@ import { highlightInteractablesHandler } from '@/eventHandlers/highlightInteract
 import {
   type Directions,
   keyboardMovementHandler
-} from './eventHandlers/keyboardMovement';
-import { playerAttackHandler } from './eventHandlers/playerAttack';
-import { playerInteractHandler } from './eventHandlers/playerInteract';
+} from './eventHandlers/keyboardMovementHandler';
+import { playerAttackHandler } from './eventHandlers/playerAttackHandler';
+import { playerInteractHandler } from './eventHandlers/playerInteractHandler';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
 import { createCamera } from './createCamera';
-import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
+import { setCameraOffsetHandler } from './eventHandlers/setCameraOffsetHandler';
 import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
@@ -133,7 +133,12 @@ export type ECSApi = {
 };
 
 const eventQueueReducer =
-  (world: ECSWorld, navigateTo: (path: string) => void, emit: ECSEmitter) =>
+  (
+    world: ECSWorld,
+    navigateTo: (path: string) => void,
+    emit: ECSEmitter,
+    app: Application
+  ) =>
   ({ type, payload }: QueueEvent) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
@@ -143,7 +148,7 @@ const eventQueueReducer =
         return playerAttackHandler(payload, world);
 
       case EventNames.PLAYER_INTERACT:
-        return playerInteractHandler(payload, world);
+        return playerInteractHandler(payload, world, app);
 
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(payload, world);
@@ -220,7 +225,7 @@ export function createGameLoop(
 
   const world = createWorld();
   const queue = createEventQueue<QueueEvent>(
-    eventQueueReducer(world, navigateTo, emit)
+    eventQueueReducer(world, navigateTo, emit, renderer.app)
   );
   const controls = createControls(renderer.app, queue, world);
 
