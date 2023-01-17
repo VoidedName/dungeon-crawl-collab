@@ -1,52 +1,182 @@
 # Main Goals
 
-The major goal of this project is to learn more about building a javascript game using an ECS (entity component system) architecture. Since non of our members have created a game engine with this type of approach, I'm assuming our contributors should keep an open mind in regards to experimentation and exploritory development. Although performance should be kept at the back of our minds as adding new features, I would argue keeping our system decoupled, fully type safe, and clean would allow for easier refactoring efforts during our experimentation develop, interate, pivot and refactor phases.
+The following list of potential features will guide us in building a minimal valuable product. Our dungeon crawler MVP requires some of these high level goals:
 
-Simnce performance and refactoring is important, we are writing out a list of potential features for guiding us in building a minimal valuable product. A MVP for our dungeon crawler would involve need to include some of these high level goals:
+
+## Major MVP Design Goals
 
 - enjoyable replayability
+- a feeling of choice
 - progression system
-  - a player will learn more about the mechanics every run
-  - a player will learn how to fight unique enemies each run
-  - a player can unlock and equip perks for future runs
-- a variety of unique enemies which force a player to truly understand the weaknesses and strengths of an enemy (forces some type of strategic gameplay and avoids hash and slash)
-- a variety of character classes a player can start as (wizard, warrior, rouge)
-- a rougelike experience, meaning when you die, you must start a new run from the start (but with the ability to start with some perks to make the next run unique and give a sense of progression)
--
+- a variety of unique enemies 
+- three character classes a player can start as (wizard, warrior, rouge)
+- a level up system with ability to increase base character stats
+- a rougelite experience (you die, you lose everything)
 
-with a variety of enemies, items, skills, and progression that would allow a causal gamer to be able to play through our game multiple times without getting bored but also provide a challenge enough to make players replay. A sense of progression and some type of mastery of our game mechanics could help with this goal.
+## Story / Theme
 
-## Goals
+You are an adventurer who is traveling through the forest to get to a nearby town.  You happen to step onto loose soil which breaks way causing you to fall down into a dungeon.  No clue where this dungeon came from and no way to climb out, your only option is to explore the dungeon and find an exit.  The first level is small, but as you reach the stairs down you find a bloody journal on the ground which explains how there are 10 levels to the dungeon and there is an exist, but blocking the exit is a boss
 
-## Theme
+The dungeon is dark and grungy, but luckily you always travel with a torch and weapon that will help light your surroundings or fight off the evils you may encounter.  As you get deeper into the dungeon, you notice the dungeon becomes larger and there are more difficult creatures you must fight.  You figure the fight with the boss will be difficult, so you try your best to prepare your character.
+
+## Character Classes
+
+each character has a unique way to be played and attack style.  Also, there is no concept of mana, just ability cooldown.  Each play has a set of skills that can be improved after leveling up.  These skills need to be leveled up / unlocked, so until a player reaches level 2, they will only have their primary and secondary attack mechanics.
+
+A primary attack is used for damaging enemies.  All character classes have a mechanic for charging up their primary attack which will deal more damage but require charging (reduces movement speed).
+
+A secondary attack is used for protecting the character (shields, roll, evasion, deflection, etc)
+
+
+### Wizard
+
+- primary attack: the wizard has a basic ranged attack which fires a magic bolt; charging will make the shot have a larger hitbox, fly faster, and deal more damage.
+- defense attack: deflect (incoming projectiles will reverse in direction and potentially hurt enemies)
+- normal walk speed
+- mechanics
+  - the damage of the bolt can be increased by equiped items or perks
+  - the attack speed can also be increased
+
+- skills
+  - ignite (catches an enemy on fire for DOTs)
+  - freeze (freezes an enemy and turns them blue, they walk slower for 3 seconds)
+  - nova (AOE attack which hits all nearby enemies)
+
+### Warrior
+
+- primary attack: swing sword
+- secondary attack: block with shield (blocks projectiles but slows movement)
+- slower walk speed
+
+- skills
+  - spin attack (hits all enemies in a 360 radius)
+  - ground slam (smashes the ground which sends out a shockwave to damage & stun enemies)
+  - charge (run fast in a direction which will damage and shove back enemies in the collision path)
+
+
+### Archer
+
+- primary attack: charge attack bow
+- secondary attack: roll (archer will roll in the walking direction to avoid projectiles)
+- the archer has a bow and arrow which the player can click and hold to charge up
+  - the archer's bow will turn bold when it's fully charged
+  - higher charge means more damagage, and a fully charged shot can have special effects
+- faster walk speed compared to the other characters
+- move slower when charging their shot
+
+- skills
+  - rapid fire (shoots 3 quick arrows)
+  - stealth (vanish from enemies for 5 seconds, attacking while in sneak will cause double damage but make you visible again)
+  - poision bomb (throws a projectile which poisions any enemies)
 
 ## Mechanics
 
+- a player can cast his abilities by pressing a key on his keyboard.
+- players can move while attacking
+- the map has a fog of war until you discover rooms and walls
+- the map has darkness that your player light will illuminate
+- going to the next level involves interacting with stairs
+- players can pick up items and use items
+- players can equip items they find
+
 ## Replayability
+
+- after beating the boss, he will drop an unlock which you can use at the start of the next run
+- games and maps are randomized, so every gameplay experience will be different
 
 ## Enemies
 
+Enemies will randomly spawn in rooms around the map.  The cooridors between the rooms will not have enemies.  Once a player comes within range of an enemy, the enemy will chase the player up to a certain range; otherwise it will run back to it's starting room and wander around.  Balancing the game might be hard, so we may have to have a preset of common "mobs" you will see, for example, 2 skeletons, 2 traps, and an archer might turn out to be a good combination for a level 3 mob. 
+
+To allow a feeling of progression and challenge, each enemy may need the ability to increase in levels as well.  As enemies increase in levels, they will have more health points and possibly deal more damage.  The goal is to reduce the size of the mobs and instead require players to play strategically room to room.  To prevent the player from just rushing through the game, enemies may need to get stronger as we get closer to the end of game.  The level of the enemy could potentially be visualized by sprites with armor, or different tint of enemies, or just a level above the enemies heads.
+
+trap
+  - static trap which will close and hurt the enemy
+  - killable
+skeleton
+  - melee attack
+  - normal walk speed
+  - will reanimate after dying
+zombie
+  - slow
+  - melee attack
+  - a bite causes posion on player for 3 seconds
+archer
+  - fires arrows
+  - will run to a new spot after firing an arrow
+exploder
+  - will explode when near to the player
+  - deals big damage
+  - AOE damage will kill other enemies
+  - walks slow
+rapid dog
+  - runs fast
+  - will leap at player and attack
+  - will run away and repeat cycle after successfully landing damage
+spitter
+  - vomits biles which will slow the player down if hit
+  - stops movement to recover after throwing up
+goblins
+  - normal move speed
+  - will steal an item from the player after hitting and run away
+  - item is gone if the goblin gets away
+spider
+  - can lay webs that will stick players for 3 seconds if they hit the traps
+  - web traps can be destroyed
+  - spits a projectile at the player
+snake
+  - posion attack
+  - can be found in pots
+leech
+  - attaches to the player
+  - player must spam click attack to throw leech
+  - drains player hp
+  - only one leech can attach at a time
+
 ## Items
+
+- random ceramic pots can be destroy around the map to potentially find items
+  - chance to run into a snake enemy
+- armor
+  - reduces damage
+  - might have other modifiers
+- weapons 
+  - might have other modifiers
+  - primary and secondary for each character class
+- potions that heal
 
 ## Unlockables
 
+- after beating the boss, a ring will drop which you can equip before doing a run
+- rings have different rarity, high rarity means better rings
+- when a player picks up a ring of higher rarity, it replaces the old ring
+  - ring of power (increase damage)
+  - ring of attack speed (increase attack speed)
+  - ring of health (increase base health)
+  - ring of defense (increase armor)
+  - ring of light (much higher player light)
+  - ring of cooldown (reduces skill cooldowns)
+  - ring of loot (increase chance of loot)
+  - ring of skill (start game with 1 extra skill point to spend)
+- unlock characters after beating the game with one
+  - game starts with wizard, but unlocks archer and warrior after being the game once
+
 ## Map Design / Generation
+
+- each level is larger and has progressively more difficult mobs to fight
+- levels will have destructables randomly placed around that can be destroyed to find loot
+- some levels may have a health shrine which will heal the player
+- shrines are randomly placed in levels
+  - health shrine - restore some hp
+  - blessing shrine (give a temporary boost in abilities)
+    - extra damage
+    - higher loot chance
+    - shield shrine  - extra armor
+    - speed shrine - faster walk speed
+    - 
 
 ## Achievements
 
-Gameplay
-
-- low enemy density
-- unlockable items (load out) you can equip before runs
-  - see hades for reference
-- unique AI for each enemy
-- systems are able to emit events
-- events should be one off things that occur in the world
-
-Systems
-
-- movement
-- physics
-- rendering
-
-- holding
+- beating a level with a character
+- beating the run within a time period
+- beat level without using a shrine
