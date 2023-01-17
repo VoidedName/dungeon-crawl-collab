@@ -27,7 +27,7 @@ function handleItemInteraction(
   text: DisplayObject,
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject
 ) {
-  if (!hasInteractable(itemEntity)) return;
+  if (!hasInteractable(itemEntity) || !hasItem(itemEntity)) return;
   const inventoryManager = world.get<TInventoryManager>('inventory').unwrap();
 
   if (inventoryManager.isFull()) return;
@@ -36,11 +36,10 @@ function handleItemInteraction(
   if (text) {
     text.visible = false;
   }
-  if (hasItem(itemEntity)) {
-    inventoryManager.addItemToBelt(itemEntity.item.type);
-  }
 
-  world.removeComponent(itemEntity.entity_id, 'position');
+  inventoryManager.addItemToBelt(itemEntity.item.type);
+  world.removeComponent(itemEntity, 'interactable');
+  world.removeComponent(itemEntity, 'position');
   world.removeComponent(itemEntity, 'renderable');
 
   const itemSprite = resolveRenderable(itemEntity.entity_id);
@@ -112,9 +111,6 @@ export const playerInteractHandler = (
   for (const interactable of interactables) {
     const parentSprite = resolveRenderable(interactable.entity_id) as Sprite;
     const text = parentSprite.getChildByName(TEXT_OBJECT_NAME);
-
-    // TODO: figure out why I need this check to prevent the app from crashing
-    if (!interactable.position) continue;
 
     const distance = dist(
       {
