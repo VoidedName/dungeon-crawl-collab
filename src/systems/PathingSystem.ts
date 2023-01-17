@@ -9,6 +9,11 @@ import type { BaseMap } from '@/map/BaseMap';
 import { TILE_SIZE } from '@/MapManager';
 import { type Maybe, none, some } from '@/utils/Maybe';
 import { fibonacciHeap } from '@/ds/FibonacciHeap';
+import type { Velocity } from '@/entity/components/Velocity';
+import { hasVelocity, velocityComponent } from '@/entity/components/Velocity';
+import type { Orientation } from '@/entity/components/Orientation';
+import { withOrientation } from '@/entity/components/Orientation';
+import { normalizeVector } from '@/utils/vectors';
 
 function getPath(history: Record<number, number>, target: number) {
   const path = [];
@@ -85,13 +90,31 @@ export const PathingSystem: (
 
                 g.lineStyle(2, 0xffff00).moveTo(e.position.x, e.position.y);
 
-                for (let next = 1; next < p.length; next++) {
+                if (hasVelocity(e)) {
+                  if (p.length > 1) {
+                    const t = p[1]!;
+                    const [x, y] = map.indexXy(t);
+
+                    e.velocity = normalizeVector({
+                      x: x + 0.5 - e.position.x / TILE_SIZE,
+                      y: y + 0.5 - e.position.y / TILE_SIZE
+                    });
+                  } else {
+                    e.velocity = normalizeVector({
+                      x: target.position.x - e.position.x,
+                      y: target.position.y - e.position.y
+                    });
+                  }
+                }
+
+                for (let next = 1; next < p.length - 1; next++) {
                   const n = map.indexXy(p[next]!);
                   g.lineTo(
                     n[0] * TILE_SIZE + TILE_SIZE / 2,
                     n[1] * TILE_SIZE + TILE_SIZE / 2
                   );
                 }
+                g.lineTo(target.position.x, target.position.y);
                 pathing.addChild(g);
               }
             }

@@ -26,6 +26,8 @@ import { lehmerRandom } from '@/utils/rand/random';
 import { hitboxes } from '@/entity/components/HitBoxes';
 import { none, some } from '@/utils/Maybe';
 import { mapLayer, overlayLayer } from './renderer/createGameRenderer';
+import type { PathingTo } from '@/entity/components/PathingTo';
+import { pathingTo } from '@/entity/components/PathingTo';
 
 export type TMap = {
   level: number;
@@ -319,6 +321,10 @@ export async function loadMap(
       const spawner = spawners[enemyKey]!;
       const enemy = spawner(world);
       if (hasPosition(enemy)) {
+        world.addComponent<PathingTo>(
+          enemy,
+          pathingTo({ target: player.entity_id })
+        );
         enemy.position.x = location.x;
         enemy.position.y = location.y;
       }

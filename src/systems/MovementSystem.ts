@@ -35,17 +35,9 @@ import type { GameMap } from '@/map/Map';
 import type { Intersect } from '@/utils/types';
 
 export const MovementSystem: () => ECSSystem<
-  [Position, Velocity, Orientation, Size, StateAware, Animatable, HitBoxes]
+  [Position, Velocity, Orientation, HitBoxes]
 > = () => ({
-  target: [
-    PositionBrand,
-    VelocityBrand,
-    OrientationBrand,
-    SizeBrand,
-    StateAwareBrand,
-    AnimatableBrand,
-    'hitboxes'
-  ],
+  target: [PositionBrand, VelocityBrand, OrientationBrand, 'hitboxes'],
   run: (world, props, entities) => {
     const handleSnapback = (
       e: typeof entities[number],
@@ -104,11 +96,11 @@ export const MovementSystem: () => ECSSystem<
       e: typeof entities[number],
       colliders: Iterable<ECSEntity & Intersect<[Collidable]>>
     ) => {
-      if (!hasPlayer(e)) return;
+      // if (!hasPlayer(e)) return;
 
-      const machine = resolveStateMachine(e.entity_id);
-      const state = machine.getSnapshot().value;
-      if (state !== PlayerState.RUNNING) return;
+      // const machine = resolveStateMachine(e.entity_id);
+      // const state = machine.getSnapshot().value;
+      // if (state !== PlayerState.RUNNING) return;
 
       e.position = addVector(e.position, { x: e.velocity.x, y: 0 });
       for (const collidable of colliders) {

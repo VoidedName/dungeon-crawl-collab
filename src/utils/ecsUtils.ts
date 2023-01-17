@@ -11,7 +11,8 @@ import {
 } from '@/entity/components/Player';
 import {
   AnimationState,
-  type Animatable
+  type Animatable,
+  hasAnimatable
 } from '@/entity/components/Animatable';
 import type { Stats } from './types';
 import { clamp } from './math';
@@ -80,13 +81,15 @@ export const dealDamage = ({
   }
 };
 
-export const removeProjectile = (
-  e: ECSEntity & Animatable & Projectile,
-  ecs: ECSWorld
-) => {
+export const removeProjectile = (e: ECSEntity & Projectile, ecs: ECSWorld) => {
   const machine = resolveStateMachine(e.entity_id);
   machine.send(ProjectileStateTransitions.DIE);
-  setTimeout(() => {
-    ecs.addComponent(e.entity_id, deleteComponent);
-  }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+  setTimeout(
+    () => {
+      ecs.addComponent(e.entity_id, deleteComponent);
+    },
+    hasAnimatable(e)
+      ? getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD)
+      : 0
+  );
 };

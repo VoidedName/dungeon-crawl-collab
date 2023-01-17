@@ -245,11 +245,6 @@ export function createGameLoop(
         // eslint-disable-next-line no-case-declarations
         const map = world.get<GameMap>('map').unwrap();
         // eslint-disable-next-line no-case-declarations
-        const player = world.entitiesByComponent<[Player]>(['player'])[0]!;
-        world.addComponent<PathingTo>(
-          player,
-          pathingTo({ target: map.getEntities(...map.stairs())[0]! })
-        );
         world.runSystems({ delta });
         break;
       case 'LOADING':
