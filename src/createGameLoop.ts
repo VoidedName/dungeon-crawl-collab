@@ -38,6 +38,7 @@ import { type GameMap, simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { createInventoryManager } from './createInventoryManager';
 import { itemHandler } from './eventHandlers/itemHandler';
+import { dropItemHandler } from '@/eventHandlers/dropItemHandler';
 import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
 import { EntityLocationIndexSystem } from '@/systems/EntityLocationIndexSystem';
@@ -55,7 +56,8 @@ export const EventNames = {
   TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
   SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
   DAMAGE: 'DAMAGE',
-  USE_ITEM: 'USE_ITEM'
+  USE_ITEM: 'USE_ITEM',
+  DROP_ITEM: 'DROP_ITEM'
 } as const;
 export type EventNames = Values<typeof EventNames>;
 
@@ -97,6 +99,11 @@ type UseItemEvent = {
   payload: TItem;
 };
 
+type DropItemEvent = {
+  type: typeof EventNames.DROP_ITEM;
+  payload: TItem;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
@@ -104,7 +111,8 @@ type QueueEvent =
   | ToggleDebugOverlayEvent
   | SetCameraOffsetEvent
   | DamageEvent
-  | UseItemEvent;
+  | UseItemEvent
+  | DropItemEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -143,6 +151,9 @@ const eventQueueReducer =
 
       case EventNames.USE_ITEM:
         return itemHandler(payload, world, emit);
+
+      case EventNames.DROP_ITEM:
+        return dropItemHandler(payload, world, resolveRenderable);
 
       default:
         isNever(type);

@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import type { AsyncReturnType } from '../utils/types';
 import { throttle } from '../utils/helpers';
+import { Layer, Stage } from '@pixi/layers';
 
 if (import.meta.env.DEV) {
   // @ts-ignore enables PIXI devtools
@@ -13,6 +14,11 @@ export type CreateGameRendererOptions = {
 };
 
 export const SCALE = 2;
+
+export const overlayLayer = new Layer();
+export const spriteLayer = new Layer();
+export const itemLayer = new Layer();
+export const mapLayer = new Layer();
 
 export const createGameRenderer = async ({
   canvas
@@ -28,10 +34,13 @@ export const createGameRenderer = async ({
     resizeTo: canvas.parentElement!
   });
 
+  app.stage = new Stage();
+
   PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
   app.stage.scale.set(SCALE);
   app.stage.sortableChildren = true;
+  app.stage.addChild(mapLayer, itemLayer, spriteLayer, overlayLayer);
 
   const onWindowResize = throttle(() => {
     app.resize();

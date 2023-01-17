@@ -25,6 +25,7 @@ import type { GameMap } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { hitboxes } from '@/entity/components/HitBoxes';
 import { none, some } from '@/utils/Maybe';
+import { mapLayer, overlayLayer } from './renderer/createGameRenderer';
 
 export type TMap = {
   level: number;
@@ -78,7 +79,7 @@ const WALL_RIGHT = [4, 11];
 const WALL_TOP = [2, 3];
 const WALL_BOTTOM = [16];
 const FLOOR = [9, 10];
-const WALL_CORNER_BOTTOM_RIGHT = [12];
+// const WALL_CORNER_BOTTOM_RIGHT = [12];
 const WALL_CORNER_BOTTOM_LEFT = [13];
 const TILE_NA = [-1];
 
@@ -169,15 +170,15 @@ export async function loadMap(
     if (tileId === STAIRS_DOWN_ID) {
       const text = new Text('Descend', {
         fontFamily: 'Arial',
-        fontSize: 36,
+        fontSize: 28,
         fill: 0xff0000,
         align: 'center'
       });
-
+      text.name = 'text';
       text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
-      text.position.set(0, -30);
+      text.position.set(3, -30);
       text.visible = false;
-
+      text.parentLayer = overlayLayer;
       tileContainer.addChild(text);
 
       const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
@@ -202,26 +203,26 @@ export async function loadMap(
         .with(withMapObject())
         .with(
           positionComponent({
-            x: globalPos.x + HALF_TILE,
-            y: globalPos.y + HALF_TILE
+            x: globalPos.x,
+            y: globalPos.y
           })
         )
         .with(renderableComponent)
         .build();
 
-      registerRenderable(entity.entity_id, text);
+      registerRenderable(entity.entity_id, tileContainer);
     } else if (tileId === STAIRS_UP_ID) {
       const text = new Text('Ascend', {
         fontFamily: 'Arial',
-        fontSize: 36,
-        fill: 0x00ffff,
+        fontSize: 28,
+        fill: 0xff0000,
         align: 'center'
       });
-
-      text.visible = false;
+      text.parentLayer = overlayLayer;
+      text.name = 'text';
       text.scale.set(0.5, 0.5); // @FIXME scale the app stage X2, how to find a generic way to render crisp text ?
-      text.position.set(0, -30);
-
+      text.position.set(3, -30);
+      text.visible = false;
       tileContainer.addChild(text);
 
       const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
@@ -246,13 +247,14 @@ export async function loadMap(
         .with(withMapObject())
         .with(
           positionComponent({
-            x: globalPos.x + HALF_TILE,
-            y: globalPos.y + HALF_TILE
+            x: globalPos.x,
+            y: globalPos.y
           })
         )
         .with(renderableComponent)
         .build();
-      registerRenderable(entity.entity_id, text);
+
+      registerRenderable(entity.entity_id, tileContainer);
     } else if (collidableTypes.includes(tileId)) {
       const globalPos = tileContainer.toGlobal({ x: 0, y: 0 });
 
@@ -286,6 +288,7 @@ export async function loadMap(
         y: y * TILE_SIZE + HALF_TILE
       });
     }
+    mapGroup.parentLayer = mapLayer;
     mapGroup.addChild(tileContainer);
   }
 

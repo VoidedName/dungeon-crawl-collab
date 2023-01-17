@@ -10,7 +10,9 @@ export type Orientation = ECSComponent<
   { angle: AngleInDegrees }
 >;
 
-export function hasVelocity<E extends ECSEntity>(e: E): e is E & Orientation {
+export function hasOrientation<E extends ECSEntity>(
+  e: E
+): e is E & Orientation {
   return OrientationBrand in e;
 }
 

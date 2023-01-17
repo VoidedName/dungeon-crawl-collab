@@ -293,7 +293,7 @@ function internalRemoveComponents(
     delete e[component];
 
     // update components
-    internals.entitiesBySystem.get(component)?.delete(e.entity_id);
+    internals.entityByComponent.get(component)?.delete(e.entity_id);
 
     // update systems
     internals.systems.forEach(([name, system]) => {
