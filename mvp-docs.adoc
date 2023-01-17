@@ -1,0 +1,52 @@
+# Main Goals
+
+The major goal of this project is to learn more about building a javascript game using an ECS (entity component system) architecture. Since non of our members have created a game engine with this type of approach, I'm assuming our contributors should keep an open mind in regards to experimentation and exploritory development. Although performance should be kept at the back of our minds as adding new features, I would argue keeping our system decoupled, fully type safe, and clean would allow for easier refactoring efforts during our experimentation develop, interate, pivot and refactor phases.
+
+Simnce performance and refactoring is important, we are writing out a list of potential features for guiding us in building a minimal valuable product. A MVP for our dungeon crawler would involve need to include some of these high level goals:
+
+- enjoyable replayability
+- progression system
+  - a player will learn more about the mechanics every run
+  - a player will learn how to fight unique enemies each run
+  - a player can unlock and equip perks for future runs
+- a variety of unique enemies which force a player to truly understand the weaknesses and strengths of an enemy (forces some type of strategic gameplay and avoids hash and slash)
+- a variety of character classes a player can start as (wizard, warrior, rouge)
+- a rougelike experience, meaning when you die, you must start a new run from the start (but with the ability to start with some perks to make the next run unique and give a sense of progression)
+-
+
+with a variety of enemies, items, skills, and progression that would allow a causal gamer to be able to play through our game multiple times without getting bored but also provide a challenge enough to make players replay. A sense of progression and some type of mastery of our game mechanics could help with this goal.
+
+## Goals
+
+## Theme
+
+## Mechanics
+
+## Replayability
+
+## Enemies
+
+## Items
+
+## Unlockables
+
+## Map Design / Generation
+
+## Achievements
+
+Gameplay
+
+- low enemy density
+- unlockable items (load out) you can equip before runs
+  - see hades for reference
+- unique AI for each enemy
+- systems are able to emit events
+- events should be one off things that occur in the world
+
+Systems
+
+- movement
+- physics
+- rendering
+
+- holding
