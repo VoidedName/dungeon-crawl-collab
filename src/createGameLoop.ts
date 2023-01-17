@@ -15,6 +15,7 @@ import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
 import { DeleteSystem } from './systems/DeleteSystem';
 import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
+import { highlightInteractablesHandler } from '@/eventHandlers/highlightInteractablesHandler';
 
 import {
   type Directions,
@@ -53,8 +54,10 @@ export const EventNames = {
   SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
   DAMAGE: 'DAMAGE',
   USE_ITEM: 'USE_ITEM',
-  DROP_ITEM: 'DROP_ITEM'
+  DROP_ITEM: 'DROP_ITEM',
+  SET_HIGHLIGHT_INTERACTABLES: 'SET_HIGHLIGHT_INTERACTABLES'
 } as const;
+
 export type EventNames = Values<typeof EventNames>;
 
 type KeyboardMovementEvent = {
@@ -100,6 +103,11 @@ type DropItemEvent = {
   payload: TItem;
 };
 
+type HighlightInteractablesEvent = {
+  type: typeof EventNames.SET_HIGHLIGHT_INTERACTABLES;
+  payload: boolean;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
@@ -108,7 +116,8 @@ type QueueEvent =
   | SetCameraOffsetEvent
   | DamageEvent
   | UseItemEvent
-  | DropItemEvent;
+  | DropItemEvent
+  | HighlightInteractablesEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -151,6 +160,9 @@ const eventQueueReducer =
       case EventNames.DROP_ITEM:
         return dropItemHandler(payload, world, resolveRenderable);
 
+      case EventNames.SET_HIGHLIGHT_INTERACTABLES:
+        return highlightInteractablesHandler(payload, world);
+
       default:
         isNever(type);
     }
@@ -167,6 +179,7 @@ const setup = async (
   world.set('map', map);
   world.set('rng', rng);
   world.set('world map', [map]);
+  world.set('highlightInteractables', false);
   world.set(DebugFlags.map, false);
   world.set(DebugFlags.hitboxes, false);
   world.set('inventory', createInventoryManager(queue));

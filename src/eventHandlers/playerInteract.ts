@@ -15,4 +15,7 @@ export const playerInteractHandler = (
   ]);
   if (!player) return;
   player.interact_intent.isInteracting = isInteracting;
+  // check if play can interact
+  // TODO: loop through interactable entities near the player
+  // interact with the closest
 };

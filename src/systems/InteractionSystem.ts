@@ -119,9 +119,12 @@ export const InteractionSystem: (
       );
       const isNear = distance < interactable.interactable.interactionRadius;
       const text = parentSprite.getChildByName(TEXT_OBJECT_NAME);
+      const shouldHighlightInteractables = world
+        .get<boolean>('highlightInteractables')
+        .unwrap();
 
       if (text) {
-        text.visible = isNear;
+        text.visible = isNear || shouldHighlightInteractables;
       }
 
       if (

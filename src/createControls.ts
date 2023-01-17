@@ -10,6 +10,7 @@ export const Controls = [
   'left',
   'right',
   'use',
+  'highlightInteractables',
   'toggleDebugMap',
   'toggleDebugHitboxes',
   'itemSlot1',
@@ -25,6 +26,8 @@ export const Controls = [
 export const movementControls = ['up', 'down', 'left', 'right'];
 const isMovementControl = (key: Control) => movementControls.includes(key);
 const isUseControl = (key: Control) => key === 'use';
+const isHighlightInteractablesControl = (key: Control) =>
+  key === 'highlightInteractables';
 const isDebugControl = (key: Control) =>
   key === 'toggleDebugMap' || key === 'toggleDebugHitboxes';
 const isItemControl = (key: Control) => [
@@ -45,6 +48,7 @@ const configuration = {
   KeyW: 'up',
   KeyS: 'down',
   KeyE: 'use',
+  Tab: 'highlightInteractables',
   Backquote: 'toggleDebugMap',
   F1: 'toggleDebugHitboxes',
   Digit1: 'itemSlot1',
@@ -63,6 +67,7 @@ const controls = {
   left: false,
   right: false,
   use: false,
+  highlightInteractables: false,
   itemSlot1: false,
   itemSlot2: false,
   itemSlot3: false,
@@ -105,6 +110,7 @@ export const createControls = (
   });
 
   const keyboardHandler = (isOn: boolean) => (e: KeyboardEvent) => {
+    e.preventDefault();
     const control = configuration[e.code];
     if (!control) return;
     setControl(control, isOn);
@@ -115,18 +121,28 @@ export const createControls = (
         payload: controls
       });
     }
+
     if (isUseControl(control)) {
       queue.dispatch({
         type: EventNames.PLAYER_INTERACT,
         payload: isOn
       });
     }
+
     if (isDebugControl(control) && isOn) {
       queue.dispatch({
         type: EventNames.TOGGLE_DEBUG_OVERLAY,
         payload: control === 'toggleDebugMap' ? 'map' : 'hitboxes'
       });
     }
+
+    if (isHighlightInteractablesControl(control)) {
+      queue.dispatch({
+        type: EventNames.SET_HIGHLIGHT_INTERACTABLES,
+        payload: isOn
+      });
+    }
+
     if (isItemControl(control)) {
       const inventoryManager = ecs.get<TInventoryManager>('inventory').unwrap();
       const itemIndex = Number(control.replace('itemSlot', ''));
