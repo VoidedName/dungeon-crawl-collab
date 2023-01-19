@@ -132,6 +132,31 @@ describe('adding and removing components', () => {
     expect(entity.two).toBeDefined();
     expect(entity.two.key).toBe('some value');
   });
+
+  test('removing a component filters it out from the collection', () => {
+    world
+      .createEntity()
+      .with(withTestComponentOne(13))
+      .with(withTestComponentTwo('some value'))
+      .build();
+
+    const entities = world.entitiesByComponent<
+      [TestComponentOne, TestComponentTwo]
+    >(['one', 'two']);
+
+    expect(entities.length).toBe(1);
+
+    world.removeComponent<typeof entities[0], TestComponentOne>(
+      entities[0]!,
+      'one'
+    );
+
+    const entitiesAfter = world.entitiesByComponent<
+      [TestComponentOne, TestComponentTwo]
+    >(['one', 'two']);
+
+    expect(entitiesAfter.length).toBe(0);
+  });
 });
 
 describe('adding and removing systems', () => {

@@ -15,17 +15,18 @@ import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
 import { DeleteSystem } from './systems/DeleteSystem';
 import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
+import { highlightInteractablesHandler } from '@/eventHandlers/highlightInteractablesHandler';
 
 import {
   type Directions,
   keyboardMovementHandler
-} from './eventHandlers/keyboardMovement';
-import { playerAttackHandler } from './eventHandlers/playerAttack';
-import { playerInteractHandler } from './eventHandlers/playerInteract';
+} from './eventHandlers/keyboardMovementHandler';
+import { playerAttackHandler } from './eventHandlers/playerAttackHandler';
+import { playerInteractHandler } from './eventHandlers/playerInteractHandler';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
 import { createCamera } from './createCamera';
-import { setCameraOffsetHandler } from './eventHandlers/setCameraOffset';
+import { setCameraOffsetHandler } from './eventHandlers/setCameraOffsetHandler';
 import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
@@ -56,8 +57,10 @@ export const EventNames = {
   DAMAGE: 'DAMAGE',
   USE_ITEM: 'USE_ITEM',
   DROP_ITEM: 'DROP_ITEM',
-  ENEMY_DIED: 'ENEMY_DIED'
+  ENEMY_DIED: 'ENEMY_DIED',
+  SET_HIGHLIGHT_INTERACTABLES: 'SET_HIGHLIGHT_INTERACTABLES'
 } as const;
+
 export type EventNames = Values<typeof EventNames>;
 
 type KeyboardMovementEvent = {
@@ -108,6 +111,11 @@ type EnemyDiedEvent = {
   payload: ECSEntity & Enemy;
 };
 
+type HighlightInteractablesEvent = {
+  type: typeof EventNames.SET_HIGHLIGHT_INTERACTABLES;
+  payload: boolean;
+};
+
 type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
@@ -117,7 +125,8 @@ type QueueEvent =
   | DamageEvent
   | UseItemEvent
   | DropItemEvent
-  | EnemyDiedEvent;
+  | EnemyDiedEvent
+  | HighlightInteractablesEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;
 
@@ -133,7 +142,12 @@ export type ECSApi = {
 };
 
 const eventQueueReducer =
-  (world: ECSWorld, navigateTo: (path: string) => void, emit: ECSEmitter) =>
+  (
+    world: ECSWorld,
+    navigateTo: (path: string) => void,
+    emit: ECSEmitter,
+    app: Application
+  ) =>
   ({ type, payload }: QueueEvent) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
@@ -143,7 +157,7 @@ const eventQueueReducer =
         return playerAttackHandler(payload, world);
 
       case EventNames.PLAYER_INTERACT:
-        return playerInteractHandler(payload, world);
+        return playerInteractHandler(payload, world, app);
 
       case EventNames.TOGGLE_DEBUG_OVERLAY:
         return debugOverlayHandler(payload, world);
@@ -163,6 +177,9 @@ const eventQueueReducer =
       case EventNames.ENEMY_DIED:
         return enemyDiedHandler(payload, world, emit);
 
+      case EventNames.SET_HIGHLIGHT_INTERACTABLES:
+        return highlightInteractablesHandler(payload, world);
+
       default:
         isNever(type);
     }
@@ -179,6 +196,7 @@ const setup = async (
   world.set('map', map);
   world.set('rng', rng);
   world.set('world map', [map]);
+  world.set('highlightInteractables', false);
   world.set(DebugFlags.map, false);
   world.set(DebugFlags.hitboxes, false);
   world.set('inventory', createInventoryManager(queue));
@@ -219,7 +237,7 @@ export function createGameLoop(
 
   const world = createWorld();
   const queue = createEventQueue<QueueEvent>(
-    eventQueueReducer(world, navigateTo, emit)
+    eventQueueReducer(world, navigateTo, emit, renderer.app)
   );
   const controls = createControls(renderer.app, queue, world);
 

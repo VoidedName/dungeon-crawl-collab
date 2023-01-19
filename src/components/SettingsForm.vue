@@ -34,7 +34,7 @@ function rebind(control: Control, e: any) {
 <template>
   <section>
     <fieldset v-for="control in Controls">
-      <label :for="'move-' + control">Move {{ control }}</label>
+      <label :for="'move-' + control">{{ control }}</label>
       <button
         type="button"
         @click="rebind(control, $event)"
@@ -58,7 +58,7 @@ section {
 
 fieldset {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-20);
   grid-template-columns: 8rem 1fr;
 }
 
