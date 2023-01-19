@@ -12,7 +12,7 @@ export type InteractIntent = ECSComponent<
   }
 >;
 
-export function interactIntentComponent(cooldown = 1000): InteractIntent {
+export function interactIntentComponent(cooldown = 200): InteractIntent {
   return {
     [InteractIntentBrand]: {
       isInteracting: false,
