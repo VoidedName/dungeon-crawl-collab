@@ -3,9 +3,9 @@ import type { ProjectileStats } from '@/entity/components/Projectile';
 import type { SpriteName } from '@/renderer/createAnimatedSprite';
 import type { AsepriteSheet } from '@/utils/aseprite';
 import type { ISpritesheetData } from 'pixi.js';
-import type { ECSEmitter } from '@/createGameLoop';
 import type { ECSWorld } from '@/ecs/ECSWorld';
 import type { EnemyStats } from '@/entity/components/Enemy';
+import type { ECSEmitter } from '@/events/createExternalQueue';
 
 export type SpriteResource = {
   url: string;
@@ -29,7 +29,7 @@ export type CodexProjectile = {
 };
 
 type ItemUseContext = {
-  ecs: ECSWorld;
+  world: ECSWorld;
   emit: ECSEmitter;
 };
 export type CodexItem = {

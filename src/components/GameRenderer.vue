@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEcsApiProvider } from '@/composables/useEcsApi';
-import { createGameLoop, type ECSEvent } from '@/createGameLoop';
+import { createGameLoop } from '@/createGameLoop';
 import { createGameRenderer } from '@/renderer/createGameRenderer.js';
 import PauseMenu from './PauseMenu.vue';
 import SettingsMenu from './SettingsMenu.vue';
@@ -8,6 +8,7 @@ import ItemBelt from './ItemBelt.vue';
 import HealthHud from './HealthHud.vue';
 import { store } from '@/store';
 import type { TInventoryManager } from '@/createInventoryManager';
+import type { ECSEvent } from '@/events/createExternalQueue';
 
 const canvasEl = ref<HTMLCanvasElement>();
 const ecsApi = useEcsApiProvider();

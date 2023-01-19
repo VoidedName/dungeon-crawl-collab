@@ -47,11 +47,11 @@ export const getStats = <T extends PlayerStats | ProjectileStats | EnemyStats>(
 export const dealDamage = ({
   to,
   amount,
-  ecs
+  world: ecs
 }: {
   to: ECSEntity & (Player | Enemy);
   amount: number;
-  ecs: ECSWorld;
+  world: ECSWorld;
 }) => {
   const stats = getStats<PlayerStats | EnemyStats>(to);
 
@@ -87,12 +87,12 @@ export const dealDamage = ({
 
 export const removeProjectile = (
   e: ECSEntity & Animatable & Projectile,
-  ecs: ECSWorld
+  world: ECSWorld
 ) => {
   const machine = resolveStateMachine(e.entity_id);
   machine.send(ProjectileStateTransitions.DIE);
   setTimeout(() => {
-    ecs.addComponent(e.entity_id, deleteComponent);
+    world.addComponent(e.entity_id, deleteComponent);
   }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
 };
 

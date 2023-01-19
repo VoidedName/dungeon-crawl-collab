@@ -64,7 +64,7 @@ export const ProjectileSystem: () => ECSSystem<
               dealDamage({
                 to: enemy,
                 amount: e.projectile.stats.current.power,
-                ecs
+                world: ecs
               });
 
               removeProjectile(e, ecs);
