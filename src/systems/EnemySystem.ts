@@ -20,8 +20,8 @@ import {
   AnimatableBrand,
   type Animatable
 } from '@/entity/components/Animatable';
-import { EventNames, type GameLoopQueue } from '@/createGameLoop';
 import { isObject } from '@/utils/assertions';
+import { type GameLoopQueue, EventNames } from '@/events/createEventQueue';
 
 export const EnemySystem: (
   resolveRenderable: (sprite: ECSEntityId) => DisplayObject,

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useEcsApi } from '@/composables/useEcsApi';
-import type { ECSEvent } from '@/createGameLoop';
 import type {
   InventoryBelt,
   TInventoryManager,
   TItem
 } from '@/createInventoryManager';
 import { BELT_SIZE } from '@/createInventoryManager';
+import type { ECSEvent } from '@/events/createExternalQueue';
 import ItemBeltSlot from './ItemBeltSlot.vue';
 
 let inventoryManager: TInventoryManager;
@@ -33,8 +33,6 @@ ecsApi.value.on((event: ECSEvent) => {
 function useItem(itemIndex: number) {
   inventoryManager?.useBeltItem(itemIndex);
 }
-
-
 </script>
 
 <template>

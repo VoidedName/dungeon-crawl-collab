@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useEcsApi } from '@/composables/useEcsApi';
 import { PlayerBrand, type Player } from '@/entity/components/Player';
-import type { ECSEvent } from '@/createGameLoop';
+import type { ECSEvent } from '@/events/createExternalQueue';
 
 const ecsApi = useEcsApi();
 const baseHealth = ref(0);

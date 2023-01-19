@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEcsApiProvider } from '@/composables/useEcsApi';
-import { createGameLoop, type ECSEvent } from '@/createGameLoop';
+import { createGameLoop } from '@/createGameLoop';
 import { createGameRenderer } from '@/renderer/createGameRenderer.js';
 import PauseMenu from './PauseMenu.vue';
 import SettingsMenu from './SettingsMenu.vue';
@@ -8,6 +8,7 @@ import ItemBelt from './ItemBelt.vue';
 import HealthHud from './HealthHud.vue';
 import { store } from '@/store';
 import type { TInventoryManager } from '@/createInventoryManager';
+import type { ECSEvent } from '@/events/createExternalQueue';
 
 const canvasEl = ref<HTMLCanvasElement>();
 const ecsApi = useEcsApiProvider();
@@ -30,10 +31,9 @@ onMounted(async () => {
       inventoryManager = ecsApi.value
         ?.getGlobal<TInventoryManager>('inventory')
         .unwrap();
-
     }
-  })
-})
+  });
+});
 
 onUnmounted(() => {
   ecsApi.value?.cleanup();
@@ -41,7 +41,7 @@ onUnmounted(() => {
 
 function handleDrop(evt: DragEvent) {
   if (!evt.dataTransfer) return;
-  const slot = evt.dataTransfer.getData('slot')
+  const slot = evt.dataTransfer.getData('slot');
   inventoryManager?.dropBeltItem(Number(slot));
 }
 </script>
@@ -52,12 +52,13 @@ function handleDrop(evt: DragEvent) {
     <PauseMenu v-if="ecsApi" />
     <ItemBelt v-if="ecsApi" />
     <HealthHud v-if="ecsApi" />
-    <canvas 
-      ref="canvasEl" 
-      droppable="true" 
-      @drop="handleDrop($event)" 
-      @dragenter.prevent 
-      @dragover.prevent />
+    <canvas
+      ref="canvasEl"
+      droppable="true"
+      @drop="handleDrop($event)"
+      @dragenter.prevent
+      @dragover.prevent
+    />
   </div>
 </template>
 

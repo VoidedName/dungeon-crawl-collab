@@ -6,7 +6,7 @@ import {
 
 import { PoisonBrand } from '@/entity/components/Poison';
 import type { Poison } from '@/entity/components/Poison';
-import { EventNames, type GameLoopQueue } from '@/createGameLoop';
+import { type GameLoopQueue, EventNames } from '@/events/createEventQueue';
 
 const DAMAGE_INTERVAL = 1000;
 

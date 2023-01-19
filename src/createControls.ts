@@ -1,8 +1,8 @@
 import type { Application } from 'pixi.js';
-import { EventNames, type GameLoopQueue } from './createGameLoop';
 import { mulVector, subVector } from './utils/vectors';
 import type { ECSWorld } from './ecs/ECSWorld';
 import type { TInventoryManager } from './createInventoryManager';
+import { type GameLoopQueue, EventNames } from './events/createEventQueue';
 
 export const Controls = [
   'up',
@@ -100,7 +100,7 @@ export function getControls() {
 export const createControls = (
   app: Application,
   queue: GameLoopQueue,
-  ecs: ECSWorld
+  world: ECSWorld
 ) => {
   const canvas = app.view as HTMLCanvasElement;
   app.stage.on('pointerdown', e => {
@@ -145,7 +145,9 @@ export const createControls = (
     }
 
     if (isItemControl(control)) {
-      const inventoryManager = ecs.get<TInventoryManager>('inventory').unwrap();
+      const inventoryManager = world
+        .get<TInventoryManager>('inventory')
+        .unwrap();
       const itemIndex = Number(control.replace('itemSlot', ''));
       inventoryManager?.useBeltItem(itemIndex - 1);
     }
