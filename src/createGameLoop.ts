@@ -94,7 +94,7 @@ export function createGameLoop(
 
   world.addSystem('dynamic_hitboxes', DynamicHitBoxSystem);
   world.addSystem('entity_location', EntityLocationIndexSystem);
-  world.addSystem('projectile', ProjectileSystem());
+  world.addSystem('projectile', ProjectileSystem(queue));
   world.addSystem('movement', MovementSystem());
   world.addSystem('render', RenderSystem(resolveRenderable, renderer.app));
   world.addSystem('debug_renderer', DebugRenderer(renderer.app));

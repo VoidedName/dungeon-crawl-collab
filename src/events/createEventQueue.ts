@@ -25,15 +25,16 @@ export const EventNames = {
   DAMAGE: 'DAMAGE',
   USE_ITEM: 'USE_ITEM',
   DROP_ITEM: 'DROP_ITEM',
-  SET_HIGHLIGHT_INTERACTABLES: 'SET_HIGHLIGHT_INTERACTABLES'
+  SET_HIGHLIGHT_INTERACTABLES: 'SET_HIGHLIGHT_INTERACTABLES',
+  ENTITY_DIED: 'ENTITY_DIED'
 } as const;
 
 export const createEventQueue = <T extends EventQueueEvent>(
-  reducer: (event: T) => void
+  reducer: (event: T, queue: EventQueue<T>) => void
 ): EventQueue<T> => {
   const events: T[] = [];
 
-  return {
+  const queue = {
     dispatch(event: T) {
       events.push(event);
     },
@@ -42,12 +43,14 @@ export const createEventQueue = <T extends EventQueueEvent>(
       let e = events.shift();
 
       while (e) {
-        reducer(e);
+        reducer(e, queue);
 
         e = events.shift();
       }
     }
   };
+
+  return queue;
 };
 
 export type EventNames = Values<typeof EventNames>;
@@ -100,6 +103,11 @@ type HighlightInteractablesEvent = {
   payload: boolean;
 };
 
+type EntityDiedEvent = {
+  type: typeof EventNames.ENTITY_DIED;
+  payload: ECSEntityId;
+};
+
 export type QueueEvent =
   | KeyboardMovementEvent
   | PlayerAttackEvent
@@ -109,6 +117,7 @@ export type QueueEvent =
   | DamageEvent
   | UseItemEvent
   | DropItemEvent
-  | HighlightInteractablesEvent;
+  | HighlightInteractablesEvent
+  | EntityDiedEvent;
 
 export type GameLoopQueue = EventQueue<QueueEvent>;

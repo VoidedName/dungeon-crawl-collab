@@ -1,4 +1,4 @@
-export type ECSEvent = 'ready' | 'playerHealthChanged';
+export type ECSEvent = 'ready' | 'playerUpdate';
 
 export type ECSEmitter = (event: ECSEvent) => void;
 export type ECSListener = (event: ECSEvent) => void;

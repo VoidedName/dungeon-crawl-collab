@@ -15,7 +15,7 @@ ecsApi.value.on((event: any) => {
     baseHealth.value = player.player.stats.base.health;
 
     ecsApi.value.on((event: ECSEvent) => {
-      if (event === 'playerHealthChanged') {
+      if (event === 'playerUpdate') {
         baseHealth.value = player.player.stats.base.health;
         currentHealth.value = player.player.stats.current.health;
       }
@@ -45,15 +45,13 @@ const health = computed(() => {
 
 <style scoped>
 .health {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
   display: flex;
-  gap: 5px;
+  gap: var(--space-2);
 }
 .health > .heart {
-  height: 25px;
-  width: 25px;
+  height: var(--space-8);
+  width: var(--space-8);
+
   border: 2px solid var(--color-hp-dark);
   border-radius: 50%;
 }

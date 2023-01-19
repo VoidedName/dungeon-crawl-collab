@@ -5,6 +5,10 @@ import type { Stats } from '@/utils/types';
 export type PlayerStats = {
   speed: number;
   health: number;
+  attack: number;
+  level: number;
+  experience: number;
+  experienceToNextLevel: number;
 };
 
 export const PlayerBrand = 'player';

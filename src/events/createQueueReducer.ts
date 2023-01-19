@@ -1,5 +1,5 @@
 import type { Application } from 'pixi.js';
-import { EventNames } from './createEventQueue';
+import { EventNames, type GameLoopQueue } from './createEventQueue';
 import type { ECSEmitter } from './createExternalQueue';
 import type { QueueEvent } from './createEventQueue';
 import type { ECSWorld } from '@/ecs/ECSWorld';
@@ -14,6 +14,7 @@ import { keyboardMovementHandler } from './handlers/keyboardMovementHandler';
 import { playerAttackHandler } from './handlers/playerAttackHandler';
 import { playerInteractHandler } from './handlers/playerInteractHandler';
 import { setCameraOffsetHandler } from './handlers/setCameraOffsetHandler';
+import { entityDiedHandler } from './handlers/entityDiedHandler';
 
 export function createEventQueueReducer(
   world: ECSWorld,
@@ -21,7 +22,7 @@ export function createEventQueueReducer(
   emit: ECSEmitter,
   app: Application
 ) {
-  return ({ type, payload }: QueueEvent) => {
+  return ({ type, payload }: QueueEvent, queue: GameLoopQueue) => {
     switch (type) {
       case EventNames.KEYBOARD_MOVEMENT:
         return keyboardMovementHandler(payload, world);
@@ -39,7 +40,7 @@ export function createEventQueueReducer(
         return setCameraOffsetHandler(payload, world);
 
       case EventNames.DAMAGE:
-        return damageHandler(payload, world, navigateTo, emit);
+        return damageHandler(payload, world, emit, queue);
 
       case EventNames.USE_ITEM:
         return itemHandler(payload, world, emit);
@@ -49,6 +50,9 @@ export function createEventQueueReducer(
 
       case EventNames.SET_HIGHLIGHT_INTERACTABLES:
         return highlightInteractablesHandler(payload, world);
+
+      case EventNames.ENTITY_DIED:
+        return entityDiedHandler(payload, world, emit, navigateTo);
 
       default:
         isNever(type);

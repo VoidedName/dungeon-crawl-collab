@@ -4,6 +4,7 @@ import type { SpriteName } from '@/renderer/createAnimatedSprite';
 import type { AsepriteSheet } from '@/utils/aseprite';
 import type { ISpritesheetData } from 'pixi.js';
 import type { ECSWorld } from '@/ecs/ECSWorld';
+import type { EnemyStats } from '@/entity/components/Enemy';
 import type { ECSEmitter } from '@/events/createExternalQueue';
 
 export type SpriteResource = {
@@ -15,10 +16,11 @@ export type SpriteResource = {
 export type CodexPlayerClass = {
   baseStats: PlayerStats;
   spriteName: SpriteName;
+  className: string;
 };
 
 export type CodexEnemy = {
-  baseStats: PlayerStats;
+  baseStats: EnemyStats;
   spriteName: SpriteName;
 };
 

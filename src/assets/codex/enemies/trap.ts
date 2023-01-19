@@ -4,6 +4,7 @@ export const trap = (): CodexEnemy => ({
   spriteName: 'trap',
   baseStats: {
     speed: 0,
-    health: 4
+    health: 5,
+    attack: 1
   }
 });

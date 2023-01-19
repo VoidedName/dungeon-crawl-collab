@@ -13,7 +13,7 @@ export const healthPotion = (): CodexItem => ({
       0,
       player.player.stats.base.health
     );
-    emit('playerHealthChanged');
+    emit('playerUpdate');
     world.get<TAudioManager>('audio').unwrap().play('drink');
   }
 });

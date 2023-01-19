@@ -14,7 +14,6 @@ import {
   type Animatable
 } from '@/entity/components/Animatable';
 import type { Stats } from './types';
-import { clamp } from './math';
 import type { ECSEntity } from '@/ecs/ECSEntity';
 import {
   hasProjectile,
@@ -26,11 +25,7 @@ import { deleteComponent } from '@/entity/components/Delete';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 import { ProjectileStateTransitions } from '@/stateMachines/projectile';
 import { getAnimationDuration } from '@/renderer/renderableUtils';
-import { TrapStateTransitions } from '@/stateMachines/trap';
-import { PlayerStateTransitions } from '@/stateMachines/player';
-import type { TAudioManager } from '@/createAudioManager';
-import { hasPosition } from '@/entity/components/Position';
-import { createRandomItem } from '@/entity/factories/createRandomItem';
+import { getPlayer } from './getPlayer';
 
 export const getStats = <T extends PlayerStats | ProjectileStats | EnemyStats>(
   entity: ECSEntity & (Player | Enemy | Projectile)
@@ -42,44 +37,6 @@ export const getStats = <T extends PlayerStats | ProjectileStats | EnemyStats>(
   throw new Error('Trying to get stats from unelligible entity');
 };
 
-export const dealDamage = ({
-  to,
-  amount,
-  world: ecs
-}: {
-  to: ECSEntity & (Player | Enemy);
-  amount: number;
-  world: ECSWorld;
-}) => {
-  const stats = getStats<PlayerStats | EnemyStats>(to);
-
-  stats.current.health = clamp(
-    stats.current.health - amount,
-    0,
-    stats.base.health
-  );
-
-  ecs.get<TAudioManager>('audio').unwrap().play('damage');
-
-  if (stats.current.health <= 0) {
-    ecs.addComponent(to, deleteComponent);
-
-    if (hasPosition(to)) {
-      createRandomItem(ecs, {
-        position: to.position
-      });
-    }
-  } else {
-    const machine = resolveStateMachine(to.entity_id);
-    if (hasPlayer(to)) {
-      machine.send(PlayerStateTransitions.TAKE_DAMAGE);
-    }
-    if (hasEnemy(to) && to.enemy.type === EnemyType.TRAP) {
-      machine.send(TrapStateTransitions.TAKE_DAMAGE);
-    }
-  }
-};
-
 export const removeProjectile = (
   e: ECSEntity & Animatable & Projectile,
   world: ECSWorld
@@ -89,4 +46,23 @@ export const removeProjectile = (
   setTimeout(() => {
     world.addComponent(e.entity_id, deleteComponent);
   }, getAnimationDuration(e.animatable.spriteName, AnimationState.DEAD));
+};
+
+export const addExperience = (to: ECSEntity & Enemy, ecs: ECSWorld) => {
+  const {
+    player: { stats }
+  } = getPlayer(ecs);
+  const experienceGain = 10; // temporary, needs to add heuristics too compute exp gain, from enemy type, level, player level, etc...
+  const newExperienceCap = stats.current.experienceToNextLevel * 1.2; //same thing
+
+  stats.current.experience += experienceGain;
+  const isLevelUp =
+    stats.current.experience < stats.current.experienceToNextLevel;
+
+  if (!isLevelUp) return;
+
+  stats.current.level++;
+  stats.current.experience =
+    stats.current.experience % stats.current.experienceToNextLevel;
+  stats.current.experienceToNextLevel = newExperienceCap;
 };
