@@ -3,7 +3,7 @@ import type { CodexProjectile } from '@/assets/types';
 export const magicMissile = (): CodexProjectile => ({
   spriteName: 'magicMissile',
   baseStats: {
-    speed: 3,
+    speed: 10,
     power: 0
   }
 });
