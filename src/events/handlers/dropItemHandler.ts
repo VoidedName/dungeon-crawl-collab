@@ -10,11 +10,11 @@ import type { Sprite } from 'pixi.js';
 
 export const dropItemHandler = (
   item: TItem,
-  ecs: ECSWorld,
+  world: ECSWorld,
   resolveRenderable: ResolveRenderable
 ) => {
-  const itemEntity = ecs.getEntity(item.entityId).unwrap();
-  const player = getPlayer(ecs);
+  const itemEntity = world.getEntity(item.entityId).unwrap();
+  const player = getPlayer(world);
   if (
     !hasItem(itemEntity) ||
     !hasInteractable(itemEntity) ||
@@ -24,14 +24,14 @@ export const dropItemHandler = (
 
   itemEntity.interactable.isEnabled = true;
 
-  ecs.addComponent(
+  world.addComponent(
     itemEntity.entity_id,
     positionComponent({
       x: player.position.x,
       y: player.position.y
     })
   );
-  ecs.addComponent(itemEntity, renderableComponent);
+  world.addComponent(itemEntity, renderableComponent);
 
   const itemSprite = resolveRenderable(itemEntity.entity_id) as Sprite;
   itemSprite.visible = true;

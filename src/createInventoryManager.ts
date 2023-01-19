@@ -1,6 +1,6 @@
 import type { CodexItem } from './assets/types';
-import { EventNames, type GameLoopQueue } from './createGameLoop';
 import type { ECSEntityId } from './ecs/ECSEntity';
+import { type GameLoopQueue, EventNames } from './events/createEventQueue';
 import type { Nullable } from './utils/types';
 
 export type TInventoryManager = ReturnType<typeof createInventoryManager>;

@@ -42,8 +42,8 @@ export const playerAttackHandler = (mousePosition: Point, world: ECSWorld) => {
     position: { ...player.position },
     target: subVector(
       {
-        x: mousePosition.x + random.nextRangeF(-50, 50),
-        y: mousePosition.y + random.nextRangeF(-50, 50)
+        x: mousePosition.x,
+        y: mousePosition.y
       },
       sprite.toGlobal({ x: 0, y: 0 })
     )
