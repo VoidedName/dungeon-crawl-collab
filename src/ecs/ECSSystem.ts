@@ -11,7 +11,7 @@ export type ECSSystemProps = {
 export interface ECSSystem<Cs extends ECSComponent<string>[]> {
   readonly target: BrandsFromComponents<Cs>;
   readonly run: (
-    ecs: ECSWorld,
+    world: ECSWorld,
     props: ECSSystemProps,
     entities: (ECSEntity & Intersect<Cs>)[]
   ) => void;

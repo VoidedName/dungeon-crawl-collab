@@ -1,127 +1,39 @@
 import type { Application } from 'pixi.js';
 import { createWorld, type ECSWorld } from '@/ecs/ECSWorld';
-import { isNever } from './utils/assertions';
-import type { Point, Values } from './utils/types';
-
 import { loadMap } from './MapManager';
 import { resolveRenderable } from './renderer/renderableManager';
-import { createEventQueue, type EventQueue } from './createEventQueue';
 import { createPlayer } from './entity/factories/createPlayer';
 import { createControls } from './createControls';
-
 import { MovementSystem } from '@/systems/MovementSystem';
 import { RenderSystem } from '@/systems/RenderSystem';
 import { CameraSystem } from './systems/CameraSystem';
 import { InteractionSystem } from './systems/InteractionSystem';
 import { DeleteSystem } from './systems/DeleteSystem';
-import { debugOverlayHandler } from '@/eventHandlers/debugOverlayHandler';
-import { highlightInteractablesHandler } from '@/eventHandlers/highlightInteractablesHandler';
-
-import {
-  type Directions,
-  keyboardMovementHandler
-} from './eventHandlers/keyboardMovementHandler';
-import { playerAttackHandler } from './eventHandlers/playerAttackHandler';
-import { playerInteractHandler } from './eventHandlers/playerInteractHandler';
 import { DebugFlags, DebugRenderer } from '@/systems/DebugRenderer';
 import type { GameRenderer } from './renderer/createGameRenderer';
 import { createCamera } from './createCamera';
-import { setCameraOffsetHandler } from './eventHandlers/setCameraOffsetHandler';
 import { createAudioManager } from './createAudioManager';
 import { createEffectManager } from './createEffectManager';
 import { PoisonSystem } from './systems/PoisonSystem';
 import { loadSpriteTextures } from './renderer/createAnimatedSprite';
 import { EnemySystem } from './systems/EnemySystem';
-import type { TItem } from './createInventoryManager';
-import type { ECSEntityId } from './ecs/ECSEntity';
-import { damageHandler } from './eventHandlers/damageHandler';
 import { simpleMapGen } from '@/map/Map';
 import { lehmerRandom } from '@/utils/rand/random';
 import { createInventoryManager } from './createInventoryManager';
-import { itemHandler } from './eventHandlers/itemHandler';
-import { dropItemHandler } from '@/eventHandlers/dropItemHandler';
 import { ProjectileSystem } from './systems/ProjectileSystem';
 import { codex } from './assets/codex';
 import { EntityLocationIndexSystem } from '@/systems/EntityLocationIndexSystem';
 import { DynamicHitBoxSystem } from '@/systems/DynamicHitBoxSystem';
-
-// @TODO maybe we should externalize all the queue related code to its own file...we might end up with a lot of different events
-export const EventNames = {
-  KEYBOARD_MOVEMENT: 'KEYBOARD_MOVEMENT',
-  PLAYER_ATTACK: 'PLAYER_ATTACK',
-  PLAYER_INTERACT: 'PLAYER_INTERACT',
-  TOGGLE_DEBUG_OVERLAY: 'TOGGLE_DEBUG_OVERLAY',
-  SET_CAMERA_OFFSET: 'SET_CAMERA_OFFSET',
-  DAMAGE: 'DAMAGE',
-  USE_ITEM: 'USE_ITEM',
-  DROP_ITEM: 'DROP_ITEM',
-  SET_HIGHLIGHT_INTERACTABLES: 'SET_HIGHLIGHT_INTERACTABLES'
-} as const;
-
-export type EventNames = Values<typeof EventNames>;
-
-type KeyboardMovementEvent = {
-  type: typeof EventNames.KEYBOARD_MOVEMENT;
-  payload: Directions;
-};
-
-type PlayerAttackEvent = {
-  type: typeof EventNames.PLAYER_ATTACK;
-  payload: Point;
-};
-
-type PlayerInteractEvent = {
-  type: typeof EventNames.PLAYER_INTERACT;
-  payload: any;
-};
-
-type ToggleDebugOverlayEvent = {
-  type: typeof EventNames.TOGGLE_DEBUG_OVERLAY;
-  payload: keyof DebugFlags;
-};
-
-type SetCameraOffsetEvent = {
-  type: typeof EventNames.SET_CAMERA_OFFSET;
-  payload: Point;
-};
-
-type DamageEvent = {
-  type: typeof EventNames.DAMAGE;
-  payload: {
-    damage: number;
-    entityId: ECSEntityId;
-  };
-};
-
-type UseItemEvent = {
-  type: typeof EventNames.USE_ITEM;
-  payload: TItem;
-};
-
-type DropItemEvent = {
-  type: typeof EventNames.DROP_ITEM;
-  payload: TItem;
-};
-
-type HighlightInteractablesEvent = {
-  type: typeof EventNames.SET_HIGHLIGHT_INTERACTABLES;
-  payload: boolean;
-};
-
-type QueueEvent =
-  | KeyboardMovementEvent
-  | PlayerAttackEvent
-  | PlayerInteractEvent
-  | ToggleDebugOverlayEvent
-  | SetCameraOffsetEvent
-  | DamageEvent
-  | UseItemEvent
-  | DropItemEvent
-  | HighlightInteractablesEvent;
-
-export type GameLoopQueue = EventQueue<QueueEvent>;
-
-export type ECSEvent = 'ready' | 'playerHealthChanged';
+import {
+  createExternalQueue,
+  type ECSEvent,
+  type ECSListener
+} from './events/createExternalQueue';
+import { createEventQueueReducer } from './events/createQueueReducer';
+import {
+  type GameLoopQueue,
+  createEventQueue
+} from './events/createEventQueue';
 
 export type ECSApi = {
   cleanup: () => void;
@@ -129,49 +41,8 @@ export type ECSApi = {
   getGlobal: ECSWorld['get'];
   emit: (event: ECSEvent) => void;
   dispatch: GameLoopQueue['dispatch'];
-  on: (cb: (event: ECSEvent) => void) => void;
+  on: (cb: ECSListener) => void;
 };
-
-const eventQueueReducer =
-  (
-    world: ECSWorld,
-    navigateTo: (path: string) => void,
-    emit: ECSEmitter,
-    app: Application
-  ) =>
-  ({ type, payload }: QueueEvent) => {
-    switch (type) {
-      case EventNames.KEYBOARD_MOVEMENT:
-        return keyboardMovementHandler(payload, world);
-
-      case EventNames.PLAYER_ATTACK:
-        return playerAttackHandler(payload, world);
-
-      case EventNames.PLAYER_INTERACT:
-        return playerInteractHandler(payload, world, app);
-
-      case EventNames.TOGGLE_DEBUG_OVERLAY:
-        return debugOverlayHandler(payload, world);
-
-      case EventNames.SET_CAMERA_OFFSET:
-        return setCameraOffsetHandler(payload, world);
-
-      case EventNames.DAMAGE:
-        return damageHandler(payload, world, navigateTo, emit);
-
-      case EventNames.USE_ITEM:
-        return itemHandler(payload, world, emit);
-
-      case EventNames.DROP_ITEM:
-        return dropItemHandler(payload, world, resolveRenderable);
-
-      case EventNames.SET_HIGHLIGHT_INTERACTABLES:
-        return highlightInteractablesHandler(payload, world);
-
-      default:
-        isNever(type);
-    }
-  };
 
 const setup = async (
   app: Application,
@@ -208,15 +79,6 @@ const setup = async (
 
 type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
 
-export type ECSEmitter = typeof emit;
-
-const listeners: any[] = [];
-function emit(event: ECSEvent) {
-  for (const listener of listeners) {
-    listener(event);
-  }
-}
-
 export function createGameLoop(
   renderer: GameRenderer,
   navigateTo: (path: string) => void
@@ -224,8 +86,9 @@ export function createGameLoop(
   let state: GameState = { type: 'SETUP' };
 
   const world = createWorld();
-  const queue = createEventQueue<QueueEvent>(
-    eventQueueReducer(world, navigateTo, emit, renderer.app)
+  const externalQueue = createExternalQueue();
+  const queue = createEventQueue(
+    createEventQueueReducer(world, navigateTo, externalQueue.emit, renderer.app)
   );
   const controls = createControls(renderer.app, queue, world);
 
@@ -249,7 +112,7 @@ export function createGameLoop(
       case 'SETUP':
         setup(renderer.app, world, queue).then(() => {
           state = { type: 'RUNNING' };
-          emit('ready');
+          externalQueue.emit('ready');
         });
         state = { type: 'LOADING' };
         break;
@@ -272,12 +135,10 @@ export function createGameLoop(
       renderer.cleanup();
       controls.cleanup();
     },
-    emit,
+    emit: externalQueue.emit,
     getEntities: world.entitiesByComponent,
     getGlobal: world.get,
     dispatch: queue.dispatch,
-    on: (cb: (event: ECSEvent) => void) => {
-      listeners.push(cb);
-    }
+    on: externalQueue.on
   };
 }
