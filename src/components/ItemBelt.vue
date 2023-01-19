@@ -48,10 +48,6 @@ function useItem(itemIndex: number) {
 
 <style scoped>
 .belt {
-  position: fixed;
-  bottom: 0px;
-  left: 50%;
-  transform: translate(-50%, 0);
   display: flex;
 }
 </style>

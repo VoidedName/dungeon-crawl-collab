@@ -24,13 +24,16 @@ import {
 import { ProjectileState } from '@/stateMachines/projectile';
 import { resolveStateMachine } from '@/stateMachines/stateMachineManager';
 import { getIntersectingTiles, spriteCollision } from '@/utils/collisions';
-import { dealDamage, removeProjectile } from '@/utils/ecsUtils';
+import { removeProjectile } from '@/utils/ecsUtils';
 import type { GameMap } from '@/map/Map';
 import type { ECSEntityId } from '@/ecs/ECSEntity';
+import { EventNames, type GameLoopQueue } from '@/events/createEventQueue';
 
-export const ProjectileSystem: () => ECSSystem<
+export const ProjectileSystem: (
+  queue: GameLoopQueue
+) => ECSSystem<
   [Projectile, Position, Size, Animatable, StateAware]
-> = () => ({
+> = queue => ({
   target: [
     ProjectileBrand,
     PositionBrand,
@@ -46,30 +49,33 @@ export const ProjectileSystem: () => ECSSystem<
 
       ecs.getEntity(e.projectile.firedBy).match(
         owner => {
-          if (hasPlayer(owner)) {
-            const candidateIds = new Set<ECSEntityId>();
-            for (const [x, y] of getIntersectingTiles(e, map)) {
-              map.getEntities(x, y).forEach(e => candidateIds.add(e));
-            }
+          if (!hasPlayer(owner)) return;
 
-            const enemies = [...candidateIds]
-              .map(e => ecs.getEntity(e).unwrap())
-              .filter(hasEnemy)
-              .filter(hasPosition)
-              .filter(hasAnimatable)
-              .filter(hasSize);
-
-            enemies.forEach(enemy => {
-              if (!spriteCollision(e, enemy)) return;
-              dealDamage({
-                to: enemy,
-                amount: e.projectile.stats.current.power,
-                world: ecs
-              });
-
-              removeProjectile(e, ecs);
-            });
+          const candidateIds = new Set<ECSEntityId>();
+          for (const [x, y] of getIntersectingTiles(e, map)) {
+            map.getEntities(x, y).forEach(e => candidateIds.add(e));
           }
+
+          const enemies = [...candidateIds]
+            .map(e => ecs.getEntity(e).unwrap())
+            .filter(hasEnemy)
+            .filter(hasPosition)
+            .filter(hasAnimatable)
+            .filter(hasSize);
+
+          enemies.forEach(enemy => {
+            if (!spriteCollision(e, enemy)) return;
+
+            queue.dispatch({
+              type: EventNames.DAMAGE,
+              payload: {
+                entityId: enemy.entity_id,
+                damage: e.projectile.stats.current.power
+              }
+            });
+
+            removeProjectile(e, ecs);
+          });
         },
         () => {
           console.warn('could not find owner of entity', e.entity_id);

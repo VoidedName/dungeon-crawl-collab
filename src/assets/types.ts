@@ -16,6 +16,7 @@ export type SpriteResource = {
 export type CodexPlayerClass = {
   baseStats: PlayerStats;
   spriteName: SpriteName;
+  className: string;
 };
 
 export type CodexEnemy = {
