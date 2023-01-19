@@ -34,6 +34,7 @@ import {
   type GameLoopQueue,
   createEventQueue
 } from './events/createEventQueue';
+import { isNever } from './utils/assertions';
 
 export type ECSApi = {
   cleanup: () => void;
@@ -77,7 +78,11 @@ const setup = async (
   camera.camera.following = player.entity_id;
 };
 
-type GameState = { type: 'RUNNING' } | { type: 'SETUP' } | { type: 'LOADING' };
+export type GameState =
+  | { type: 'RUNNING' }
+  | { type: 'SETUP' }
+  | { type: 'LOADING' }
+  | { type: 'STOPPED' };
 
 export function createGameLoop(
   renderer: GameRenderer,
@@ -90,7 +95,16 @@ export function createGameLoop(
   const queue = createEventQueue(
     createEventQueueReducer(world, navigateTo, externalQueue.emit, renderer.app)
   );
-  const controls = createControls(renderer.app, queue, world);
+  const controls = createControls({
+    app: renderer.app,
+    setState(newState: GameState) {
+      console.log(newState);
+      state = newState;
+    },
+    getState: () => state,
+    queue,
+    world
+  });
 
   world.addSystem('dynamic_hitboxes', DynamicHitBoxSystem);
   world.addSystem('entity_location', EntityLocationIndexSystem);
@@ -108,13 +122,14 @@ export function createGameLoop(
   world.addSystem('destroy', DeleteSystem());
 
   function tick(delta: number) {
-    switch (state.type) {
+    const { type } = state;
+    switch (type) {
       case 'SETUP':
+        state = { type: 'LOADING' };
         setup(renderer.app, world, queue).then(() => {
           state = { type: 'RUNNING' };
           externalQueue.emit('ready');
         });
-        state = { type: 'LOADING' };
         break;
       case 'RUNNING':
         queue.process();
@@ -123,8 +138,10 @@ export function createGameLoop(
       case 'LOADING':
         // update loading ui
         break;
+      case 'STOPPED':
+        break;
       default:
-      // should never happen, maybe panic here
+        isNever(type);
     }
   }
 

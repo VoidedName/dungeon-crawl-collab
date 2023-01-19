@@ -6,7 +6,7 @@ export const wizard = (): CodexPlayerClass => ({
   className: 'Wizard',
   baseStats: {
     speed: 3.25,
-    health: 10,
+    health: 6,
     attack: 1,
     level: 1,
     experience: 0,

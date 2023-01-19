@@ -3,6 +3,7 @@ import { mulVector, subVector } from './utils/vectors';
 import type { ECSWorld } from './ecs/ECSWorld';
 import type { TInventoryManager } from './createInventoryManager';
 import { type GameLoopQueue, EventNames } from './events/createEventQueue';
+import type { GameState } from './createGameLoop';
 
 export const Controls = [
   'up',
@@ -97,11 +98,20 @@ export function getControls() {
   return controls;
 }
 
-export const createControls = (
-  app: Application,
-  queue: GameLoopQueue,
-  world: ECSWorld
-) => {
+type CreateControlsOptions = {
+  app: Application;
+  queue: GameLoopQueue;
+  world: ECSWorld;
+  getState: () => Readonly<GameState>;
+  setState: (newState: GameState) => void;
+};
+export const createControls = ({
+  app,
+  queue,
+  world,
+  getState,
+  setState
+}: CreateControlsOptions) => {
   const canvas = app.view as HTMLCanvasElement;
   app.stage.on('pointerdown', e => {
     queue.dispatch({
@@ -112,6 +122,9 @@ export const createControls = (
 
   const keyboardHandler = (isOn: boolean) => (e: KeyboardEvent) => {
     e.preventDefault();
+    if (e.code === 'Escape' && isOn) {
+      setState({ type: getState().type === 'STOPPED' ? 'RUNNING' : 'STOPPED' });
+    }
     const control = configuration[e.code];
     if (!control) return;
     setControl(control, isOn);

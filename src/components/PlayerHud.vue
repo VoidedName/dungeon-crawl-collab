@@ -24,7 +24,6 @@ const expBarWidth = computed(() => {
 
 ecsApi.value.on((event: ECSEvent) => {
   if (['ready', 'playerUpdate'].includes(event)) {
-    console.log('event');
     player.value = {
       ...ecsApi.value.getEntities<[Player, Animatable]>([
         PlayerBrand,
