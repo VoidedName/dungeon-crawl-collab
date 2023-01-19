@@ -1,6 +1,9 @@
 import type { TItem } from '@/createInventoryManager';
 import type { ECSWorld } from '@/ecs/ECSWorld';
-import { hasInteractable } from '@/entity/components/Interactable';
+import {
+  hasInteractable,
+  interactableComponent
+} from '@/entity/components/Interactable';
 import { hasItem } from '@/entity/components/Item';
 import { hasPosition, positionComponent } from '@/entity/components/Position';
 import { renderableComponent } from '@/entity/components/Renderable';

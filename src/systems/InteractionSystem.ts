@@ -21,13 +21,7 @@ export const InteractionSystem: (
       if (!hasPosition(player) || !hasInteractIntent(player)) return;
       if (!interactable.interactable.isEnabled) return;
       const parentSprite = resolveRenderable(interactable.entity_id) as Sprite;
-      const distance = dist(
-        {
-          x: interactable.position.x + parentSprite.width / 2,
-          y: interactable.position.y + parentSprite.height / 2
-        },
-        player.position
-      );
+      const distance = dist(interactable.position, player.position);
       const isNear = distance < interactable.interactable.interactionRadius;
       const text = parentSprite.getChildByName(TEXT_OBJECT_NAME);
       const shouldHighlightInteractables = world

@@ -58,7 +58,7 @@ const setup = async (
   world.set('highlightInteractables', false);
   world.set(DebugFlags.map, false);
   world.set(DebugFlags.hitboxes, false);
-  world.set('inventory', createInventoryManager(queue));
+  world.set('inventory', createInventoryManager(world, queue));
   world.set('audio', createAudioManager());
   world.set('effects', createEffectManager(app));
 

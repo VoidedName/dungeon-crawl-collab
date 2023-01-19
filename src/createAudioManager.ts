@@ -3,13 +3,17 @@ import stairsSound from './assets/sounds/stairs.mp3';
 import damageSound from './assets/sounds/damage.mp3';
 import drinkSound from './assets/sounds/drink.mp3';
 import stepsSound from './assets/sounds/steps.mp3';
+import pickupSound from './assets/sounds/pickup.mp3';
+import dropSound from './assets/sounds/drop.mp3';
 
 const sounds = {
   ouch: ouchSound,
   stairs: stairsSound,
   damage: damageSound,
   drink: drinkSound,
-  steps: stepsSound
+  steps: stepsSound,
+  pickup: pickupSound,
+  drop: dropSound
 } as const;
 const soundCache: any = {};
 const audioCtx = new AudioContext();
