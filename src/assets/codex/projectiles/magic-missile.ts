@@ -4,6 +4,6 @@ export const magicMissile = (): CodexProjectile => ({
   spriteName: 'magicMissile',
   baseStats: {
     speed: 3,
-    power: 1
+    power: 0
   }
 });

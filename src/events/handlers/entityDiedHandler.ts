@@ -2,10 +2,15 @@ import type { ECSWorld } from '@/ecs/ECSWorld';
 import type { ECSEmitter } from '../createExternalQueue';
 import type { ECSEntity, ECSEntityId } from '@/ecs/ECSEntity';
 import { deleteComponent } from '@/entity/components/Delete';
-import { hasPlayer, type Player } from '@/entity/components/Player';
+import {
+  hasPlayer,
+  type Player,
+  type PlayerStats
+} from '@/entity/components/Player';
 import { hasEnemy, type Enemy } from '@/entity/components/Enemy';
 import { getPlayer } from '@/utils/getPlayer';
 import { MAX_LEVEL, experienceTable } from '@/assets/codex/resources/expTable';
+import type { Entries } from '@/utils/types';
 
 const getExperienceGain = (
   player: ECSEntity & Player,
@@ -25,16 +30,29 @@ const addExperience = (world: ECSWorld, entity: ECSEntity & Enemy) => {
 
   const isLevelUp =
     stats.current.experience >= stats.current.experienceToNextLevel;
+  if (isLevelUp) handleLevelUp(player);
+};
 
-  if (!isLevelUp) return;
+const handleLevelUp = (player: ECSEntity & Player) => {
+  const { stats, playerClass } = player.player;
+  const overflowExp =
+    stats.current.experience % stats.current.experienceToNextLevel;
 
   stats.current.level++;
-  stats.current.experience =
-    stats.current.experience % stats.current.experienceToNextLevel;
-  if (stats.current.level > MAX_LEVEL) return;
+  stats.current.experience = overflowExp;
 
+  if (stats.current.level > MAX_LEVEL) return;
   const nextLevel = (stats.current.level + 1) as keyof typeof experienceTable;
   stats.current.experienceToNextLevel = experienceTable[nextLevel];
+
+  Object.entries(playerClass.statGrowth).forEach(entry => {
+    const [stat, growth] = entry as [keyof PlayerStats, number];
+    stats.current[stat] += growth;
+    stats.base[stat] += growth;
+  });
+
+  // fully heal on level up
+  stats.current.health = stats.base.health;
 };
 
 export const entityDiedHandler = (

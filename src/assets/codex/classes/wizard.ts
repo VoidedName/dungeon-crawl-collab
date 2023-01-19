@@ -1,5 +1,6 @@
 import type { CodexPlayerClass } from '@/assets/types';
 import { experienceTable } from '../resources/expTable';
+import type { ECSEntity } from '@/ecs/ECSEntity';
 
 export const wizard = (): CodexPlayerClass => ({
   spriteName: 'wizard',
@@ -11,5 +12,9 @@ export const wizard = (): CodexPlayerClass => ({
     level: 1,
     experience: 0,
     experienceToNextLevel: experienceTable[2]
+  },
+  statGrowth: {
+    health: 1,
+    attack: 1
   }
 });

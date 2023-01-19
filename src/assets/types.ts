@@ -17,6 +17,7 @@ export type CodexPlayerClass = {
   baseStats: PlayerStats;
   spriteName: SpriteName;
   className: string;
+  statGrowth: Partial<PlayerStats>;
 };
 
 export type CodexEnemy = {

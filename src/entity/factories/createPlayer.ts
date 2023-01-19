@@ -37,7 +37,8 @@ export const createPlayer = (
         stats: {
           base: playerClass.baseStats,
           current: { ...playerClass.baseStats }
-        }
+        },
+        playerClass
       })
     )
     .with(renderableComponent)
