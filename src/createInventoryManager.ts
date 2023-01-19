@@ -1,5 +1,7 @@
 import type { CodexItem } from './assets/types';
+import type { TAudioManager } from './createAudioManager';
 import type { ECSEntityId } from './ecs/ECSEntity';
+import type { ECSWorld } from './ecs/ECSWorld';
 import { type GameLoopQueue, EventNames } from './events/createEventQueue';
 import type { Nullable } from './utils/types';
 
@@ -16,7 +18,7 @@ export const BELT_SIZE = 8;
 export type InventoryEvent = 'updated';
 export type InventoryBelt = Nullable<TItem>[];
 
-export function createInventoryManager(queue: GameLoopQueue) {
+export function createInventoryManager(world: ECSWorld, queue: GameLoopQueue) {
   const belt: InventoryBelt = Array.from<TItem>({ length: BELT_SIZE });
 
   const listeners: ((event: InventoryEvent) => void)[] = [];
@@ -43,6 +45,7 @@ export function createInventoryManager(queue: GameLoopQueue) {
         payload: belt[index]!
       });
       belt[index] = undefined;
+      world.get<TAudioManager>('audio').unwrap().play('drop');
       emit('updated');
     },
     isFull() {

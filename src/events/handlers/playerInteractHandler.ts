@@ -30,6 +30,7 @@ function handleItemInteraction(
   if (!hasInteractable(itemEntity) || !hasItem(itemEntity)) return;
   const inventoryManager = world.get<TInventoryManager>('inventory').unwrap();
 
+  if (!itemEntity.interactable.isEnabled) return;
   if (inventoryManager.isFull()) return;
 
   itemEntity.interactable.isEnabled = false;
@@ -38,7 +39,7 @@ function handleItemInteraction(
   }
 
   inventoryManager.addItemToBelt(itemEntity.item.type);
-  world.removeComponent(itemEntity, 'interactable');
+  world.get<TAudioManager>('audio').unwrap().play('pickup');
   world.removeComponent(itemEntity, 'position');
   world.removeComponent(itemEntity, 'renderable');
 
