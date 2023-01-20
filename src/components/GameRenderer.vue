@@ -8,6 +8,7 @@ import ItemBelt from './ItemBelt.vue';
 import HealthHud from './HealthHud.vue';
 import PlayerHud from './PlayerHud.vue';
 import { store } from '@/store';
+import Inventory from './Inventory.vue';
 import type { TInventoryManager } from '@/createInventoryManager';
 import type { ECSEvent } from '@/events/createExternalQueue';
 
@@ -56,6 +57,7 @@ function handleDrop(evt: DragEvent) {
       <ItemBelt class="item-belt" />
       <PlayerHud class="player-hud" />
       <HealthHud class="health-hud" />
+      <Inventory class="inventory" />
     </template>
 
     <canvas
@@ -75,6 +77,7 @@ function handleDrop(evt: DragEvent) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(3, minmax(0, 1fr));
 }
+
 canvas {
   display: block;
   grid-column: 1 / -1;
@@ -98,6 +101,13 @@ canvas {
   grid-column: 2;
   grid-row: 3;
   align-self: flex-end;
+}
+
+.inventory {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .health-hud {
