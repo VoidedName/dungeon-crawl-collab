@@ -5,7 +5,7 @@ import { scheduleAnimation } from '@/renderer/AnimationManager';
 import { AnimationState } from '@/entity/components/Animatable';
 import { getAnimationDuration } from '@/renderer/renderableUtils';
 import { resolveRenderable } from '@/renderer/renderableManager';
-import type { Sprite } from 'pixi.js';
+import type { Application, Sprite } from 'pixi.js';
 import { trapHitEndFX, trapHitFX } from '@/fx/trap';
 
 export const TrapState = {
@@ -33,7 +33,10 @@ export type TrapStateTransitions = Values<typeof TrapStateTransitions>;
 
 export type TrapstateMachine = ReturnType<typeof createTrapStateMachine>;
 
-export const createTrapStateMachine = (entity: TrapEntity) => {
+export const createTrapStateMachine = (
+  entity: TrapEntity,
+  app: Application
+) => {
   const machine = createMachine(
     {
       id: `trap-${entity.entity_id}`,
@@ -98,8 +101,8 @@ export const createTrapStateMachine = (entity: TrapEntity) => {
           }
         },
         [TrapState.HIT]: {
-          entry() {
-            trapHitFX(entity);
+          entry(context, event) {
+            trapHitFX(entity, event.amount, app);
           },
 
           exit() {

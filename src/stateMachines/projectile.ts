@@ -3,6 +3,8 @@ import type { Values } from '@/utils/types';
 import { AnimationState } from '@/entity/components/Animatable';
 import { scheduleAnimation } from '@/renderer/AnimationManager';
 import type { ProjectileEntity } from '@/entity/factories/createProjectile';
+import type { ECSWorld } from '@/ecs/ECSWorld';
+import type { TAudioManager } from '@/createAudioManager';
 
 export const ProjectileState = {
   IDLE: 'idle',
@@ -21,7 +23,10 @@ export type ProjectileStateMachine = ReturnType<
   typeof createProjectileStateMachine
 >;
 
-export const createProjectileStateMachine = (entity: ProjectileEntity) => {
+export const createProjectileStateMachine = (
+  entity: ProjectileEntity,
+  world: ECSWorld
+) => {
   const machine = createMachine({
     id: `projectile-${entity.entity_id}`,
     initial: 'idle',
@@ -46,6 +51,7 @@ export const createProjectileStateMachine = (entity: ProjectileEntity) => {
             spriteName: entity.animatable.spriteName,
             state: AnimationState.DEAD
           });
+          world.get<TAudioManager>('audio').unwrap().play('damage');
         }
       }
     }

@@ -11,6 +11,8 @@ import { hasEnemy, type Enemy } from '@/entity/components/Enemy';
 import { getPlayer } from '@/utils/getPlayer';
 import { MAX_LEVEL, experienceTable } from '@/assets/codex/resources/expTable';
 import type { Entries } from '@/utils/types';
+import { onLevelUpFx } from '@/fx/player';
+import type { TAudioManager } from '@/createAudioManager';
 
 const getExperienceGain = (
   player: ECSEntity & Player,
@@ -30,7 +32,11 @@ const addExperience = (world: ECSWorld, entity: ECSEntity & Enemy) => {
 
   const isLevelUp =
     stats.current.experience >= stats.current.experienceToNextLevel;
-  if (isLevelUp) handleLevelUp(player);
+  if (isLevelUp) {
+    handleLevelUp(player);
+    onLevelUpFx(player);
+    world.get<TAudioManager>('audio').unwrap().play('levelUp');
+  }
 };
 
 const handleLevelUp = (player: ECSEntity & Player) => {
