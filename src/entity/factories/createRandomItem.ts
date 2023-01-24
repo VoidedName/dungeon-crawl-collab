@@ -61,7 +61,7 @@ export const createRandomItem = (
   registerRenderable(item.entity_id, sprite);
 
   const text = new Text('potion', {
-    fontFamily: 'Arial',
+    fontFamily: 'Inconsolata',
     fontSize: 18,
     fill: 0xffffff,
     align: 'center'

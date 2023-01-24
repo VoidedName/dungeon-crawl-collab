@@ -43,8 +43,6 @@ export const damageHandler = (
     stats.base.health
   );
 
-  world.get<TAudioManager>('audio').unwrap().play('damage');
-
   if (stats.current.health <= 0) {
     world.addComponent(target, deleteComponent);
 
@@ -62,14 +60,15 @@ export const damageHandler = (
       machine.send(PlayerStateTransitions.TAKE_DAMAGE);
     }
     if (hasEnemy(target) && target.enemy.type === EnemyType.TRAP) {
-      machine.send(TrapStateTransitions.TAKE_DAMAGE);
+      machine.send({
+        type: TrapStateTransitions.TAKE_DAMAGE,
+        amount: options.damage
+      });
     }
   }
 
   if (hasPlayer(target)) {
     emit('playerUpdate');
-  } else if (hasEnemy(target)) {
-    world.get<TAudioManager>('audio').unwrap().play('damage');
   }
 
   if (stats.current.health <= 0) {

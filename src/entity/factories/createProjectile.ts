@@ -34,8 +34,6 @@ export const createProjectile = (
   );
   sprite.zIndex = 1;
 
-  const speed = 8;
-
   const projectile = world
     .createEntity()
     .with(
@@ -49,7 +47,11 @@ export const createProjectile = (
     )
     .with(positionComponent(options.position))
     .with(sizeComponent({ w: 64, h: 64 }))
-    .with(velocityComponent(setMagnitude(options.target, speed)))
+    .with(
+      velocityComponent(
+        setMagnitude(options.target, options.projectile.baseStats.speed)
+      )
+    )
     .with(withOrientation(toAngle(options.target)))
     .with(renderableComponent)
     .with(stateAwareComponent)
@@ -59,7 +61,7 @@ export const createProjectile = (
   registerRenderable(projectile.entity_id, sprite);
   registerStateMachine(
     projectile.entity_id,
-    createProjectileStateMachine(projectile)
+    createProjectileStateMachine(projectile, world)
   );
   return projectile;
 };

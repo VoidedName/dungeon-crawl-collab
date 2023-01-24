@@ -5,6 +5,7 @@ import drinkSound from './assets/sounds/drink.mp3';
 import stepsSound from './assets/sounds/steps.mp3';
 import pickupSound from './assets/sounds/pickup.mp3';
 import dropSound from './assets/sounds/drop.mp3';
+import levelupSound from './assets/sounds/level-up.mp3';
 
 const sounds = {
   ouch: ouchSound,
@@ -13,7 +14,8 @@ const sounds = {
   drink: drinkSound,
   steps: stepsSound,
   pickup: pickupSound,
-  drop: dropSound
+  drop: dropSound,
+  levelUp: levelupSound
 } as const;
 const soundCache: any = {};
 const audioCtx = new AudioContext();

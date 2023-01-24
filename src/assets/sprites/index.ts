@@ -3,12 +3,14 @@ import { wizard } from './wizard';
 import { trap } from './trap';
 import { magicMissile } from './magic-missile';
 import { healthPotion } from './health-potion';
+import { levelUpFX } from './fx';
 
 export const sprites = {
   wizard,
   trap,
   magicMissile,
-  healthPotion
+  healthPotion,
+  levelUpFX
 } satisfies Record<string, SpriteResource>;
 
 export const texturesBundle = Object.fromEntries(

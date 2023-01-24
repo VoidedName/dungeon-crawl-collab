@@ -3,15 +3,11 @@ import { useEcsApi } from '@/composables/useEcsApi';
 import Surface from './ui/Surface.vue';
 import { type Player, PlayerBrand } from '@/entity/components/Player';
 import type { ECSEvent } from '@/events/createExternalQueue';
-import {
-  AnimatableBrand,
-  type Animatable
-} from '@/entity/components/Animatable';
 import type { ECSEntity } from '@/ecs/ECSEntity';
 
 const ecsApi = useEcsApi();
 
-const player = ref<ECSEntity & Player & Animatable>();
+const player = ref<ECSEntity & Player>();
 
 const expBarWidth = computed(() => {
   if (!player.value) return 0;
@@ -24,12 +20,8 @@ const expBarWidth = computed(() => {
 
 ecsApi.value.on((event: ECSEvent) => {
   if (['ready', 'playerUpdate'].includes(event)) {
-    console.log('event');
     player.value = {
-      ...ecsApi.value.getEntities<[Player, Animatable]>([
-        PlayerBrand,
-        AnimatableBrand
-      ])[0]!
+      ...ecsApi.value.getEntities<[Player]>([PlayerBrand])[0]!
     };
   }
 });
@@ -37,7 +29,7 @@ ecsApi.value.on((event: ECSEvent) => {
 
 <template>
   <Surface class="player-hud">
-    <h2>{{ player?.animatable.spriteName }}</h2>
+    <h2>{{ player?.player.playerClass.className }}</h2>
     <div>Lvl {{ player?.player.stats.current.level }}</div>
     <div>
       Exp {{ player?.player.stats.current.experience }} /
