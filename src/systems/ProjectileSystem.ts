@@ -70,7 +70,9 @@ export const ProjectileSystem: (
               type: EventNames.DAMAGE,
               payload: {
                 entityId: enemy.entity_id,
-                damage: e.projectile.stats.current.power
+                damage:
+                  e.projectile.stats.current.power +
+                  owner.player.stats.current.attack
               }
             });
 

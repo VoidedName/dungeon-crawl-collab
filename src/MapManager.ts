@@ -31,8 +31,11 @@ export type TMap = {
   level: number;
 };
 
-const spawners: Record<EnemyType, (world: ECSWorld) => ECSEntity> = {
-  trap: (world: ECSWorld) => createTrap(world, { enemy: codex.enemies.trap() })
+const spawners: Record<
+  EnemyType,
+  (world: ECSWorld, app: Application) => ECSEntity
+> = {
+  trap: (world, app) => createTrap(world, app, { enemy: codex.enemies.trap() })
 };
 
 export const maps = [
@@ -169,7 +172,7 @@ export async function loadMap(
 
     if (tileId === STAIRS_DOWN_ID) {
       const text = new Text('Descend', {
-        fontFamily: 'Arial',
+        fontFamily: 'Inconsolata',
         fontSize: 28,
         fill: 0xff0000,
         align: 'center'
@@ -213,7 +216,7 @@ export async function loadMap(
       registerRenderable(entity.entity_id, tileContainer);
     } else if (tileId === STAIRS_UP_ID) {
       const text = new Text('Ascend', {
-        fontFamily: 'Arial',
+        fontFamily: 'Inconsolata',
         fontSize: 28,
         fill: 0xff0000,
         align: 'center'
@@ -317,7 +320,7 @@ export async function loadMap(
       const location = enemySpawnLocations[randomIndex]!;
       enemySpawnLocations.splice(randomIndex, 1);
       const spawner = spawners[enemyKey]!;
-      const enemy = spawner(world);
+      const enemy = spawner(world, app);
       if (hasPosition(enemy)) {
         enemy.position.x = location.x;
         enemy.position.y = location.y;

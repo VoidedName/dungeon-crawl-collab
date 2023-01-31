@@ -12,6 +12,7 @@ import { enemyComponent } from '../components/Enemy';
 import { registerStateMachine } from '@/stateMachines/stateMachineManager';
 import { createTrapStateMachine } from '@/stateMachines/trap';
 import type { CodexEnemy } from '@/assets/types';
+import type { Application } from 'pixi.js';
 
 export type CreateTrapOptions = {
   enemy: CodexEnemy;
@@ -19,7 +20,11 @@ export type CreateTrapOptions = {
 
 export type TrapEntity = ReturnType<typeof createTrap>;
 
-export const createTrap = (world: ECSWorld, options: CreateTrapOptions) => {
+export const createTrap = (
+  world: ECSWorld,
+  app: Application,
+  options: CreateTrapOptions
+) => {
   const sprite = createAnimatedSprite(
     options.enemy.spriteName,
     AnimationState.IDLE
@@ -46,7 +51,7 @@ export const createTrap = (world: ECSWorld, options: CreateTrapOptions) => {
     .build();
 
   registerRenderable(trap.entity_id, sprite);
-  registerStateMachine(trap.entity_id, createTrapStateMachine(trap));
+  registerStateMachine(trap.entity_id, createTrapStateMachine(trap, app));
 
   return trap;
 };

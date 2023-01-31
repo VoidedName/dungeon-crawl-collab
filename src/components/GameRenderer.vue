@@ -7,6 +7,7 @@ import SettingsMenu from './SettingsMenu.vue';
 import ItemBelt from './ItemBelt.vue';
 import HealthHud from './HealthHud.vue';
 import PlayerHud from './PlayerHud.vue';
+import LevelUpAlert from './LevelUpAlert.vue';
 import { store } from '@/store';
 import Inventory from './Inventory.vue';
 import type { TInventoryManager } from '@/createInventoryManager';
@@ -63,6 +64,7 @@ function handleDrop(evt: DragEvent) {
       <PlayerHud class="player-hud" />
       <HealthHud class="health-hud" />
       <Inventory class="inventory" />
+      <LevelUpAlert />
     </template>
 
     <canvas
