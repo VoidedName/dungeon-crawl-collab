@@ -6,6 +6,7 @@ import { clamp } from '@/utils/math';
 const POTION_HEAL_AMOUNT = 5;
 export const healthPotion = (): CodexItem => ({
   spriteName: 'healthPotion',
+  type: 'item',
   onUse: ({ world, emit }) => {
     const player = getPlayer(world);
     player.player.stats.current.health = clamp(

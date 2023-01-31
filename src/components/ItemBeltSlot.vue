@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import type { TItem } from '@/createInventoryManager';
+import type { TInventoryManager, TItem } from '@/createInventoryManager';
 import { sprites } from '@/assets/sprites';
 import type { Nullable } from '@/utils/types';
+import { useEcsApi } from '@/composables/useEcsApi';
+import type { ECSEvent } from '@/events/createExternalQueue';
 
-const props = defineProps<{ item: Nullable<TItem>; slot: number }>();
+const props = defineProps<{
+  inventoryManager: TInventoryManager;
+  item: Nullable<TItem>;
+  slot: number;
+}>();
 
 const bg = computed(() => {
   if (!props.item) return 'transparent';
@@ -14,15 +20,29 @@ const bg = computed(() => {
 function startDrag(evt: DragEvent, index: number) {
   if (!evt.dataTransfer) return;
   evt.dataTransfer.setData('slot', index + '');
+  evt.dataTransfer.setData('from', 'belt');
+}
+
+function handleDrop(evt: DragEvent) {
+  if (!evt.dataTransfer) return;
+  const slot = evt.dataTransfer.getData('slot');
+  const from = evt.dataTransfer.getData('from');
+  props.inventoryManager?.swapItem(from, Number(slot), 'belt', props.slot - 1);
 }
 </script>
 
 <template>
-  <li class="item-belt-slot">
+  <li
+    class="item-belt-slot"
+    droppable="true"
+    @drop="handleDrop($event)"
+    @dragenter.prevent
+    @dragover.prevent
+  >
     <span>{{ props.slot }}</span>
 
     <button
-      draggable="true"
+      :draggable="!!props.item"
       @dragstart="startDrag($event, props.slot - 1)"
       :title="item?.item.spriteName"
     />

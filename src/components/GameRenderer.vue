@@ -44,7 +44,12 @@ onUnmounted(() => {
 function handleDrop(evt: DragEvent) {
   if (!evt.dataTransfer) return;
   const slot = evt.dataTransfer.getData('slot');
-  inventoryManager?.dropBeltItem(Number(slot));
+  const from = evt.dataTransfer.getData('from');
+  if (from === 'belt') {
+    inventoryManager?.dropBeltItem(Number(slot));
+  } else if (from === 'stash') {
+    inventoryManager?.dropStashItem(Number(slot));
+  }
 }
 </script>
 

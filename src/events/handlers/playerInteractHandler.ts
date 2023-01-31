@@ -31,14 +31,18 @@ function handleItemInteraction(
   const inventoryManager = world.get<TInventoryManager>('inventory').unwrap();
 
   if (!itemEntity.interactable.isEnabled) return;
-  if (inventoryManager.isFull()) return;
+  if (inventoryManager.isBeltFull() && inventoryManager.isStashFull()) return;
 
   itemEntity.interactable.isEnabled = false;
   if (text) {
     text.visible = false;
   }
 
-  inventoryManager.addItemToBelt(itemEntity.item.type);
+  if (!inventoryManager.isBeltFull()) {
+    inventoryManager.addItemToBelt(itemEntity.item.type);
+  } else {
+    inventoryManager.addItemToStash(itemEntity.item.type);
+  }
   world.get<TAudioManager>('audio').unwrap().play('pickup');
   world.removeComponent(itemEntity, 'position');
   world.removeComponent(itemEntity, 'renderable');

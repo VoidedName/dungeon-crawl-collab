@@ -38,6 +38,7 @@ function useItem(itemIndex: number) {
 <template>
   <ol class="belt">
     <ItemBeltSlot
+      :inventory-manager="inventoryManager"
       @click="useItem(index)"
       v-for="(item, index) in belt"
       :item="item"

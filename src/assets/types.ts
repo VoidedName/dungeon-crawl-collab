@@ -36,4 +36,5 @@ type ItemUseContext = {
 export type CodexItem = {
   spriteName: SpriteName;
   onUse: (ctx: ItemUseContext) => void;
+  type: 'item' | 'primary';
 };
